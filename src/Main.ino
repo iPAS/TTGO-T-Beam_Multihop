@@ -16,6 +16,10 @@
 #define LED_IO_V10 4
 static uint8_t led_io;
 
+void led_setup() {
+    pinMode(led_io, OUTPUT);
+    digitalWrite(led_io, LOW);
+}
 
 // ---------- AXP192 ----------
 AXP20X_Class axp;
@@ -80,7 +84,6 @@ void smartDelay(unsigned long ms) {
     } while (millis() - start < ms);
 }
 
-
 void gps_setup() {
     Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
     while (!Serial1);
@@ -89,7 +92,13 @@ void gps_setup() {
 
 
 // ---------- Bluetooth-serial ----------
+#define BT_NAME "ESP32-LoRa-Relay"
 BluetoothSerial bt;
+
+
+void bt_setup() {
+    bt.begin(BT_NAME);
+}
 
 
 // ---------- LoRa ----------
@@ -125,7 +134,6 @@ void lora_setup() {
     Serial.println("[DEBUG] Starting LoRa ok");
 }
 
-
 void lora_data() {
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -143,7 +151,6 @@ void lora_data() {
         bt.println(str);
     }
 }
-
 
 void cbk(int packetSize) {
     packet   = "";
@@ -174,9 +181,6 @@ void setup() {
     Serial.begin(115200);
     while (!Serial);
 
-    // OLED
-    oled_setup();
-
     // Version validation
     Wire.begin(AXP_SDA, AXP_SCL);
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
@@ -195,21 +199,12 @@ void setup() {
         gps_rx = GPS_RX_V10;
     }
 
-    // LED
-    pinMode(led_io, OUTPUT);
-    digitalWrite(led_io, LOW);
-
-    // LoRa
-    lora_setup();
-
-    // Bluetooth-Serial
-    bt.begin("ESP32-LoRa-Receiver"); //Name of your Bluetooth Signal
-
-    // GPS
-    gps_setup();
-
-    // CLI
-    cli_setup();
+    oled_setup();   // OLED
+    led_setup();    // LED
+    lora_setup();   // LoRa
+    bt_setup();     // Bluetooth-Serial
+    gps_setup();    // GPS
+    cli_setup();    // CLI
 }
 
 
