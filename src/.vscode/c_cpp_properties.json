@@ -7,14 +7,14 @@
             "compilerArgs": [],
             "intelliSenseMode": "clang-x64",
             "includePath": [
-                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/**",
+                "~/Workspace/Arduino/hardware/espressif/esp32/**",
                 "~/Workspace/Arduino/libraries/**",
                 "~/Development/arduino-nightly/libraries/**",
                 "~/Workspace/Arduino/hardware/espressif/esp32/libraries/**",
                 "~/Workspace/Arduino/hardware/espressif/esp32/tools/sdk/include/**",
                 "~/Workspace/Arduino/hardware/espressif/esp32/cores/**",
-                "/home/ipas/Development/arduino-nightly/libraries/**",
-                "/home/ipas/Workspace/Arduino/libraries/**"
+                "~/Development/arduino-nightly/libraries/**",
+                "~/Workspace/Arduino/libraries/**"
             ],
             "forcedInclude": [],
             "cStandard": "",
