@@ -1,0 +1,3 @@
+[submodule "motelib_flooding"]
+	path = motelib_flooding
+	url = https://github.com/iPAS/motelib_flooding.git
