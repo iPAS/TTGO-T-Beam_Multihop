@@ -6,7 +6,9 @@
 #include <SSD1306.h>
 #include <TinyGPS++.h>
 #include <axp20x.h>
+
 #include <BluetoothSerial.h>
+#include <SimpleCLI.h>
 
 
 //#define BAND    868E6
@@ -75,7 +77,7 @@ void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
     if (!LoRa.begin(BAND)) {
-        Serial.println("Starting LoRa failed!");
+        Serial.println("[DEBUG] Starting LoRa failed!");
         while (1);
     }
 
@@ -88,8 +90,8 @@ void lora_setup() {
                       // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
     // LoRa.onReceive(cbk);
-    LoRa.receive();
-    Serial.println("LoRa ok");
+    LoRa.receive();  // Receieve while in the main loop instead of callback function -- cbk.'
+    Serial.println("[DEBUG] Starting LoRa ok");
 }
 
 void lora_data() {
@@ -104,7 +106,7 @@ void lora_data() {
     display.display();
 
     String str = gps_datetime + ", " + gps_loc + ", " + rssi + ", " + snr + ", " + packet;
-    Serial.println(str);
+    // Serial.println("[DEBUG] " + str);
     if (bt.connected()) {
         bt.println(str);
     }
@@ -133,30 +135,32 @@ void smartDelay(unsigned long ms) {
     } while (millis() - start < ms);
 }
 
+// ---------- CLI ----------
+void cli_setup() {
+
+}
+
 // ---------- Setup ----------
 void setup() {
     Serial.begin(115200);
     while (!Serial);
-    Serial.println();
 
     display.init();
     display.flipScreenVertically();
     display.setFont(ArialMT_Plain_10);
-
     delay(500);
-
 
     // Version validation
     Wire.begin(AXP_SDA, AXP_SCL);
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
-        Serial.println("Starting AXP192 failed! -- guessing, this is the V0.7");
+        Serial.println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
 
         led_io = LED_IO_V07;
         gps_tx = GPS_TX_V07;
         gps_rx = GPS_RX_V07;
 
     } else {
-        Serial.println("Starting AXP192 succeeded! -- guessing, its version >= V1.0");
+        Serial.println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
 
         axp_setup();
         led_io = LED_IO_V10;
@@ -164,19 +168,15 @@ void setup() {
         gps_rx = GPS_RX_V10;
     }
 
-
     // LED
     pinMode(led_io, OUTPUT);
     digitalWrite(led_io, LOW);
 
-
     // LoRa
     lora_setup();
 
-
     // Bluetooth-Serial
     bt.begin("ESP32-LoRa-Receiver"); //Name of your Bluetooth Signal
-
 
     // GPS
     Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
