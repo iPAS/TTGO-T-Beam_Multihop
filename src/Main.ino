@@ -11,22 +11,34 @@
 #include <SimpleCLI.h>
 
 
-//#define BAND    868E6
-#define BAND 923E6
-
-#define LORA_SCK  5   // GPIO5  -- SX1278's SCK
-#define LORA_MISO 19  // GPIO19 -- SX1278's MISO
-#define LORA_MOSI 27  // GPIO27 -- SX1278's MOSI
-#define LORA_SS   18  // GPIO18 -- SX1278's CS
-#define LORA_DI0  26  // GPIO26 -- SX1278's IRQ(Interrupt Request)
-#define LORA_RST  23  // GPIO23 -- SX1278's RESET
-
-
+// ---------- LED ----------
 #define LED_IO_V07 14
 #define LED_IO_V10 4
 static uint8_t led_io;
 
 
+// ---------- AXP192 ----------
+AXP20X_Class axp;
+#define AXP_SDA 21
+#define AXP_SCL 22
+#define AXP_IRQ 35
+
+
+void axp_setup() {
+    axp.setLDO2Voltage(3300);   // LoRa VDD
+    axp.setLDO3Voltage(3300);   // GPS  VDD
+    axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);  // LORA radio
+    axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);  // GPS main power
+
+    axp.setDCDC1Voltage(3300);  // for the OLED power
+    axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
+
+    axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
+    axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
+}
+
+
+// ---------- OLED ----------
 SSD1306 display(0x3C, 21, 22);
 String  rssi     = "RSSI --";
 String  snr      = "SNR --";
@@ -34,6 +46,15 @@ String  packSize = "--";
 String  packet   = "";
 
 
+void oled_setup() {
+    display.init();
+    display.flipScreenVertically();
+    display.setFont(ArialMT_Plain_10);
+    delay(100);
+}
+
+
+// ---------- GPS ----------
 #define GPS_BAUDRATE 9600
 
 static uint8_t gps_tx;
@@ -50,29 +71,39 @@ String gps_datetime = "@ --";
 String gps_loc  = "SAT --, LAT --, LON --, ALT --";
 
 
+void smartDelay(unsigned long ms) {
+    unsigned long start = millis();
+    do {
+        while (Serial1.available() > 0) {
+            gps.encode(Serial1.read());
+        }
+    } while (millis() - start < ms);
+}
+
+
+void gps_setup() {
+    Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
+    while (!Serial1);
+    smartDelay(1500);
+}
+
+
+// ---------- Bluetooth-serial ----------
 BluetoothSerial bt;
 
 
-AXP20X_Class axp;
-#define AXP_SDA 21
-#define AXP_SCL 22
-#define AXP_IRQ 35
-
-// ---------- AXP192 ----------
-void axp_setup() {
-    axp.setLDO2Voltage(3300);   // LoRa VDD
-    axp.setLDO3Voltage(3300);   // GPS  VDD
-    axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);  // LORA radio
-    axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);  // GPS main power
-
-    axp.setDCDC1Voltage(3300);  // for the OLED power
-    axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
-
-    axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
-    axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
-}
-
 // ---------- LoRa ----------
+// #define BAND    868E6
+#define BAND    923E6
+
+#define LORA_SCK  5   // GPIO5  -- SX1278's SCK
+#define LORA_MISO 19  // GPIO19 -- SX1278's MISO
+#define LORA_MOSI 27  // GPIO27 -- SX1278's MOSI
+#define LORA_SS   18  // GPIO18 -- SX1278's CS
+#define LORA_DI0  26  // GPIO26 -- SX1278's IRQ(Interrupt Request)
+#define LORA_RST  23  // GPIO23 -- SX1278's RESET
+
+
 void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
@@ -94,6 +125,7 @@ void lora_setup() {
     Serial.println("[DEBUG] Starting LoRa ok");
 }
 
+
 void lora_data() {
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -112,6 +144,7 @@ void lora_data() {
     }
 }
 
+
 void cbk(int packetSize) {
     packet   = "";
     packSize = String(packetSize, DEC);
@@ -125,30 +158,24 @@ void cbk(int packetSize) {
     lora_data();
 }
 
-// ---------- Aux functions ----------
-void smartDelay(unsigned long ms) {
-    unsigned long start = millis();
-    do {
-        while (Serial1.available() > 0) {
-            gps.encode(Serial1.read());
-        }
-    } while (millis() - start < ms);
-}
 
 // ---------- CLI ----------
+SimpleCLI cli;
+Command cmd_set_id;
+
+
 void cli_setup() {
 
 }
+
 
 // ---------- Setup ----------
 void setup() {
     Serial.begin(115200);
     while (!Serial);
 
-    display.init();
-    display.flipScreenVertically();
-    display.setFont(ArialMT_Plain_10);
-    delay(500);
+    // OLED
+    oled_setup();
 
     // Version validation
     Wire.begin(AXP_SDA, AXP_SCL);
@@ -179,10 +206,12 @@ void setup() {
     bt.begin("ESP32-LoRa-Receiver"); //Name of your Bluetooth Signal
 
     // GPS
-    Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
-    while (!Serial1);
-    smartDelay(1500);
+    gps_setup();
+
+    // CLI
+    cli_setup();
 }
+
 
 // ---------- Main ----------
 void loop() {
