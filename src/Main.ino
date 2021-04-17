@@ -168,11 +168,24 @@ void cbk(int packetSize) {
 
 // ---------- CLI ----------
 SimpleCLI cli;
+Command cmd_hello;
 Command cmd_set_id;
 
 
-void cli_setup() {
+void errorCallback(cmd_error *e) {
+    CommandError cmdError(e); // Create wrapper object
+    Serial.println("[CMD] " + cmdError.toString());
+}
 
+void on_cmd_hello(cmd *c) {
+    Command cmd(c);
+    Serial.println("[CMD] Hello!");
+}
+
+void cli_setup() {
+    cli.setOnError(errorCallback); // Set error Callback
+
+    cmd_hello = cli.addCommand("hello", on_cmd_hello);
 }
 
 
@@ -213,6 +226,7 @@ void loop() {
     digitalWrite(led_io, HIGH);  // turn the LED on (HIGH is the voltage level)
     smartDelay(500);
 
+    // Process GPS data
     if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
         // Example: http://arduiniana.org/libraries/tinygpsplus/
         // "T --, SAT --, LAT --, LON --, ALT --, ";
@@ -230,9 +244,16 @@ void loop() {
         gps_loc  = gps_loc + ", " + "ALT " + String(gps.altitude.meters());
     }
 
+    // Process LoRa received packet
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
         cbk(packetSize);
+    }
+
+    // Process command-line input
+    if (Serial.available()) {
+        String input = Serial.readStringUntil('\n');  // Read out string from the serial monitor
+        cli.parse(input);  // Parse the user input into the CLI
     }
 
     digitalWrite(led_io, LOW);   // turn the LED off by making the voltage LOW
