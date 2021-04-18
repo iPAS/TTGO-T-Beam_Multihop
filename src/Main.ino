@@ -16,10 +16,34 @@
 #define LED_IO_V10 4
 static uint8_t led_io;
 
+
+void led_toggle_process() {
+    static uint8_t state = 0;
+    static uint32_t start = millis();
+
+    switch (state) {
+        case 0:
+            if (millis() - start > 500) {
+                digitalWrite(led_io, HIGH);
+                start = millis();
+                state = 1;
+            }
+            break;
+        case 1:
+            if (millis() - start > 500) {
+                digitalWrite(led_io, LOW);
+                start = millis();
+                state = 0;
+            }
+            break;
+    }
+}
+
 void led_setup() {
     pinMode(led_io, OUTPUT);
     digitalWrite(led_io, LOW);
 }
+
 
 // ---------- AXP192 ----------
 AXP20X_Class axp;
@@ -75,19 +99,26 @@ String gps_datetime = "@ --";
 String gps_loc  = "SAT --, LAT --, LON --, ALT --";
 
 
-void smartDelay(unsigned long ms) {
-    unsigned long start = millis();
-    do {
-        while (Serial1.available() > 0) {
-            gps.encode(Serial1.read());
-        }
-    } while (millis() - start < ms);
-}
-
 void gps_setup() {
     Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
     while (!Serial1);
-    smartDelay(1500);
+    while (Serial1.available()) {
+        gps.encode(Serial1.read());
+    }
+}
+
+
+// ---------- Virtual Tube ----------
+// screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
+#define TUBE_UART_BAUDRATE  38400
+#define TUBE_UART_CONFIG    SERIAL_8E1
+#define TUBE_TX 14
+#define TUBE_RX 13
+
+
+void tube_setup() {
+    Serial2.begin(TUBE_UART_BAUDRATE, TUBE_UART_CONFIG, TUBE_RX, TUBE_TX);
+    while (!Serial2);
 }
 
 
@@ -278,16 +309,21 @@ void setup() {
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
     gps_setup();    // GPS
+    tube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
 }
 
 
 // ---------- Main ----------
 void loop() {
-    digitalWrite(led_io, HIGH);  // turn the LED on (HIGH is the voltage level)
-    smartDelay(500);
+    // LED toggle
+    led_toggle_process();
 
     // Process GPS data
+    while (Serial1.available()) {
+        gps.encode(Serial1.read());
+    }
+
     if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
         // Example: http://arduiniana.org/libraries/tinygpsplus/
         // "T --, SAT --, LAT --, LON --, ALT --, ";
@@ -311,6 +347,15 @@ void loop() {
         cbk(packetSize);
     }
 
+    // Forward Data received from Virtual Tube
+    if (Serial2.available()) {
+        String input = Serial2.readStringUntil('\n');
+
+        // Pass 'input' through LoRa network to node id 0
+        Serial.print("[TUBE] ");
+        Serial.println(input);
+    }
+
     // Process command-line input
     if (Serial.available()) {
         String input = Serial.readStringUntil('\n');  // Read out string from the serial monitor
@@ -329,8 +374,4 @@ void loop() {
             Serial.println("\"?");
         }
     }
-
-    // Toggle LED
-    digitalWrite(led_io, LOW);   // turn the LED off by making the voltage LOW
-    smartDelay(500);
 }
