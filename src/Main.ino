@@ -169,17 +169,17 @@ void cbk(int packetSize) {
 // ---------- CLI ----------
 SimpleCLI cli;
 Command cmd_hello;
-Command cmd_set_id;
+Command cmd_node_id;
 
 
 void errorCallback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
-    Serial.println("[CMD] " + cmdError.toString());
+    Serial.println("[CLI] " + cmdError.toString());
 }
 
 void on_cmd_hello(cmd *c) {
     Command cmd(c);
-    Serial.println("[CMD] Hello!");
+    Serial.println("[CLI] Hello!");
 }
 
 void cli_setup() {
@@ -256,6 +256,20 @@ void loop() {
         cli.parse(input);  // Parse the user input into the CLI
     }
 
+    if (cli.errored()) {
+        CommandError cmdError = cli.getError();
+
+        Serial.print("[CLI] Error: ");
+        Serial.println(cmdError.toString());
+
+        if (cmdError.hasCommand()) {
+            Serial.print("[CLI] Did you mean \"");
+            Serial.print(cmdError.getCommand().toString());
+            Serial.println("\"?");
+        }
+    }
+
+    // Toggle LED
     digitalWrite(led_io, LOW);   // turn the LED off by making the voltage LOW
     smartDelay(500);
 }
