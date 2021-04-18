@@ -94,9 +94,9 @@ void gps_setup() {
 // ---------- Virtual Tube ----------
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
 #define TUBE_UART_BAUDRATE  38400
-#define TUBE_UART_CONFIG    SERIAL_8N1  //SERIAL_8E1
-#define TUBE_TX 14  //36
-#define TUBE_RX 13  //39
+#define TUBE_UART_CONFIG    SERIAL_8E1
+#define TUBE_TX 14
+#define TUBE_RX 13
 
 
 void tube_setup() {
@@ -328,12 +328,11 @@ void loop() {
 
     // Forward Data received from Virtual Tube
     if (Serial2.available()) {
-        while (Serial2.available() > 0) {
-            String input = Serial2.readStringUntil('\n');
+        String input = Serial2.readStringUntil('\n');
 
             // Pass 'input' through LoRa network to node id 0
-            Serial2.println(input);
-        }
+            Serial.print("[TUBE] ");
+            Serial.println(input);
     }
 
     // Process command-line input
