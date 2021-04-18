@@ -91,6 +91,20 @@ void gps_setup() {
 }
 
 
+// ---------- Virtual Tube ----------
+// screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
+#define TUBE_UART_BAUDRATE  38400
+#define TUBE_UART_CONFIG    SERIAL_8N1  //SERIAL_8E1
+#define TUBE_TX 14  //36
+#define TUBE_RX 13  //39
+
+
+void tube_setup() {
+    Serial2.begin(TUBE_UART_BAUDRATE, TUBE_UART_CONFIG, TUBE_RX, TUBE_TX);
+    while (!Serial2);
+}
+
+
 // ---------- Bluetooth-serial ----------
 #define BT_NAME "ESP32-LoRa-Relay"
 BluetoothSerial bt;
@@ -278,6 +292,7 @@ void setup() {
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
     gps_setup();    // GPS
+    tube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
 }
 
@@ -309,6 +324,16 @@ void loop() {
     int packetSize = LoRa.parsePacket();
     if (packetSize) {
         cbk(packetSize);
+    }
+
+    // Forward Data received from Virtual Tube
+    if (Serial2.available()) {
+        while (Serial2.available() > 0) {
+            String input = Serial2.readStringUntil('\n');
+
+            // Pass 'input' through LoRa network to node id 0
+            Serial2.println(input);
+        }
     }
 
     // Process command-line input
