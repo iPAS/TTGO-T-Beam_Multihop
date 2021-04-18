@@ -1,4 +1,4 @@
-#include "images.h"  // Note on a bug: arduino-vscode cannot find the header 
+#include "images.h"  // Note on a bug: arduino-vscode cannot find the header
                      //   named with alphabet comming before the main .ino file.
 #include <strings.h>
 #include <SPI.h>
@@ -126,7 +126,7 @@ void lora_setup() {
                                      // Supported values are 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3, and 500E3.
     // LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);  // Set maximum Tx power to 20 dBm (17 is default).
                                                   // https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md#tx-power
-    // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used. 
+    // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
                       // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
     // LoRa.onReceive(cbk);
@@ -172,6 +172,32 @@ Command cmd_hello;
 Command cmd_node_id;
 
 
+boolean isNumeric(String str) {  // http://tripsintech.com/arduino-isnumeric-function/
+    unsigned int stringLength = str.length();
+
+    if (stringLength == 0) {
+        return false;
+    }
+
+    boolean seenDecimal = false;
+
+    for(unsigned int i = 0; i < stringLength; ++i) {
+        if (isDigit(str.charAt(i))) {
+            continue;
+        }
+
+        if (str.charAt(i) == '.') {
+            if (seenDecimal) {
+                return false;
+            }
+            seenDecimal = true;
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
 void errorCallback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
     Serial.println("[CLI] " + cmdError.toString());
@@ -179,13 +205,48 @@ void errorCallback(cmd_error *e) {
 
 void on_cmd_hello(cmd *c) {
     Command cmd(c);
-    Serial.println("[CLI] Hello!");
+    Serial.println("[CLI] hello: Hello!");
+}
+
+void on_cmd_node_id(cmd *c) {
+    Command cmd(c);
+    Argument idArg = cmd.getArgument("id");
+    long id = idArg.getValue().toInt();
+    bool legal_id = false;
+
+    if (idArg.isSet()) {  // The argument is provided.
+        if (id == 0) {
+            if (isNumeric(idArg.getValue()))
+                legal_id = true;
+        } else
+        if (id > 0 && id < 65536) {
+            legal_id = true;
+        }
+
+        if (legal_id) {
+            // Set new id
+            Serial.println("[CLI] node_id: new id");
+        } else {
+            // Illegal id
+            Serial.println("[CLI] node_id: illegal id number");
+        }
+
+    } else {  // No argument
+        // Ask for current id
+        Serial.println("[CLI] node_id: current id");
+    }
+
+    Serial.print("[CLI] node_id: ");
+    Serial.println(id);
 }
 
 void cli_setup() {
     cli.setOnError(errorCallback); // Set error Callback
 
     cmd_hello = cli.addCommand("hello", on_cmd_hello);
+
+    cmd_node_id = cli.addCommand("node_id", on_cmd_node_id);
+    cmd_node_id.addPositionalArgument("id", "");
 }
 
 
@@ -234,7 +295,7 @@ void loop() {
         // gps_datetime = gps_datetime + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
         char s_datetime[25];
         sprintf(s_datetime, "@ %02u-%02u-%04u %02u:%02u:%02u",
-            gps.date.day(),  gps.date.month(),  gps.date.year(), 
+            gps.date.day(),  gps.date.month(),  gps.date.year(),
             gps.time.hour(), gps.time.minute(), gps.time.second());
         gps_datetime = String(s_datetime);
 
