@@ -9,4 +9,4 @@
 #include "bind.h"
 
 
-#endif  // __ALL_HEADERS__
+#endif  // __ALL_HEADERS_H__

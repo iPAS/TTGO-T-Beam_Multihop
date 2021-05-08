@@ -10,6 +10,8 @@
 #include <BluetoothSerial.h>
 #include <SimpleCLI.h>
 
+#include "all_headers.h"
+
 
 // ---------- LED ----------
 #define LED_IO_V07 14
