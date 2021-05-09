@@ -1,5 +1,9 @@
 #include "bind.h"
 
+#include <SPI.h>
+#include <LoRa.h>
+#include <stdarg.h>
+
 
 /**
  * zTimer
@@ -12,7 +16,7 @@ void zTimerCreate(zTimer *timer)
 
 static void vTimerCallback(TimerHandle_t xTimer)
 {
-    zTimer *timer = pvTimerGetTimerID(xTimer);  // timer ID, but used as argument -- passing zTimer
+    zTimer *timer = (zTimer *)pvTimerGetTimerID(xTimer);  // timer ID, but used as argument -- passing zTimer
     TimerFired fn = timer->callback_fn;
     (*fn)(timer);
 }
@@ -54,21 +58,46 @@ Address getAddress()
     return 0;  // TODO: how?
 }
 
+static RadioRxHandler radioRxHandler;
+
+static void radioOnReceive(int packetLength)
+{
+    // TODO: rearrange format
+
+    // (*radioRxHandler)(Address source, MessageType type, void *message, uint8_t len);
+}
+
 void radioSetRxHandler(RadioRxHandler rxHandler)
 {
-
+    radioRxHandler = rxHandler;
+    LoRa.onReceive(radioOnReceive);
 }
 
 RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone)
 {
+    // TODO:
 
+    // void on_tx_done() {
+    //     Serial.println(counter);
+    // }
+    // LoRa.onTxDone(on_tx_done);
+
+    // LoRa.beginPacket();
+    // LoRa.printf("<%04X> #", ESP.getEfuseMac());
+    // LoRa.print(counter);
+    // LoRa.endPacket();
 }
 
 
 /**
  * Debug
  */
-void debug(char *fmt, ...)
+void debug(const char *format, ...)
 {
-
+    char buf[200], *p;
+    va_list ap;
+    va_start(ap, format);
+    vsnprintf(buf, sizeof(buf), format, ap);
+    Serial.print(buf);
+    va_end(ap);
 }

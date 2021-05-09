@@ -54,7 +54,7 @@ extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg
 /**
  * Others
  */
-extern void debug(char *fmt, ...);
+extern void debug(const char *format, ...);
 
 
 #endif  // __BIND_H__
