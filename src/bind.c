@@ -1,6 +1,9 @@
 #include "bind.h"
 
 
+/**
+ * zTimer
+ */
 void zTimerCreate(zTimer *timer)
 {
     // timerHndl1Sec = xTimerCreate(
@@ -22,6 +25,34 @@ void zTimerStop(zTimer *timer)
 }
 
 uint16_t zTimerTicks()
+{
+
+}
+
+
+/**
+ * Radio
+ */
+Address getAddress()
+{
+
+}
+
+void radioSetRxHandler(RadioRxHandler rxHandler)
+{
+
+}
+
+RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone)
+{
+
+}
+
+
+/**
+ * 
+ */
+void debug(char *fmt, ...)
 {
 
 }
