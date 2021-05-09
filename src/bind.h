@@ -7,13 +7,15 @@
 
 #include "all_headers.h"
 
-#define BROADCAST_ADDR ((Address)0xFFFF)
-typedef uint16_t Address;
-typedef uint8_t MessageType;
+/**
+ * Timer
+ */
+typedef void (*TimerFired)(void *);
 
 typedef struct
 {
     xTimerHandle timerHandle;
+    TimerFired callback_fn;
 } zTimer;
 
 typedef enum
@@ -21,6 +23,19 @@ typedef enum
     TIMER_ONESHOT,
     TIMER_PERIODIC
 } TimerType;
+
+extern void zTimerCreate(zTimer *timer);
+extern void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired timerFired);
+extern void zTimerStop(zTimer *timer);
+extern uint16_t zTimerTicks();
+
+
+/**
+ * Radio
+ */
+#define BROADCAST_ADDR ((Address)0xFFFF)
+typedef uint16_t Address;
+typedef uint8_t MessageType;
 
 typedef enum
 {
@@ -31,18 +46,14 @@ typedef enum
 typedef void (*RadioRxHandler)(Address source, MessageType type, void *message, uint8_t len);
 typedef void (*RadioTxDone)(RadioStatus status);
 
-
-typedef void (*TimerFired)(zTimer*);
-
-extern void zTimerCreate(zTimer *timer);
-extern void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired timerFired);
-extern void zTimerStop(zTimer *timer);
-extern uint16_t zTimerTicks();
-
 extern Address getAddress();
 extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 
+
+/**
+ * Others
+ */
 extern void debug(char *fmt, ...);
 
 
