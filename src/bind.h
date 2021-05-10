@@ -7,7 +7,7 @@
 
 #include "all_headers.h"
 
-#define SIZE_DEBUG_BUF 200
+#define SIZE_DEBUG_BUF 255
 
 /**
  * Timer
@@ -39,6 +39,17 @@ extern void zTimerTest();
 #define BROADCAST_ADDR ((Address)0xFFFF)
 typedef uint16_t Address;
 typedef uint8_t MessageType;
+
+typedef struct __attribute__((packed))
+{
+    // uint8_t frame_id;  // No need. Of motelib only
+    Address src;
+    Address dst;
+    uint8_t data_len;
+
+    MessageType type;
+    // uint8_t seq_no;  // No need. Of motelib only
+} MessageHeader;
 
 typedef enum
 {

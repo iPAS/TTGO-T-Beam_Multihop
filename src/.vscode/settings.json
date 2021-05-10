@@ -4,6 +4,9 @@
         "**/templates/*": "django-txt",
         "flood.h": "c",
         "all_headers.h": "c",
-        "commqueue.h": "c"
+        "commqueue.h": "c",
+        "arduino.h": "c",
+        "stdint.h": "c",
+        "*.tcc": "cpp"
     }
 }

@@ -96,34 +96,63 @@ Address getAddress()
     return ((Address)mac[4]<<8) | (Address)mac[5];
 }
 
+
 static RadioRxHandler radioRxHandler;
 
-static void radioOnReceive(int packetLength)
+static void loraOnReceive(int packetLength)
 {
-    // TODO: rearrange format
+    uint8_t *msg = (uint8_t *)malloc(packetLength);
+    uint8_t *p = msg;
+    MessageHeader *hdr = (MessageHeader *)msg;
 
-    // (*radioRxHandler)(Address source, MessageType type, void *message, uint8_t len);
+    while (LoRa.available() > 0)
+    {
+        *p++ = LoRa.read();
+    }
+
+    if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR)
+        (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
+
+    free(msg);
 }
 
 void radioSetRxHandler(RadioRxHandler rxHandler)
 {
     radioRxHandler = rxHandler;
-    LoRa.onReceive(radioOnReceive);
+    LoRa.onReceive(loraOnReceive);
+}
+
+
+static RadioTxDone radioTxDone;
+
+static void loraOnTxDone()
+{
+    (*radioTxDone)(RADIO_OK);
 }
 
 RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone)
 {
-    // TODO:
+    if (txDone != NULL)
+    {
+        radioTxDone = txDone;
+        LoRa.onTxDone(loraOnTxDone);
+    }
+    else
+    {
+        radioTxDone = NULL;
+        LoRa.onTxDone(NULL);
+    }
 
-    // void on_tx_done() {
-    //     Serial.println(counter);
-    // }
-    // LoRa.onTxDone(on_tx_done);
+    MessageHeader hdr;
+    hdr.src = getAddress();
+    hdr.dst = dst;
+    hdr.type = type;
+    hdr.data_len = len;
 
-    // LoRa.beginPacket();
-    // LoRa.printf("<%04X> #", ESP.getEfuseMac());
-    // LoRa.print(counter);
-    // LoRa.endPacket();
+    LoRa.beginPacket();
+    LoRa.write((uint8_t *)&hdr, sizeof(hdr));
+    LoRa.write((uint8_t *)msg, len);
+    return (LoRa.endPacket())? RADIO_OK : RADIO_FAILED;
 }
 
 
