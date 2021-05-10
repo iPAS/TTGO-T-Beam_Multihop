@@ -80,6 +80,8 @@ void zTimerTest()
     static zTimer timer;
     zTimerCreate(&timer);
     zTimerStart(&timer, TIMER_PERIODIC, 1000, zTimerTestFired);
+
+    debug("Address: %04X", getAddress());
 }
 
 
@@ -88,8 +90,10 @@ void zTimerTest()
  */
 Address getAddress()
 {
-    // esp_efuse_mac_get_default()
-    return 0;  // TODO: how?
+    uint8_t mac[6] = {0};
+    esp_efuse_mac_get_default(mac);
+    // debug("MAC: %02X %02X %02X %02X %02X %02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    return ((Address)mac[4]<<8) | (Address)mac[5];
 }
 
 static RadioRxHandler radioRxHandler;
