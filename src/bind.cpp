@@ -23,6 +23,9 @@ static void vTimerCallback(TimerHandle_t xTimer)
 
 void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired timerFired)
 {
+    if (timer->timerHandle != NULL)
+        zTimerStop(timer);
+
     timer->callback_fn = timerFired;
     timer->timerHandle = xTimerCreate(
         "Name4DbgOnly",  // The RTOS kernel itself only ever references a timer by its handle, and never by its name.
@@ -41,7 +44,9 @@ void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired ti
 void zTimerStop(zTimer *timer)
 {
     xTimerStop(timer->timerHandle, 0);  // Stop it suddenly.
-    xTimerReset(timer->timerHandle, 0);  // Reset it
+    xTimerReset(timer->timerHandle, 0);  // Reset it without waiting.
+    xTimerDelete(timer->timerHandle, 0);  // Delete.
+    zTimerCreate(timer);  // Re-init
 }
 
 uint16_t zTimerTicks()
@@ -51,10 +56,39 @@ uint16_t zTimerTicks()
 
 
 /**
+ * zTimer Test
+ */
+static void zTimerTestFired(void *arg)
+{
+    static uint8_t counter = 0;
+    zTimer *timer = (zTimer *)arg;
+
+    if (++counter > 15)
+    {
+        zTimerStop(timer);
+        counter = 0;
+    }
+    else
+    {
+        zTimerStart(timer, TIMER_PERIODIC, 1000, zTimerTestFired);
+        debug("zTimer Test #%d", counter);
+    }
+}
+
+void zTimerTest()
+{  // Used for testing
+    static zTimer timer;
+    zTimerCreate(&timer);
+    zTimerStart(&timer, TIMER_PERIODIC, 1000, zTimerTestFired);
+}
+
+
+/**
  * Radio
  */
 Address getAddress()
 {
+    // esp_efuse_mac_get_default()
     return 0;  // TODO: how?
 }
 
@@ -94,10 +128,11 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
  */
 void debug(const char *format, ...)
 {
-    char buf[200], *p;
+    char buf[SIZE_DEBUG_BUF], *p = buf;
     va_list ap;
     va_start(ap, format);
-    vsnprintf(buf, sizeof(buf), format, ap);
-    Serial.print(buf);
+    p += sprintf(p, "[X] ");
+    vsnprintf(p, sizeof(buf)-4, format, ap);
+    Serial.println(buf);
     va_end(ap);
 }

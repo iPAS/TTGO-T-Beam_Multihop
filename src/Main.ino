@@ -322,6 +322,13 @@ void setup() {
     gps_setup();    // GPS
     tube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
+
+
+    // ----------------
+    // For testing only
+    // ----------------
+    zTimerTest();
+
 }
 
 

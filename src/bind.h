@@ -7,6 +7,8 @@
 
 #include "all_headers.h"
 
+#define SIZE_DEBUG_BUF 200
+
 /**
  * Timer
  */
@@ -28,6 +30,7 @@ extern void zTimerCreate(zTimer *timer);
 extern void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired timerFired);
 extern void zTimerStop(zTimer *timer);
 extern uint16_t zTimerTicks();
+extern void zTimerTest();
 
 
 /**
