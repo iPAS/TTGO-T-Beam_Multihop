@@ -2,7 +2,7 @@
 
 
 static queue_t cq;
-static Timer delayTxTimer;
+static zTimer delayTxTimer;
 
 
 /**
@@ -20,7 +20,7 @@ void cq_tx_task()
         return;
 
     TxTask *next = (TxTask *)q_item(&cq, 0)->data;
-    timerStart(&delayTxTimer, TIMER_ONESHOT, task.delay_tick, &cq_tx_task);
+    zTimerStart(&delayTxTimer, TIMER_ONESHOT, task.delay_tick, &cq_tx_task);
 }
 
 
@@ -44,7 +44,7 @@ bool cq_send(Address dst, MessageType type, void *msg, uint8_t len)
     // Start this job if it's the only first one.
     if (q_length(&cq) == 1)
     {
-        timerStart(&delayTxTimer, TIMER_ONESHOT, task.delay_tick, &cq_tx_task);
+        zTimerStart(&delayTxTimer, TIMER_ONESHOT, task.delay_tick, &cq_tx_task);
     }
 
     return true;
@@ -57,5 +57,5 @@ bool cq_send(Address dst, MessageType type, void *msg, uint8_t len)
 void cq_init()
 {
     q_init(&cq);
-    timerCreate(&delayTxTimer);
+    zTimerCreate(&delayTxTimer);
 }

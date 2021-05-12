@@ -1,3 +1,11 @@
+/**
+ * 
+ * Serial as DEBUG & CLI
+ * Serial1 as GPS
+ * Serial2 as VTube connected with RTU
+ * BT as data log
+ * 
+ */
 #include "images.h"  // Note on a bug: arduino-vscode cannot find the header
                      //   named with alphabet comming before the main .ino file.
 #include <strings.h>
@@ -9,6 +17,9 @@
 
 #include <BluetoothSerial.h>
 #include <SimpleCLI.h>
+
+#include "all_headers.h"
+#include "flood.h"
 
 
 // ---------- LED ----------
@@ -311,6 +322,13 @@ void setup() {
     gps_setup();    // GPS
     tube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
+
+
+    // ----------------
+    // For testing only
+    // ----------------
+    zTimerTest();
+
 }
 
 

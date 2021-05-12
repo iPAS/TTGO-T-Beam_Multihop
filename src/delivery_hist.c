@@ -25,7 +25,7 @@ delivery_history_t *hist_find(RoutingHeader *hdr)
                        *free_hist = NULL,
                        *oldest_hist = NULL;
     uint32_t oldest_timestamp = 0,
-             now = timerTicks();
+             now = zTimerTicks();
     uint8_t i;
 
     // Find in the table
