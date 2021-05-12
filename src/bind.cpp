@@ -36,8 +36,7 @@ void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired o
 
     if(xTimerStart(timer->timerHandle, 0) != pdPASS)  // Start it suddenly.
     {
-        // The timer could not be set into the Active state.
-        // TODO: show something
+        debug("xTimerStart() problem");
     }
 }
 
@@ -90,7 +89,7 @@ void zTimerTest()
  */
 static Address node_address = BROADCAST_ADDR;
 
-Address getAddress()  // TODO: configurable
+Address getAddress()
 {
     Address addr = node_address;
     if (addr == BROADCAST_ADDR)
@@ -103,9 +102,10 @@ Address getAddress()  // TODO: configurable
     return addr;
 }
 
-void setAddress(Address addr)
+Address setAddress(Address addr)
 {
     node_address = addr;
+    return node_address;
 }
 
 

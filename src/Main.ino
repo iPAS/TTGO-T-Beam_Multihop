@@ -273,19 +273,18 @@ void on_cmd_node_id(cmd *c) {
 
         if (legal_id) {
             // Set new id
-            Serial.println("[CLI] node_id: new id");
+            Serial.print("[CLI] node_id: new id ");
+            Serial.println(setAddress(id));
         } else {
             // Illegal id
-            Serial.println("[CLI] node_id: illegal id number");
+            Serial.println("[CLI] node_id: illegal id");
         }
 
     } else {  // No argument
         // Ask for current id
-        Serial.println("[CLI] node_id: current id");
+        Serial.print("[CLI] node_id: current id ");
+        Serial.println(getAddress());
     }
-
-    Serial.print("[CLI] node_id: ");
-    Serial.println(id);
 }
 
 void cli_setup() {
@@ -372,7 +371,7 @@ void loop() {
     //     cbk(packetSize);
     // }
 
-    // flood_send_to(Address sink, void *msg, uint8_t len);  // XXX: 
+    // flood_send_to(Address sink, void *msg, uint8_t len);  // TODO: tx for testing
 
     // Forward Data received from Virtual Tube
     if (Serial2.available()) {
