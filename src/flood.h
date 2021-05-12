@@ -25,7 +25,7 @@ typedef void (*on_rx_sink)(void *message, uint8_t len);
 
 extern void flood_init(void);
 extern void flood_set_rx_handler(on_rx_sink fn);
-extern bool flood_send_to(Address sink, void *msg, uint8_t len);
+extern bool flood_send_to(Address sink, const void *msg, uint8_t len);
 
 
 #endif  // __FLOOD_H__

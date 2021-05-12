@@ -177,7 +177,7 @@ void flood_set_rx_handler(on_rx_sink fn)
 /**
  * Send to
  */
-bool flood_send_to(Address sink, void *msg, uint8_t len)
+bool flood_send_to(Address sink, const void *msg, uint8_t len)
 {
     debug("Tx to finalSink %d with seqNo %d ", sink, txSeqNo);
 

@@ -44,8 +44,15 @@ void led_toggle_process() {
             if (millis() - start > 500) {
                 digitalWrite(led_io, LOW);
                 start = millis();
-                state = 0;
+                state = 2;
             }
+            break;
+        case 2:
+            // ----------------
+            // For testing only
+            // ----------------
+            flood_send_to(0, "Hello", 6);  // XXX: tx for testing
+            state = 0;
             break;
     }
 }
@@ -159,7 +166,7 @@ void bt_setup() {
 
 
 void on_flood_receive(void *message, uint8_t len) {
-
+    debug("Received: %s", message);
 }
 
 void lora_setup() {
@@ -372,8 +379,6 @@ void loop() {
     // if (packetSize) {
     //     cbk(packetSize);
     // }
-
-    // flood_send_to(Address sink, void *msg, uint8_t len);  // TODO: tx for testing
 
     // Forward Data received from Virtual Tube
     if (Serial2.available()) {
