@@ -17,16 +17,16 @@ void zTimerCreate(zTimer *timer)
 static void vTimerCallback(TimerHandle_t xTimer)
 {
     zTimer *timer = (zTimer *)pvTimerGetTimerID(xTimer);  // timer ID, but used as argument -- passing zTimer
-    TimerFired fn = timer->callback_fn;
+    zTimerFired fn = timer->callback_fn;
     (*fn)(timer);
 }
 
-void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired timerFired)
+void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired onFired)
 {
     if (timer->timerHandle != NULL)
         zTimerStop(timer);
 
-    timer->callback_fn = timerFired;
+    timer->callback_fn = onFired;
     timer->timerHandle = xTimerCreate(
         "Name4DbgOnly",  // The RTOS kernel itself only ever references a timer by its handle, and never by its name.
         pdMS_TO_TICKS(interval),  // Period/time
@@ -58,7 +58,7 @@ uint16_t zTimerTicks()
 /**
  * zTimer Test
  */
-static void zTimerTestFired(void *arg)
+static void zTimerTestFired(zTimer *arg)
 {
     static uint8_t counter = 0;
     zTimer *timer = (zTimer *)arg;
@@ -88,7 +88,7 @@ void zTimerTest()
 /**
  * Radio
  */
-Address getAddress()
+Address getAddress()  // TODO: configurable
 {
     uint8_t mac[6] = {0};
     esp_efuse_mac_get_default(mac);

@@ -12,13 +12,13 @@
 /**
  * Timer
  */
-typedef void (*TimerFired)(void *);
-
-typedef struct
+typedef struct zTimer
 {
     xTimerHandle timerHandle;
-    TimerFired callback_fn;
+    void (*callback_fn)(struct zTimer *timer);
 } zTimer;
+
+typedef void (*zTimerFired)(zTimer *timer);
 
 typedef enum
 {
@@ -27,7 +27,7 @@ typedef enum
 } TimerType;
 
 extern void zTimerCreate(zTimer *timer);
-extern void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, TimerFired timerFired);
+extern void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired onFired);
 extern void zTimerStop(zTimer *timer);
 extern uint16_t zTimerTicks();
 extern void zTimerTest();

@@ -155,6 +155,11 @@ void bt_setup() {
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
 
 
+void on_flood_receive(void *message, uint8_t len)
+{
+
+}
+
 void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
@@ -171,12 +176,26 @@ void lora_setup() {
     // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
                       // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
-    // LoRa.onReceive(cbk);
-    LoRa.receive();  // Receieve while in the main loop instead of callback function -- cbk.'
+    // LoRa.onReceive(cbk); // XXX: For testing if not call flood_init().
+    // LoRa.receive();      // XXX: Receieve mode while in the main loop instead of callback function -- cbk.'
+
+    flood_init();
+    flood_set_rx_handler(on_flood_receive);
+
     Serial.println("[DEBUG] Starting LoRa ok");
 }
 
-void lora_data() {
+void cbk(int packetSize) {  // XXX: leave it here for reference.
+    packet   = "";
+    packSize = String(packetSize, DEC);
+    for (int i = 0; i < packetSize; i++) {
+        packet += (char)LoRa.read();
+    }
+
+    rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
+    snr  = "SNR "  + String(LoRa.packetSnr(), 2);
+
+    // lora_data();
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
@@ -192,19 +211,6 @@ void lora_data() {
     if (bt.connected()) {
         bt.println(str);
     }
-}
-
-void cbk(int packetSize) {
-    packet   = "";
-    packSize = String(packetSize, DEC);
-    for (int i = 0; i < packetSize; i++) {
-        packet += (char)LoRa.read();
-    }
-
-    rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
-    snr  = "SNR "  + String(LoRa.packetSnr(), 2);
-
-    lora_data();
 }
 
 
@@ -327,7 +333,7 @@ void setup() {
     // ----------------
     // For testing only
     // ----------------
-    zTimerTest();
+    // zTimerTest();  // XXX: for testing only
 
 }
 
@@ -360,10 +366,13 @@ void loop() {
     }
 
     // Process LoRa received packet
-    int packetSize = LoRa.parsePacket();
-    if (packetSize) {
-        cbk(packetSize);
-    }
+    // XXX: use calling-back function instead
+    // int packetSize = LoRa.parsePacket();
+    // if (packetSize) {
+    //     cbk(packetSize);
+    // }
+
+    // flood_send_to(Address sink, void *msg, uint8_t len);  // XXX: 
 
     // Forward Data received from Virtual Tube
     if (Serial2.available()) {

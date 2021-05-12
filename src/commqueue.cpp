@@ -8,7 +8,7 @@ static zTimer delayTxTimer;
 /**
  * Sending task
  */
-void cq_tx_task()
+void cq_tx_task(zTimer *timer)
 {
     TxTask task;
     q_dequeue(&cq, &task, sizeof(task));
