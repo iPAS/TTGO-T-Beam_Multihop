@@ -114,7 +114,7 @@ void gps_setup() {
     Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
     while (!Serial1);
     while (Serial1.available()) {
-        gps.encode(Serial1.read());
+        Serial1.read();
     }
 }
 
@@ -130,6 +130,9 @@ void gps_setup() {
 void tube_setup() {
     Serial2.begin(TUBE_UART_BAUDRATE, TUBE_UART_CONFIG, TUBE_RX, TUBE_TX);
     while (!Serial2);
+    while (Serial2.available()) {
+        Serial2.read();
+    }
 }
 
 
@@ -155,8 +158,7 @@ void bt_setup() {
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
 
 
-void on_flood_receive(void *message, uint8_t len)
-{
+void on_flood_receive(void *message, uint8_t len) {
 
 }
 
@@ -377,8 +379,8 @@ void loop() {
     if (Serial2.available()) {
         String input = Serial2.readStringUntil('\n');
 
-        // Pass 'input' through LoRa network to node id 0
-        Serial.print("[TUBE] ");
+        // TODO: Pass 'input' through LoRa network to node id 0
+        Serial.print("[TUBE] >> ");
         Serial.println(input);
     }
 
