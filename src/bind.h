@@ -61,6 +61,7 @@ typedef void (*RadioRxHandler)(Address source, MessageType type, void *message, 
 typedef void (*RadioTxDone)(RadioStatus status);
 
 extern Address getAddress();
+extern void setAddress(Address addr);
 extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 

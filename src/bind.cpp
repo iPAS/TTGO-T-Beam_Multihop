@@ -88,12 +88,24 @@ void zTimerTest()
 /**
  * Radio
  */
+static Address node_address = BROADCAST_ADDR;
+
 Address getAddress()  // TODO: configurable
 {
-    uint8_t mac[6] = {0};
-    esp_efuse_mac_get_default(mac);
-    // debug("MAC: %02X %02X %02X %02X %02X %02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-    return ((Address)mac[4]<<8) | (Address)mac[5];
+    Address addr = node_address;
+    if (addr == BROADCAST_ADDR)
+    {
+        uint8_t mac[6] = {0};
+        esp_efuse_mac_get_default(mac);
+        // debug("MAC: %02X %02X %02X %02X %02X %02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        addr = ((Address)mac[4]<<8) | (Address)mac[5];
+    }
+    return addr;
+}
+
+void setAddress(Address addr)
+{
+    node_address = addr;
 }
 
 
