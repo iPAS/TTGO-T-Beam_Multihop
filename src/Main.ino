@@ -44,15 +44,8 @@ void led_toggle_process() {
             if (millis() - start > 500) {
                 digitalWrite(led_io, LOW);
                 start = millis();
-                state = 2;
+                state = 0;
             }
-            break;
-        case 2:
-            // ----------------
-            // For testing only
-            // ----------------
-            flood_send_to(0, "Hello", 6);  // XXX: tx for testing
-            state = 0;
             break;
     }
 }
@@ -222,6 +215,18 @@ void cbk(int packetSize) {  // XXX: leave it here for reference.
     }
 }
 
+void send_to_zero() {
+    if (getAddress == 0)
+        return;
+
+    static uint32_t start = millis();
+    if (millis() - start > 2000)
+    {
+        flood_send_to(0, "Hello", 6);  // XXX: tx for testing
+        start = millis();
+    }
+}
+
 
 // ---------- CLI ----------
 SimpleCLI cli;
@@ -379,6 +384,13 @@ void loop() {
     // if (packetSize) {
     //     cbk(packetSize);
     // }
+
+
+    // ----------------
+    // For testing only
+    // ----------------
+    send_to_zero();  //  XXX: for testing only
+
 
     // Forward Data received from Virtual Tube
     if (Serial2.available()) {
