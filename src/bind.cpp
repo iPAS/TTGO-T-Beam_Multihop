@@ -122,6 +122,8 @@ static void loraOnReceive(int packetLength)
         *p++ = LoRa.read();
     }
 
+    debug("loraOnReceive() received message %d bytes", packetLength);
+
     if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR)
         (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
 

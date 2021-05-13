@@ -178,8 +178,7 @@ void lora_setup() {
     // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
                       // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
-    // LoRa.onReceive(cbk); // XXX: For testing if not call flood_init().
-    // LoRa.receive();      // XXX: Receieve mode while in the main loop instead of callback function -- cbk.'
+    LoRa.receive();
 
     flood_init();
     flood_set_rx_handler(on_flood_receive);
@@ -216,7 +215,7 @@ void cbk(int packetSize) {  // XXX: leave it here for reference.
 }
 
 void send_to_zero() {
-    if (getAddress == 0)
+    if (getAddress() == 0)
         return;
 
     static uint32_t start = millis();
@@ -225,6 +224,8 @@ void send_to_zero() {
         flood_send_to(0, "Hello", 6);  // XXX: tx for testing
         start = millis();
     }
+
+    LoRa.receive();  // Back to receive-mode
 }
 
 
