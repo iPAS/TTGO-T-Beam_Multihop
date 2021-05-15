@@ -34,12 +34,22 @@ bool cq_send(Address dst, MessageType type, void *msg, uint8_t len)
     task.dst = dst;
     task.type = type;
     task.msg = malloc(len);
+    if (task.msg == NULL)
+    {
+        debug("cq_send() cannot allocate memory");
+        return false;
+    }
     memcpy(task.msg, msg, len);
     task.len = len;
     task.delay_tick = rand() % DELAY_TX_GAP;
 
     // Queue the task
-    q_enqueue(&cq, &task, sizeof(task));
+    if (q_enqueue(&cq, &task, sizeof(task)) == NULL)
+    {
+        debug("cq_send() calls q_enqueue() cannot allocate memory");
+        free(task.msg);
+        return false;
+    }
 
     // Start this job if it's the only first one.
     if (q_length(&cq) == 1)

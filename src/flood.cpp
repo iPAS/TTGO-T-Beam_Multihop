@@ -183,6 +183,11 @@ bool flood_send_to(Address sink, const void *msg, uint8_t len)
 
     uint8_t length = sizeof(RoutingHeader) + len;
     uint8_t *message = (uint8_t *)malloc(length);
+    if (message == NULL)
+    {
+        debug("flood_send_to() cannot allocate memory");
+        return false;
+    }
 
     RoutingHeader *hdr = (RoutingHeader *)message;
     hdr->seqNo = txSeqNo++;

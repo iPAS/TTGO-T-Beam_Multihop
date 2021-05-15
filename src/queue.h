@@ -21,7 +21,7 @@ typedef struct
 } queue_t;
 
 extern void q_init(queue_t *q);
-extern void q_enqueue(queue_t *q, void *data, uint8_t len);
+extern linklist_t *q_enqueue(queue_t *q, void *data, uint8_t len);
 extern uint8_t q_dequeue(queue_t *q, void *data, uint8_t maxlen);
 extern uint8_t q_length(queue_t *q);
 extern linklist_t *q_item(queue_t *q, uint8_t index);

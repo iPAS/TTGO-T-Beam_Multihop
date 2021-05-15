@@ -9,11 +9,22 @@ void q_init(queue_t *q)
 }
 
 
-void q_enqueue(queue_t *q, void *data, uint8_t len)
+linklist_t *q_enqueue(queue_t *q, void *data, uint8_t len)
 {
     // For the new item.
     linklist_t *ll = (linklist_t *)malloc(sizeof(linklist_t));
+    if (ll == NULL)
+    {
+        return NULL;
+    }
+
     ll->data = malloc(len);
+    if (ll->data == NULL)
+    {
+        free(ll);
+        return NULL;
+    }
+
     memcpy(ll->data, data, len);
     ll->len = len;
     ll->next = NULL;
@@ -30,6 +41,8 @@ void q_enqueue(queue_t *q, void *data, uint8_t len)
         q->head = ll;
     }
     q->len++;
+
+    return ll;
 }
 
 
