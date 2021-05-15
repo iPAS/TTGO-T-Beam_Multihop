@@ -23,6 +23,9 @@
 
 
 // ---------- LED ----------
+#define BLINK_ON_PERIOD 500
+#define BLINK_OFF_PERIOD 1000
+
 #define LED_IO_V07 14
 #define LED_IO_V10 4
 static uint8_t led_io;
@@ -30,23 +33,22 @@ static uint8_t led_io;
 
 void led_toggle_process() {
     static uint8_t state = 0;
-    static uint32_t start = millis();
+    static uint32_t next = 0;
 
-    switch (state) {
+    if (millis() > next) {
+        switch (state) {
         case 0:
-            if (millis() - start > 500) {
-                digitalWrite(led_io, HIGH);
-                start = millis();
-                state = 1;
-            }
+            digitalWrite(led_io, HIGH);
+            next = millis() + BLINK_ON_PERIOD;
+            state = 1;
             break;
+
         case 1:
-            if (millis() - start > 500) {
-                digitalWrite(led_io, LOW);
-                start = millis();
-                state = 0;
-            }
+            digitalWrite(led_io, LOW);
+            next = millis() + BLINK_OFF_PERIOD;
+            state = 0;
             break;
+        }
     }
 }
 
@@ -74,6 +76,8 @@ void axp_setup() {
 
     axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
     axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
+
+    // axp.setChgLEDMode(AXP20X_LED_BLINK_1HZ);
 }
 
 
@@ -119,16 +123,16 @@ void gps_setup() {
 }
 
 
-// ---------- Virtual Tube ----------
+// ---------- Virtual TUBE ----------
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
-#define TUBE_UART_BAUDRATE  38400
-#define TUBE_UART_CONFIG    SERIAL_8E1
-#define TUBE_TX 14
-#define TUBE_RX 13
+#define VTUBE_UART_BAUDRATE  38400
+#define VTUBE_UART_CONFIG    SERIAL_8E1
+#define VTUBE_TX 14
+#define VTUBE_RX 13
 
 
-void tube_setup() {
-    Serial2.begin(TUBE_UART_BAUDRATE, TUBE_UART_CONFIG, TUBE_RX, TUBE_TX);
+void vtube_setup() {
+    Serial2.begin(VTUBE_UART_BAUDRATE, VTUBE_UART_CONFIG, VTUBE_RX, VTUBE_TX);
     while (!Serial2);
     while (Serial2.available()) {
         Serial2.read();
@@ -178,8 +182,6 @@ void lora_setup() {
     // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
                       // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
-    LoRa.receive();
-
     flood_init();
     flood_set_rx_handler(on_flood_receive);
 
@@ -218,14 +220,11 @@ void send_to_zero() {
     if (getAddress() == 0)
         return;
 
-    static uint32_t start = millis();
-    if (millis() - start > 2000)
-    {
+    static uint32_t next = millis() + 10000 + ((rand() & 0x03) << 10);
+    if (millis() > next) {
         flood_send_to(0, "Hello", 6);  // XXX: tx for testing
-        start = millis();
+        next = millis() + 10000 + ((rand() & 0x03) << 10);
     }
-
-    LoRa.receive();  // Back to receive-mode
 }
 
 
@@ -340,7 +339,7 @@ void setup() {
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
     gps_setup();    // GPS
-    tube_setup();   // Virtual Tube connected to weather station
+    vtube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
 
 
@@ -398,7 +397,7 @@ void loop() {
         String input = Serial2.readStringUntil('\n');
 
         // TODO: Pass 'input' through LoRa network to node id 0
-        Serial.print("[TUBE] >> ");
+        Serial.print("[VTUBE] >> ");
         Serial.println(input);
     }
 

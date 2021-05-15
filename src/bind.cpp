@@ -114,10 +114,17 @@ static RadioRxHandler radioRxHandler;
 static void loraOnReceive(int packetLength)
 {
     uint8_t *msg = (uint8_t *)malloc(packetLength);
+    if (msg == NULL)
+    {
+        debug("loraOnReceive() cannot allocate memory");
+        return;
+    }
+
     uint8_t *p = msg;
     MessageHeader *hdr = (MessageHeader *)msg;
+    uint16_t i;
 
-    while (LoRa.available() > 0)
+    for (i = 0; i < packetLength  &&  LoRa.available() > 0; i++)
     {
         *p++ = LoRa.read();
     }
@@ -134,28 +141,16 @@ void radioSetRxHandler(RadioRxHandler rxHandler)
 {
     radioRxHandler = rxHandler;
     LoRa.onReceive(loraOnReceive);
+
+    LoRa.receive();  // Begin reception-mode
 }
 
 
 static RadioTxDone radioTxDone;
 
-static void loraOnTxDone()
-{
-    (*radioTxDone)(RADIO_OK);
-}
-
 RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone)
 {
-    if (txDone != NULL)
-    {
-        radioTxDone = txDone;
-        LoRa.onTxDone(loraOnTxDone);
-    }
-    else
-    {
-        radioTxDone = NULL;
-        LoRa.onTxDone(NULL);
-    }
+    radioTxDone = (txDone == NULL)? NULL : txDone;
 
     MessageHeader hdr;
     hdr.src = getAddress();
@@ -166,7 +161,14 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
     LoRa.beginPacket();
     LoRa.write((uint8_t *)&hdr, sizeof(hdr));
     LoRa.write((uint8_t *)msg, len);
-    return (LoRa.endPacket())? RADIO_OK : RADIO_FAILED;
+    RadioStatus ret = (LoRa.endPacket())? RADIO_OK : RADIO_FAILED;
+
+    LoRa.receive();  // Back to reception-mode
+
+    if (radioTxDone != NULL)
+        (*radioTxDone)(ret);
+
+    return ret;
 }
 
 
