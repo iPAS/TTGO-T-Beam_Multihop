@@ -123,6 +123,29 @@ void gps_setup() {
     }
 }
 
+void gps_decode_process() {
+    while (SERIAL_GPS.available()) {
+        gps.encode(SERIAL_GPS.read());
+    }
+
+    if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
+        // Example: http://arduiniana.org/libraries/tinygpsplus/
+        // "T --, SAT --, LAT --, LON --, ALT --, ";
+        // gps_datetime = "@ "         + String(gps.date.day())  + ":" + String(gps.date.month())  + ":" + String(gps.date.year()) + " ";
+        // gps_datetime = gps_datetime + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
+        char s_datetime[25];
+        sprintf(s_datetime, "@ %02u-%02u-%04u %02u:%02u:%02u",
+            gps.date.day(),  gps.date.month(),  gps.date.year(),
+            gps.time.hour(), gps.time.minute(), gps.time.second());
+        gps_datetime = String(s_datetime);
+
+        gps_loc  = "SAT " + String(gps.satellites.value());
+        gps_loc  = gps_loc + ", " + "LAT " + String(gps.location.lat(), 6);
+        gps_loc  = gps_loc + ", " + "LON " + String(gps.location.lng(), 6);
+        gps_loc  = gps_loc + ", " + "ALT " + String(gps.altitude.meters());
+    }
+}
+
 
 // ---------- Virtual TUBE ----------
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
@@ -359,26 +382,7 @@ void loop() {
     led_toggle_process();
 
     // Process GPS data
-    while (SERIAL_GPS.available()) {
-        gps.encode(SERIAL_GPS.read());
-    }
-
-    if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
-        // Example: http://arduiniana.org/libraries/tinygpsplus/
-        // "T --, SAT --, LAT --, LON --, ALT --, ";
-        // gps_datetime = "@ "         + String(gps.date.day())  + ":" + String(gps.date.month())  + ":" + String(gps.date.year()) + " ";
-        // gps_datetime = gps_datetime + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
-        char s_datetime[25];
-        sprintf(s_datetime, "@ %02u-%02u-%04u %02u:%02u:%02u",
-            gps.date.day(),  gps.date.month(),  gps.date.year(),
-            gps.time.hour(), gps.time.minute(), gps.time.second());
-        gps_datetime = String(s_datetime);
-
-        gps_loc  = "SAT " + String(gps.satellites.value());
-        gps_loc  = gps_loc + ", " + "LAT " + String(gps.location.lat(), 6);
-        gps_loc  = gps_loc + ", " + "LON " + String(gps.location.lng(), 6);
-        gps_loc  = gps_loc + ", " + "ALT " + String(gps.altitude.meters());
-    }
+    gps_decode_process();
 
     // Process LoRa received packet
     // XXX: use calling-back function instead
