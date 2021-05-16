@@ -31,7 +31,7 @@
 static uint8_t led_io;
 
 
-void led_toggle_process() {
+void led_blinking_process() {
     static uint8_t state = 0;
     static uint32_t next = 0;
 
@@ -94,56 +94,6 @@ void oled_setup() {
     display.flipScreenVertically();
     display.setFont(ArialMT_Plain_10);
     delay(100);
-}
-
-
-// ---------- GPS ----------
-#define SERIAL_GPS Serial1
-#define GPS_BAUDRATE 9600
-
-static uint8_t gps_tx;
-static uint8_t gps_rx;
-
-#define GPS_TX_V07 15
-#define GPS_RX_V07 12
-
-#define GPS_TX_V10 12
-#define GPS_RX_V10 34
-
-TinyGPSPlus gps;
-String gps_datetime = "@ --";
-String gps_loc  = "SAT --, LAT --, LON --, ALT --";
-
-
-void gps_setup() {
-    SERIAL_GPS.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
-    while (!SERIAL_GPS);
-    while (SERIAL_GPS.available()) {
-        SERIAL_GPS.read();
-    }
-}
-
-void gps_decoding_process() {
-    while (SERIAL_GPS.available()) {
-        gps.encode(SERIAL_GPS.read());
-    }
-
-    if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
-        // Example: http://arduiniana.org/libraries/tinygpsplus/
-        // "T --, SAT --, LAT --, LON --, ALT --, ";
-        // gps_datetime = "@ "         + String(gps.date.day())  + ":" + String(gps.date.month())  + ":" + String(gps.date.year()) + " ";
-        // gps_datetime = gps_datetime + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
-        char s_datetime[25];
-        sprintf(s_datetime, "@ %02u-%02u-%04u %02u:%02u:%02u",
-            gps.date.day(),  gps.date.month(),  gps.date.year(),
-            gps.time.hour(), gps.time.minute(), gps.time.second());
-        gps_datetime = String(s_datetime);
-
-        gps_loc  = "SAT " + String(gps.satellites.value());
-        gps_loc  = gps_loc + ", " + "LAT " + String(gps.location.lat(), 6);
-        gps_loc  = gps_loc + ", " + "LON " + String(gps.location.lng(), 6);
-        gps_loc  = gps_loc + ", " + "ALT " + String(gps.altitude.meters());
-    }
 }
 
 
@@ -244,11 +194,11 @@ void cbk(int packetSize) {  // XXX: leave it here for reference.
 
     display.display();
 
-    String str = gps_datetime + ", " + gps_loc + ", " + rssi + ", " + snr + ", " + packet;
+    // String str = gps_datetime + ", " + gps_loc + ", " + rssi + ", " + snr + ", " + packet;
     // Serial.println("[DEBUG] " + str);
-    if (bt.connected()) {
-        bt.println(str);
-    }
+    // if (bt.connected()) {
+    //     bt.println(str);
+    // }
 }
 
 void test_routing_send_to_zero() {
@@ -345,7 +295,7 @@ void cli_setup() {
     cmd_node_id.addPositionalArgument("id", "");
 }
 
-void cli_command_process() {
+void cli_interpreting_process() {
     if (Serial.available()) {
         String input = Serial.readStringUntil('\n');  // Read out string from the serial monitor
         cli.parse(input);  // Parse the user input into the CLI
@@ -368,6 +318,8 @@ void cli_command_process() {
 
 // ---------- Setup ----------
 void setup() {
+    bool is_tbeam_version_less_v1;
+
     Serial.begin(115200);
     while (!Serial);
 
@@ -375,25 +327,22 @@ void setup() {
     Wire.begin(AXP_SDA, AXP_SCL);
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
         Serial.println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
+        is_tbeam_version_less_v1 = true;
 
         led_io = LED_IO_V07;
-        gps_tx = GPS_TX_V07;
-        gps_rx = GPS_RX_V07;
-
     } else {
         Serial.println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
+        is_tbeam_version_less_v1 = false;
 
         axp_setup();
         led_io = LED_IO_V10;
-        gps_tx = GPS_TX_V10;
-        gps_rx = GPS_RX_V10;
     }
 
     oled_setup();   // OLED
     led_setup();    // LED
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
-    gps_setup();    // GPS
+    gps_setup(is_tbeam_version_less_v1);  // GPS
     vtube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
 
@@ -407,11 +356,11 @@ void setup() {
 
 // ---------- Main ----------
 void loop() {
-    // LED toggle
-    led_toggle_process();
+    // LED blinking
+    led_blinking_process();
 
     // Process GPS data
-    gps_decode_process();
+    gps_decoding_process();
 
 
     // Process LoRa received packet
@@ -431,5 +380,5 @@ void loop() {
     vtube_forwarding_process();
 
     // Process command-line input
-    cli_command_process();
+    cli_interpreting_process();
 }
