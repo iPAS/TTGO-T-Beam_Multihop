@@ -28,3 +28,19 @@ void vtube_forwarding_process() {
         Serial.println(input);
     }
 }
+
+
+void test_vtube_loopback() {
+    while (true) {
+        if (SERIAL_V.available()) {
+            String input = SERIAL_V.readStringUntil('\n');
+            Serial.println(input);
+        }
+
+        if (Serial.available()) {
+            String input = Serial.readStringUntil('\n');
+            Serial.println("Send >>>");
+            SERIAL_V.println(input);
+        }
+    }
+}
