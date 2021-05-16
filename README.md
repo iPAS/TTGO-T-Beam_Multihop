@@ -105,4 +105,5 @@ On purpose, these commands could be send to T-Beam through __UART0__, debugging 
 
 * [Examples for each peripheral on T-Beam](https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series)
 * [Low-power design guide for T-Beam](https://github.com/JoepSchyns/Low_power_TTGO_T-beam)
+* [Most comprehensive resource on Riot-OS website](https://doc.riot-os.org/group__boards__esp32__ttgo-t-beam.html)
 

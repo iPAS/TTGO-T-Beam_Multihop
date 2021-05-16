@@ -1,3 +1,11 @@
+/**
+ * 
+ * Serial as DEBUG & CLI
+ * Serial1 as GPS
+ * Serial2 as VTube connected with RTU
+ * BT as data log
+ * 
+ */
 #include "images.h"  // Note on a bug: arduino-vscode cannot find the header
                      //   named with alphabet comming before the main .ino file.
 #include <strings.h>
@@ -10,8 +18,14 @@
 #include <BluetoothSerial.h>
 #include <SimpleCLI.h>
 
+#include "all_headers.h"
+#include "flood.h"
+
 
 // ---------- LED ----------
+#define BLINK_ON_PERIOD 500
+#define BLINK_OFF_PERIOD 1000
+
 #define LED_IO_V07 14
 #define LED_IO_V10 4
 static uint8_t led_io;
@@ -19,23 +33,22 @@ static uint8_t led_io;
 
 void led_toggle_process() {
     static uint8_t state = 0;
-    static uint32_t start = millis();
+    static uint32_t next = 0;
 
-    switch (state) {
+    if (millis() > next) {
+        switch (state) {
         case 0:
-            if (millis() - start > 500) {
-                digitalWrite(led_io, HIGH);
-                start = millis();
-                state = 1;
-            }
+            digitalWrite(led_io, HIGH);
+            next = millis() + BLINK_ON_PERIOD;
+            state = 1;
             break;
+
         case 1:
-            if (millis() - start > 500) {
-                digitalWrite(led_io, LOW);
-                start = millis();
-                state = 0;
-            }
+            digitalWrite(led_io, LOW);
+            next = millis() + BLINK_OFF_PERIOD;
+            state = 0;
             break;
+        }
     }
 }
 
@@ -63,6 +76,8 @@ void axp_setup() {
 
     axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
     axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
+
+    // axp.setChgLEDMode(AXP20X_LED_BLINK_1HZ);
 }
 
 
@@ -103,22 +118,25 @@ void gps_setup() {
     Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
     while (!Serial1);
     while (Serial1.available()) {
-        gps.encode(Serial1.read());
+        Serial1.read();
     }
 }
 
 
-// ---------- Virtual Tube ----------
+// ---------- Virtual TUBE ----------
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
-#define TUBE_UART_BAUDRATE  38400
-#define TUBE_UART_CONFIG    SERIAL_8E1
-#define TUBE_TX 14
-#define TUBE_RX 13
+#define VTUBE_UART_BAUDRATE  38400
+#define VTUBE_UART_CONFIG    SERIAL_8E1
+#define VTUBE_TX 14
+#define VTUBE_RX 13
 
 
-void tube_setup() {
-    Serial2.begin(TUBE_UART_BAUDRATE, TUBE_UART_CONFIG, TUBE_RX, TUBE_TX);
+void vtube_setup() {
+    Serial2.begin(VTUBE_UART_BAUDRATE, VTUBE_UART_CONFIG, VTUBE_RX, VTUBE_TX);
     while (!Serial2);
+    while (Serial2.available()) {
+        Serial2.read();
+    }
 }
 
 
@@ -144,6 +162,10 @@ void bt_setup() {
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
 
 
+void on_flood_receive(void *message, uint8_t len) {
+    debug("Received: %s", message);
+}
+
 void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
@@ -160,12 +182,23 @@ void lora_setup() {
     // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
                       // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
-    // LoRa.onReceive(cbk);
-    LoRa.receive();  // Receieve while in the main loop instead of callback function -- cbk.'
+    flood_init();
+    flood_set_rx_handler(on_flood_receive);
+
     Serial.println("[DEBUG] Starting LoRa ok");
 }
 
-void lora_data() {
+void cbk(int packetSize) {  // XXX: leave it here for reference.
+    packet   = "";
+    packSize = String(packetSize, DEC);
+    for (int i = 0; i < packetSize; i++) {
+        packet += (char)LoRa.read();
+    }
+
+    rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
+    snr  = "SNR "  + String(LoRa.packetSnr(), 2);
+
+    // lora_data();
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
@@ -183,17 +216,15 @@ void lora_data() {
     }
 }
 
-void cbk(int packetSize) {
-    packet   = "";
-    packSize = String(packetSize, DEC);
-    for (int i = 0; i < packetSize; i++) {
-        packet += (char)LoRa.read();
+void send_to_zero() {
+    if (getAddress() == 0)
+        return;
+
+    static uint32_t next = millis() + 10000 + ((rand() & 0x03) << 10);
+    if (millis() > next) {
+        flood_send_to(0, "Hello", 6);  // XXX: tx for testing
+        next = millis() + 10000 + ((rand() & 0x03) << 10);
     }
-
-    rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
-    snr  = "SNR "  + String(LoRa.packetSnr(), 2);
-
-    lora_data();
 }
 
 
@@ -256,19 +287,18 @@ void on_cmd_node_id(cmd *c) {
 
         if (legal_id) {
             // Set new id
-            Serial.println("[CLI] node_id: new id");
+            Serial.print("[CLI] node_id: new id ");
+            Serial.println(setAddress(id));
         } else {
             // Illegal id
-            Serial.println("[CLI] node_id: illegal id number");
+            Serial.println("[CLI] node_id: illegal id");
         }
 
     } else {  // No argument
         // Ask for current id
-        Serial.println("[CLI] node_id: current id");
+        Serial.print("[CLI] node_id: current id ");
+        Serial.println(getAddress());
     }
-
-    Serial.print("[CLI] node_id: ");
-    Serial.println(id);
 }
 
 void cli_setup() {
@@ -309,8 +339,15 @@ void setup() {
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
     gps_setup();    // GPS
-    tube_setup();   // Virtual Tube connected to weather station
+    vtube_setup();   // Virtual Tube connected to weather station
     cli_setup();    // CLI
+
+
+    // ----------------
+    // For testing only
+    // ----------------
+    // zTimerTest();  // XXX: for testing only
+
 }
 
 
@@ -342,17 +379,25 @@ void loop() {
     }
 
     // Process LoRa received packet
-    int packetSize = LoRa.parsePacket();
-    if (packetSize) {
-        cbk(packetSize);
-    }
+    // XXX: use calling-back function instead
+    // int packetSize = LoRa.parsePacket();
+    // if (packetSize) {
+    //     cbk(packetSize);
+    // }
+
+
+    // ----------------
+    // For testing only
+    // ----------------
+    send_to_zero();  //  XXX: for testing only
+
 
     // Forward Data received from Virtual Tube
     if (Serial2.available()) {
         String input = Serial2.readStringUntil('\n');
 
-        // Pass 'input' through LoRa network to node id 0
-        Serial.print("[TUBE] ");
+        // TODO: Pass 'input' through LoRa network to node id 0
+        Serial.print("[VTUBE] >> ");
         Serial.println(input);
     }
 
