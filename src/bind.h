@@ -70,6 +70,7 @@ extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg
  * Others
  */
 extern void debug(const char *format, ...);
+extern void test_ztimer();
 
 
 #endif  // __BIND_H__

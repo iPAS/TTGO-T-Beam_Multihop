@@ -74,7 +74,7 @@ static void zTimerTestFired(zTimer *arg)
     }
 }
 
-void zTimerTest()
+void test_ztimer()
 {  // Used for testing
     static zTimer timer;
     zTimerCreate(&timer);
