@@ -22,6 +22,7 @@ String gps_sat = "SAT --";
 String gps_loc = "LAT --, LON --, ALT --";
 
 
+// ----------------------------------------------------------------------------
 void gps_setup(bool is_tbeam_version_less_v1) {
     if (is_tbeam_version_less_v1) {
         gps_tx = GPS_TX_V07;
