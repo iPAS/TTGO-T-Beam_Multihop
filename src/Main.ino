@@ -123,7 +123,7 @@ void gps_setup() {
     }
 }
 
-void gps_decode_process() {
+void gps_decoding_process() {
     while (SERIAL_GPS.available()) {
         gps.encode(SERIAL_GPS.read());
     }
@@ -161,6 +161,16 @@ void vtube_setup() {
     while (!SERIAL_V);
     while (SERIAL_V.available()) {
         SERIAL_V.read();
+    }
+}
+
+void vtube_forwarding_process() {
+    if (SERIAL_V.available()) {
+        String input = SERIAL_V.readStringUntil('\n');
+
+        // TODO: Pass 'input' through LoRa network to node id 0
+        Serial.print("[VTUBE] >> ");
+        Serial.println(input);
     }
 }
 
@@ -241,7 +251,7 @@ void cbk(int packetSize) {  // XXX: leave it here for reference.
     }
 }
 
-void send_to_zero() {
+void test_routing_send_to_zero() {
     if (getAddress() == 0)
         return;
 
@@ -335,6 +345,26 @@ void cli_setup() {
     cmd_node_id.addPositionalArgument("id", "");
 }
 
+void cli_command_process() {
+    if (Serial.available()) {
+        String input = Serial.readStringUntil('\n');  // Read out string from the serial monitor
+        cli.parse(input);  // Parse the user input into the CLI
+    }
+
+    if (cli.errored()) {
+        CommandError cmdError = cli.getError();
+
+        Serial.print("[CLI] Error: ");
+        Serial.println(cmdError.toString());
+
+        if (cmdError.hasCommand()) {
+            Serial.print("[CLI] Did you mean \"");
+            Serial.print(cmdError.getCommand().toString());
+            Serial.println("\"?");
+        }
+    }
+}
+
 
 // ---------- Setup ----------
 void setup() {
@@ -371,8 +401,7 @@ void setup() {
     // ----------------
     // For testing only
     // ----------------
-    // zTimerTest();  // XXX: for testing only
-
+    // test_ztimer();  // XXX: for testing only
 }
 
 
@@ -384,6 +413,7 @@ void loop() {
     // Process GPS data
     gps_decode_process();
 
+
     // Process LoRa received packet
     // XXX: use calling-back function instead
     // int packetSize = LoRa.parsePacket();
@@ -391,38 +421,15 @@ void loop() {
     //     cbk(packetSize);
     // }
 
-
     // ----------------
     // For testing only
     // ----------------
-    send_to_zero();  //  XXX: for testing only
+    test_routing_send_to_zero();  //  XXX: for testing only
 
 
     // Forward Data received from Virtual Tube
-    if (SERIAL_V.available()) {
-        String input = SERIAL_V.readStringUntil('\n');
-
-        // TODO: Pass 'input' through LoRa network to node id 0
-        Serial.print("[VTUBE] >> ");
-        Serial.println(input);
-    }
+    vtube_forwarding_process();
 
     // Process command-line input
-    if (Serial.available()) {
-        String input = Serial.readStringUntil('\n');  // Read out string from the serial monitor
-        cli.parse(input);  // Parse the user input into the CLI
-    }
-
-    if (cli.errored()) {
-        CommandError cmdError = cli.getError();
-
-        Serial.print("[CLI] Error: ");
-        Serial.println(cmdError.toString());
-
-        if (cmdError.hasCommand()) {
-            Serial.print("[CLI] Did you mean \"");
-            Serial.print(cmdError.getCommand().toString());
-            Serial.println("\"?");
-        }
-    }
+    cli_command_process();
 }
