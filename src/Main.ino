@@ -24,42 +24,6 @@
 #include "flood.h"
 
 
-// ---------- LED ----------
-#define BLINK_ON_PERIOD 500
-#define BLINK_OFF_PERIOD 1000
-
-#define LED_IO_V07 14
-#define LED_IO_V10 4
-static uint8_t led_io;
-
-
-void led_blinking_process() {
-    static uint8_t state = 0;
-    static uint32_t next = 0;
-
-    if (millis() > next) {
-        switch (state) {
-        case 0:
-            digitalWrite(led_io, HIGH);
-            next = millis() + BLINK_ON_PERIOD;
-            state = 1;
-            break;
-
-        case 1:
-            digitalWrite(led_io, LOW);
-            next = millis() + BLINK_OFF_PERIOD;
-            state = 0;
-            break;
-        }
-    }
-}
-
-void led_setup() {
-    pinMode(led_io, OUTPUT);
-    digitalWrite(led_io, LOW);
-}
-
-
 // ---------- AXP192 ----------
 AXP20X_Class axp;
 #define AXP_SDA 21
@@ -96,34 +60,6 @@ void oled_setup() {
     display.flipScreenVertically();
     display.setFont(ArialMT_Plain_10);
     delay(100);
-}
-
-
-// ---------- Virtual TUBE ----------
-// screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
-#define SERIAL_V Serial2
-#define VTUBE_UART_BAUDRATE  38400
-#define VTUBE_UART_CONFIG    SERIAL_8E1
-#define VTUBE_TX 2
-#define VTUBE_RX 13
-
-
-void vtube_setup() {
-    SERIAL_V.begin(VTUBE_UART_BAUDRATE, VTUBE_UART_CONFIG, VTUBE_RX, VTUBE_TX);
-    while (!SERIAL_V);
-    while (SERIAL_V.available()) {
-        SERIAL_V.read();
-    }
-}
-
-void vtube_forwarding_process() {
-    if (SERIAL_V.available()) {
-        String input = SERIAL_V.readStringUntil('\n');
-
-        // TODO: Pass 'input' through LoRa network to node id 0
-        Serial.print("[VTUBE] >> ");
-        Serial.println(input);
-    }
 }
 
 
@@ -227,18 +163,14 @@ void setup() {
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
         Serial.println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
         is_tbeam_version_less_v1 = true;
-
-        led_io = LED_IO_V07;
     } else {
         Serial.println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
         is_tbeam_version_less_v1 = false;
-
         axp_setup();
-        led_io = LED_IO_V10;
     }
 
     oled_setup();   // OLED
-    led_setup();    // LED
+    led_setup(is_tbeam_version_less_v1);  // LED
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
     gps_setup(is_tbeam_version_less_v1);  // GPS
