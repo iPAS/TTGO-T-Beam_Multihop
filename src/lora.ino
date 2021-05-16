@@ -19,11 +19,6 @@
 #define LORA_DI0  26  // GPIO26 -- SX1278's IRQ(Interrupt Request)
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
 
-String  rssi     = "RSSI --";
-String  snr      = "SNR --";
-String  packSize = "--";
-String  packet   = "";
-
 
 // ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
@@ -54,34 +49,6 @@ void lora_setup() {
     Serial.println("[DEBUG] Starting LoRa ok");
 }
 
-
-void cbk(int packetSize) {  // XXX: leave it here for reference.
-    packet   = "";
-    packSize = String(packetSize, DEC);
-    for (int i = 0; i < packetSize; i++) {
-        packet += (char)LoRa.read();
-    }
-
-    rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
-    snr  = "SNR "  + String(LoRa.packetSnr(), 2);
-
-    // lora_data();
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-
-    display.drawString(0, 0, rssi + ", " + snr);
-    display.drawString(0, 15, "Recv: " + packSize + " bytes");
-    display.drawStringMaxWidth(0, 26, 128, packet);
-
-    display.display();
-
-    // String str = gps_datetime + ", " + gps_loc + ", " + rssi + ", " + snr + ", " + packet;
-    // Serial.println("[DEBUG] " + str);
-    // if (bt.connected()) {
-    //     bt.println(str);
-    // }
-}
 
 void test_routing_send_to_zero() {
     if (getAddress() == 0)

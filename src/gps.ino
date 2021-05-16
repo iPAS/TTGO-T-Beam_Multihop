@@ -18,8 +18,10 @@ static uint8_t gps_rx;
 
 TinyGPSPlus gps;
 String gps_datetime = "@ --";
-String gps_sat = "SAT --";
-String gps_loc = "LAT --, LON --, ALT --";
+String gps_sat      = "SAT --";
+String gps_loc      = "LAT --, LON --, ALT --";
+String gps_rssi     = "RSSI --";
+String gps_snr      = "SNR --";
 
 
 // ----------------------------------------------------------------------------
@@ -57,9 +59,12 @@ void gps_decoding_process() {
         gps_datetime = String(s_datetime);
 
         gps_sat = "SAT " + String(gps.satellites.value());
-    
+
         gps_loc =                  "LAT " + String(gps.location.lat(), 6);
         gps_loc = gps_loc + ", " + "LON " + String(gps.location.lng(), 6);
         gps_loc = gps_loc + ", " + "ALT " + String(gps.altitude.meters());
+
+        gps_rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
+        gps_snr  = "SNR "  + String(LoRa.packetSnr(), 2);
     }
 }

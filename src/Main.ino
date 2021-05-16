@@ -10,8 +10,8 @@
                      //   named with alphabet comming before the main .ino file.
 #include <strings.h>
 
-#include <SSD1306.h>
 #include <axp20x.h>
+#include <SSD1306.h>
 #include <BluetoothSerial.h>
 
 #include <SPI.h>
@@ -31,19 +31,33 @@ AXP20X_Class axp;
 #define AXP_IRQ 35
 
 
-void axp_setup() {
-    axp.setLDO2Voltage(3300);   // LoRa VDD
-    axp.setLDO3Voltage(3300);   // GPS  VDD
-    axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);  // LORA radio
-    axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);  // GPS main power
+bool axp_setup() {
+    bool is_tbeam_version_less_v1;
 
-    axp.setDCDC1Voltage(3300);  // for the OLED power
-    axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
+    Wire.begin(AXP_SDA, AXP_SCL);
+    if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
+        Serial.println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
+        is_tbeam_version_less_v1 = true;
+    } else {
+        Serial.println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
 
-    axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
-    axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
+        axp.setLDO2Voltage(3300);   // LoRa VDD
+        axp.setLDO3Voltage(3300);   // GPS  VDD
+        axp.setPowerOutPut(AXP192_LDO2, AXP202_ON);  // LORA radio
+        axp.setPowerOutPut(AXP192_LDO3, AXP202_ON);  // GPS main power
 
-    // axp.setChgLEDMode(AXP20X_LED_BLINK_1HZ);
+        axp.setDCDC1Voltage(3300);  // for the OLED power
+        axp.setPowerOutPut(AXP192_DCDC1, AXP202_ON);
+
+        axp.setPowerOutPut(AXP192_DCDC2, AXP202_ON);
+        axp.setPowerOutPut(AXP192_EXTEN, AXP202_ON);
+
+        // axp.setChgLEDMode(AXP20X_LED_BLINK_1HZ);
+
+        is_tbeam_version_less_v1 = false;
+    }
+
+    return is_tbeam_version_less_v1;
 }
 
 
@@ -56,6 +70,15 @@ void oled_setup() {
     display.flipScreenVertically();
     display.setFont(ArialMT_Plain_10);
     delay(100);
+
+    // Using...
+    // display.clear();
+    // display.setTextAlignment(TEXT_ALIGN_LEFT);
+    // display.setFont(ArialMT_Plain_10);
+    // display.drawString(0, 0, rssi + ", " + snr);
+    // display.drawString(0, 15, "Recv: " + packSize + " bytes");
+    // display.drawStringMaxWidth(0, 26, 128, packet);
+    // display.display();
 }
 
 
@@ -66,38 +89,32 @@ BluetoothSerial bt;
 
 void bt_setup() {
     bt.begin(BT_NAME);
+
+    // Using...
+    // if (bt.connected()) {
+    //     bt.println(str);
+    // }
 }
 
 
 // ---------- Setup ----------
 void setup() {
-    bool is_tbeam_version_less_v1;
-
     Serial.begin(115200);
     while (!Serial);
 
-    // Version validation
-    Wire.begin(AXP_SDA, AXP_SCL);
-    if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
-        Serial.println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
-        is_tbeam_version_less_v1 = true;
-    } else {
-        Serial.println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
-        is_tbeam_version_less_v1 = false;
-        axp_setup();
-    }
+    bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
 
     oled_setup();   // OLED
     led_setup(is_tbeam_version_less_v1);  // LED
     lora_setup();   // LoRa
     bt_setup();     // Bluetooth-Serial
     gps_setup(is_tbeam_version_less_v1);  // GPS
-    vtube_setup();   // Virtual Tube connected to weather station
+    vtube_setup();  // Virtual Tube connected to weather station
     cli_setup();    // CLI
 
 
     // ----------------
-    // For testing only
+    // XXX: For testing only
     // ----------------
     // test_ztimer();  // XXX: for testing only
 }
@@ -105,29 +122,15 @@ void setup() {
 
 // ---------- Main ----------
 void loop() {
-    // LED blinking
-    led_blinking_process();
+    led_blinking_process();  // LED blinking
+    gps_decoding_process();  // Process GPS data
 
-    // Process GPS data
-    gps_decoding_process();
+    vtube_forwarding_process();  // Forward Data received from Virtual Tube
+    cli_interpreting_process();  // Process command-line input
 
-
-    // Process LoRa received packet
-    // XXX: use calling-back function instead
-    // int packetSize = LoRa.parsePacket();
-    // if (packetSize) {
-    //     cbk(packetSize);
-    // }
 
     // ----------------
-    // For testing only
+    // XXX: For testing only
     // ----------------
     test_routing_send_to_zero();  //  XXX: for testing only
-
-
-    // Forward Data received from Virtual Tube
-    vtube_forwarding_process();
-
-    // Process command-line input
-    cli_interpreting_process();
 }
