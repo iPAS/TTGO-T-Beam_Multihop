@@ -98,6 +98,7 @@ void oled_setup() {
 
 
 // ---------- GPS ----------
+#define SERIAL_GPS Serial1
 #define GPS_BAUDRATE 9600
 
 static uint8_t gps_tx;
@@ -115,27 +116,28 @@ String gps_loc  = "SAT --, LAT --, LON --, ALT --";
 
 
 void gps_setup() {
-    Serial1.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
-    while (!Serial1);
-    while (Serial1.available()) {
-        Serial1.read();
+    SERIAL_GPS.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
+    while (!SERIAL_GPS);
+    while (SERIAL_GPS.available()) {
+        SERIAL_GPS.read();
     }
 }
 
 
 // ---------- Virtual TUBE ----------
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
+#define SERIAL_V Serial2
 #define VTUBE_UART_BAUDRATE  38400
 #define VTUBE_UART_CONFIG    SERIAL_8E1
-#define VTUBE_TX 14
+#define VTUBE_TX 2
 #define VTUBE_RX 13
 
 
 void vtube_setup() {
-    Serial2.begin(VTUBE_UART_BAUDRATE, VTUBE_UART_CONFIG, VTUBE_RX, VTUBE_TX);
-    while (!Serial2);
-    while (Serial2.available()) {
-        Serial2.read();
+    SERIAL_V.begin(VTUBE_UART_BAUDRATE, VTUBE_UART_CONFIG, VTUBE_RX, VTUBE_TX);
+    while (!SERIAL_V);
+    while (SERIAL_V.available()) {
+        SERIAL_V.read();
     }
 }
 
@@ -357,8 +359,8 @@ void loop() {
     led_toggle_process();
 
     // Process GPS data
-    while (Serial1.available()) {
-        gps.encode(Serial1.read());
+    while (SERIAL_GPS.available()) {
+        gps.encode(SERIAL_GPS.read());
     }
 
     if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
@@ -393,8 +395,8 @@ void loop() {
 
 
     // Forward Data received from Virtual Tube
-    if (Serial2.available()) {
-        String input = Serial2.readStringUntil('\n');
+    if (SERIAL_V.available()) {
+        String input = SERIAL_V.readStringUntil('\n');
 
         // TODO: Pass 'input' through LoRa network to node id 0
         Serial.print("[VTUBE] >> ");
