@@ -22,7 +22,10 @@
 
 // ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
-    debug("Received: %s", message);
+    Serial.print("Received <");
+    Serial.print(len);
+    Serial.print("> ");
+    Serial.println((char *)message);
 }
 
 
@@ -54,9 +57,9 @@ void test_routing_send_to_zero() {
     if (getAddress() == 0)
         return;
 
-    static uint32_t next = millis() + 10000 + ((rand() & 0x03) << 10);
+    static uint32_t next = millis() + 10000 + ((rand() & 0b011) << 10);
     if (millis() > next) {
         flood_send_to(0, "Hello", 6);  // XXX: tx for testing
-        next = millis() + 10000 + ((rand() & 0x03) << 10);
+        next = millis() + 10000 + ((rand() & 0b011) << 10);
     }
 }

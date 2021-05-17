@@ -10,7 +10,7 @@ Command cmd_node_id;
 
 
 // ----------------------------------------------------------------------------
-boolean isNumeric(String str) {  
+boolean isNumeric(String str) {
     // http://tripsintech.com/arduino-isnumeric-function/
     unsigned int stringLength = str.length();
 

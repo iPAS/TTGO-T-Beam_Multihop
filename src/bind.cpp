@@ -2,7 +2,9 @@
 
 #include <SPI.h>
 #include <LoRa.h>
-#include <stdarg.h>
+#include <BluetoothSerial.h>
+
+extern BluetoothSerial bt;
 
 
 /**
@@ -177,11 +179,15 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
  */
 void debug(const char *format, ...)
 {
+    if (!bt.connected())
+        return;
+
     char buf[SIZE_DEBUG_BUF], *p = buf;
     va_list ap;
     va_start(ap, format);
-    p += sprintf(p, "[X] ");
+    p += sprintf(p, "[%s] ", __func__);
     vsnprintf(p, sizeof(buf)-4, format, ap);
-    Serial.println(buf);
+    // Serial.println(buf);
+    bt.println(buf);
     va_end(ap);
 }

@@ -116,9 +116,9 @@ void setup() {
     // ----------------
     // XXX: For testing only
     // ----------------
-    while (true)
+    // while (true)
         // test_ztimer();
-        test_vtube_loopback();
+        // test_vtube_loopback();
 }
 
 
