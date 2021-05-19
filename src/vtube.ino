@@ -30,6 +30,11 @@ void vtube_forwarding_process() {
 }
 
 
+void vtube_command_to_station(String cmd) {
+    SERIAL_V.println(cmd);
+}
+
+
 void test_vtube_loopback() {
     while (true) {
         if (SERIAL_V.available()) {

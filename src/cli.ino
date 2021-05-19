@@ -8,6 +8,7 @@ SimpleCLI cli;
 Command cmd_help;
 Command cmd_hello;
 Command cmd_node_id;
+Command cmd_vtube;
 
 
 // ----------------------------------------------------------------------------
@@ -56,6 +57,7 @@ void on_cmd_help(cmd *c) {
         "\thelp",
         "\thello",
         "\tnode_id [new_id]",
+        "\tvtube ...",
     };
     uint8_t i;
     Command cmd(c);
@@ -104,6 +106,14 @@ void on_cmd_node_id(cmd *c) {
 }
 
 
+void on_cmd_vtube(cmd *c) {
+    Command cmd(c);
+    String arg = cmd.getArg(0).getValue();
+    Serial.println("[CLI] vtube: '" + arg + "'");
+    vtube_command_to_station(arg);
+}
+
+
 // ----------------------------------------------------------------------------
 void cli_setup() {
     cli.setOnError(on_error_callback); // Set error Callback
@@ -112,6 +122,7 @@ void cli_setup() {
     cmd_hello = cli.addCommand("hello", on_cmd_hello);
     cmd_node_id = cli.addCommand("node_id", on_cmd_node_id);
     cmd_node_id.addPositionalArgument("id", "");
+    cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
 }
 
 
