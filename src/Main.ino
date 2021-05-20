@@ -134,5 +134,5 @@ void loop() {
     // ----------------
     // XXX: For testing only
     // ----------------
-    test_routing_send_to_zero();  //  XXX: for testing only
+    test_routing_send_to_zero();
 }
