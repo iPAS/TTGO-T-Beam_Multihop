@@ -1,8 +1,8 @@
 #include "all_headers.h"
 
 
-#define BLINK_ON_PERIOD 500
-#define BLINK_OFF_PERIOD 1000
+#define BLINK_ON_PERIOD 200
+#define BLINK_OFF_PERIOD 2000
 
 #define LED_IO_V07 14
 #define LED_IO_V10 4
