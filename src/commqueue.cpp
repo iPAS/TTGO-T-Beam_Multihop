@@ -20,7 +20,7 @@ void cq_tx_task(zTimer *timer)
         return;
 
     TxTask *next = (TxTask *)q_item(&cq, 0)->data;
-    zTimerStart(&delayTxTimer, TIMER_ONESHOT, task.delay_tick, &cq_tx_task);
+    zTimerStart(&delayTxTimer, TIMER_ONESHOT, next->delay_tick, &cq_tx_task);
 }
 
 
@@ -41,7 +41,7 @@ bool cq_send(Address dst, MessageType type, void *msg, uint8_t len)
     }
     memcpy(task.msg, msg, len);
     task.len = len;
-    task.delay_tick = rand() % DELAY_TX_GAP;
+    task.delay_tick = DELAY_TX_DEFAULT + (rand() & DELAY_TX_GAP_MASK);
 
     // Queue the task
     if (q_enqueue(&cq, &task, sizeof(task)) == NULL)

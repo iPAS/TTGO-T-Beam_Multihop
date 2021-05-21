@@ -5,7 +5,8 @@
 #include "all_headers.h"
 #include "queue.h"
 
-#define DELAY_TX_GAP 500
+#define DELAY_TX_DEFAULT 800
+#define DELAY_TX_GAP_MASK 0x01FF
 
 typedef struct TxTask
 {
