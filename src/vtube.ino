@@ -87,7 +87,7 @@ void test_vtube_loopback() {
     while (true) {
         if (SERIAL_V.available()) {
             String input = SERIAL_V.readStringUntil('\n');
-            Serial.print("[VTUBE] Got: ");
+            Serial.print("[VTUBE] Recv: ");
             Serial.println(input);
         }
 

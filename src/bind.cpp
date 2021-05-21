@@ -19,8 +19,7 @@ void zTimerCreate(zTimer *timer)
 static void vTimerCallback(TimerHandle_t xTimer)
 {
     zTimer *timer = (zTimer *)pvTimerGetTimerID(xTimer);  // timer ID, but used as argument -- passing zTimer
-    zTimerFired fn = timer->callback_fn;
-    (*fn)(timer);
+    (*timer->callback_fn)(timer);
 }
 
 void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired onFired)
@@ -34,7 +33,13 @@ void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired o
         pdMS_TO_TICKS(interval),  // Period/time
         (type == TIMER_PERIODIC)? pdTRUE : pdFALSE,  // Auto reload
         timer,  // timer ID, but used as argument -- passing zTimer
-        vTimerCallback); /* callback */
+        vTimerCallback); // callback
+
+    if (timer->timerHandle == NULL)
+    {
+        debug("xTimerCreate() problem");
+        return;
+    }
 
     if(xTimerStart(timer->timerHandle, 0) != pdPASS)  // Start it suddenly.
     {
@@ -77,12 +82,22 @@ static void zTimerTestFired(zTimer *arg)
 }
 
 void test_ztimer()
-{  // Used for testing
-    static zTimer timer;
-    zTimerCreate(&timer);
-    zTimerStart(&timer, TIMER_PERIODIC, 1000, zTimerTestFired);
+{
+    static uint32_t next = millis() + 30000;
 
-    debug("Address: %04X", getAddress());
+    while (true)
+    {
+        if (millis() > next) 
+        {
+            debug("Address: %04X", getAddress());
+
+            static zTimer timer;
+            zTimerCreate(&timer);
+            zTimerStart(&timer, TIMER_PERIODIC, 1000, zTimerTestFired);
+
+            next = millis() + 30000;
+        }
+    }
 }
 
 
@@ -179,15 +194,17 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
  */
 void debug(const char *format, ...)
 {
-    if (!bt.connected())
-        return;
+    // if (!bt.connected())
+    //     return;
 
     char buf[SIZE_DEBUG_BUF], *p = buf;
     va_list ap;
     va_start(ap, format);
-    p += sprintf(p, "[%s] ", __func__);
+    p += sprintf(p, "[X] ");
     vsnprintf(p, sizeof(buf)-4, format, ap);
-    // Serial.println(buf);
-    bt.println(buf);
+
+    // bt.println(buf);
+    Serial.println(buf);
+
     va_end(ap);
 }
