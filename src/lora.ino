@@ -31,6 +31,8 @@ void on_flood_receive(void *message, uint8_t len) {
     Serial.print(len);
     Serial.print("> ");
     Serial.println((char *)message);
+
+    // TODO: print out and tell who sent
 }
 
 
@@ -62,7 +64,7 @@ void test_routing_send_to_zero() {
 
     static uint32_t next = millis() + 10000 + ((rand() & 0b011) << 10);
     if (millis() > next) {
-        flood_send_to(0, "Hello", 6);  // XXX: tx for testing
+        flood_send_to(0, "Hello", 6);
         next = millis() + 10000 + ((rand() & 0b011) << 10);
     }
 }
