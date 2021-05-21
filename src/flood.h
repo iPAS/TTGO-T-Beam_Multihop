@@ -11,7 +11,7 @@
 #define MAX_HOP         255
 #define WAIT_PARENT     10000
 
-#define MAX_HISTORY     16
+#define MAX_HISTORY     16  // XXX: maximum node sources that can exist.
 
 typedef struct
 {
