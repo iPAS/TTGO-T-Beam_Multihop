@@ -1,4 +1,5 @@
 #include "all_headers.h"
+#include "flood.h"
 
 
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
@@ -45,6 +46,12 @@ void vtube_forwarding_process() {
 
     if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next) {
         if (buffer.length() > 0) {
+
+            // Transmit to node #0
+            if (flood_send_to(0, buffer.c_str(), buffer.length()) == false) {
+                Serial.println("[VTUBE] flood_send_to() error");
+            }
+
             // Pass 'input' through LoRa network to the node #0 by putting them into sedning queue.
             Serial.println("[VTUBE] To #0: ");
 
