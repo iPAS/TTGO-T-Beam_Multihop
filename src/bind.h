@@ -15,6 +15,8 @@
 typedef struct zTimer
 {
     xTimerHandle timerHandle;
+    TickType_t period_tick;
+    UBaseType_t do_reload;
     void (*callback_fn)(struct zTimer *timer);
 } zTimer;
 
