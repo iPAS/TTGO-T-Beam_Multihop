@@ -10,33 +10,73 @@ extern BluetoothSerial bt;
 /**
  * zTimer
  */
-void zTimerCreate(zTimer *timer)
+static void zTimerInit(zTimer *timer)
 {
     timer->timerHandle = NULL;
     timer->callback_fn = NULL;
 }
 
+void zTimerCreate(zTimer *timer)
+{
+    zTimerInit(timer);
+}
+
 static void vTimerCallback(TimerHandle_t xTimer)
 {
     zTimer *timer = (zTimer *)pvTimerGetTimerID(xTimer);  // timer ID, but used as argument -- passing zTimer
-    zTimerFired fn = timer->callback_fn;
-    (*fn)(timer);
+    if (timer->callback_fn == NULL)
+        debug("vTimerCallback() timer->callback_fn == NULL");
+    else
+        (*timer->callback_fn)(timer);
 }
 
 void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired onFired)
 {
-    if (timer->timerHandle != NULL)
-        zTimerStop(timer);
+    TickType_t period_tick = pdMS_TO_TICKS(interval);
+    UBaseType_t do_reload = (type == TIMER_PERIODIC)? pdTRUE : pdFALSE;
 
     timer->callback_fn = onFired;
-    timer->timerHandle = xTimerCreate(
-        "Name4DbgOnly",  // The RTOS kernel itself only ever references a timer by its handle, and never by its name.
-        pdMS_TO_TICKS(interval),  // Period/time
-        (type == TIMER_PERIODIC)? pdTRUE : pdFALSE,  // Auto reload
-        timer,  // timer ID, but used as argument -- passing zTimer
-        vTimerCallback); /* callback */
 
-    if(xTimerStart(timer->timerHandle, 0) != pdPASS)  // Start it suddenly.
+    if (timer->timerHandle != NULL)  // Already created and started.
+    {
+        if (xTimerIsTimerActive(timer->timerHandle))
+            xTimerStop(timer->timerHandle, 0);
+
+        if (timer->period_tick != period_tick)
+        {
+            timer->period_tick = period_tick;
+            if (xTimerChangePeriod(timer->timerHandle, period_tick, 0) == pdFAIL)
+                debug("xTimerChangePeriod() problem");
+        }
+
+        if (timer->do_reload != do_reload)
+        {
+            if (xTimerDelete(timer->timerHandle, 0) == pdFAIL)
+                debug("xTimerDelete() problem");
+            timer->timerHandle = NULL;
+        }
+    }
+
+    if (timer->timerHandle == NULL)
+    {
+        timer->period_tick = period_tick;
+        timer->do_reload = do_reload;
+
+        timer->timerHandle = xTimerCreate(
+            "Name4DbgOnly",         // Never be referred by the kernel.
+            period_tick,            // Period/time
+            do_reload,              // Auto reload
+            timer,                  // Adapted for passing argument.
+            vTimerCallback);        // The callback
+
+        if (timer->timerHandle == NULL)
+        {
+            debug("xTimerCreate() problem");
+            return;
+        }
+    }
+
+    if(xTimerStart(timer->timerHandle, 0) == pdFAIL)  // Start it suddenly.
     {
         debug("xTimerStart() problem");
     }
@@ -45,9 +85,9 @@ void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired o
 void zTimerStop(zTimer *timer)
 {
     xTimerStop(timer->timerHandle, 0);  // Stop it suddenly.
-    xTimerReset(timer->timerHandle, 0);  // Reset it without waiting.
-    xTimerDelete(timer->timerHandle, 0);  // Delete.
-    zTimerCreate(timer);  // Re-init
+    // xTimerReset(timer->timerHandle, 0);  // Reset & if not already been started, will start the timer.
+    // xTimerDelete(timer->timerHandle, 0);  // Delete.
+    // zTimerInit(timer);  // Re-init
 }
 
 uint16_t zTimerTicks()
@@ -67,22 +107,34 @@ static void zTimerTestFired(zTimer *arg)
     if (++counter > 15)
     {
         zTimerStop(timer);
+        debug("zTimer Test stop for a while");
         counter = 0;
     }
     else
     {
-        zTimerStart(timer, TIMER_PERIODIC, 1000, zTimerTestFired);
-        debug("zTimer Test #%d", counter);
+        uint16_t period = 1000 + (rand() % 1000);
+        zTimerStart(timer, TIMER_ONESHOT, period, zTimerTestFired);
+        debug("zTimer Test #%d, next in %d ms", counter, period);
     }
 }
 
 void test_ztimer()
-{  // Used for testing
-    static zTimer timer;
-    zTimerCreate(&timer);
-    zTimerStart(&timer, TIMER_PERIODIC, 1000, zTimerTestFired);
+{
+    static uint32_t next = 0;
 
-    debug("Address: %04X", getAddress());
+    while (true)
+    {
+        if (millis() > next)
+        {
+            debug("Address: %04X", getAddress());
+
+            static zTimer timer;
+            zTimerCreate(&timer);
+            zTimerStart(&timer, TIMER_ONESHOT, 1000, zTimerTestFired);
+
+            next = millis() + 30000;
+        }
+    }
 }
 
 
@@ -179,15 +231,17 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
  */
 void debug(const char *format, ...)
 {
-    if (!bt.connected())
-        return;
+    // if (!bt.connected())
+    //     return;
 
     char buf[SIZE_DEBUG_BUF], *p = buf;
     va_list ap;
     va_start(ap, format);
-    p += sprintf(p, "[%s] ", __func__);
+    p += sprintf(p, "[X] ");
     vsnprintf(p, sizeof(buf)-4, format, ap);
-    // Serial.println(buf);
-    bt.println(buf);
+
+    // bt.println(buf);
+    Serial.println(buf);
+
     va_end(ap);
 }

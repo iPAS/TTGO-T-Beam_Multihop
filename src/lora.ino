@@ -9,8 +9,13 @@
 #include "flood.h"
 
 
-// #define BAND    868E6
-#define BAND    923E6
+// Computed with https://www.thethingsnetwork.org/airtime-calculator
+// Airtime should be about 513ms on sending of 100-byte payload
+#define LORA_BAND   923E6   // 868E6
+#define LORA_SF     11      // SF 6-12, default 7
+#define LORA_BW     500E3   // BW in Hz, defaults 125E3.
+                            // Supported values are 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3, and 500E3.
+#define LORA_TX_POWER 20    // Set maximum Tx power to 20 dBm (17 is default). See https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md#tx-power
 
 #define LORA_SCK  5   // GPIO5  -- SX1278's SCK
 #define LORA_MISO 19  // GPIO19 -- SX1278's MISO
@@ -26,6 +31,8 @@ void on_flood_receive(void *message, uint8_t len) {
     Serial.print(len);
     Serial.print("> ");
     Serial.println((char *)message);
+
+    // TODO: print out and tell who sent
 }
 
 
@@ -33,18 +40,16 @@ void on_flood_receive(void *message, uint8_t len) {
 void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
-    if (!LoRa.begin(BAND)) {
+    if (!LoRa.begin(LORA_BAND)) {
         Serial.println("[DEBUG] Starting LoRa failed!");
         while (1);
     }
 
-    LoRa.setSpreadingFactor(12);  // ranges from 6-12, default 7 see API docs. Changed for ver 0.1 Glacierjay
-    // LoRa.setSignalBandwidth(7.8E3);  // signalBandwidth - signal bandwidth in Hz, defaults to 125E3.
-                                     // Supported values are 7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3, 41.7E3, 62.5E3, 125E3, 250E3, and 500E3.
-    // LoRa.setTxPower(20, PA_OUTPUT_PA_BOOST_PIN);  // Set maximum Tx power to 20 dBm (17 is default).
-                                                  // https://github.com/sandeepmistry/arduino-LoRa/blob/master/API.md#tx-power
-    // LoRa.setGain(0);  // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
-                      // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
+    LoRa.setSpreadingFactor(LORA_SF);
+    LoRa.setSignalBandwidth(LORA_BW);
+    LoRa.setTxPower(LORA_TX_POWER, PA_OUTPUT_PA_BOOST_PIN);
+    // LoRa.setGain(0);    // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
+                        // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
     flood_init();
     flood_set_rx_handler(on_flood_receive);
@@ -59,7 +64,7 @@ void test_routing_send_to_zero() {
 
     static uint32_t next = millis() + 10000 + ((rand() & 0b011) << 10);
     if (millis() > next) {
-        flood_send_to(0, "Hello", 6);  // XXX: tx for testing
+        flood_send_to(0, "Hello", 6);
         next = millis() + 10000 + ((rand() & 0b011) << 10);
     }
 }
