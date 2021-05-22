@@ -15,26 +15,27 @@ This project tries to implement multihopping data relay on the network of ESP32 
 The firmware uses UART2 for communicating with the weather station through
     [UART-232 module](https://www.aliexpress.com/item/696400942.html?spm=a2g0o.cart.0.0.79333c009rHjfp&mp=1),
     while UART0 and UART1 are used for debugging and connecting with GPS respectively.
+The signal pins between the two modules are connected as following:
 
-* [T-Beam].14 (TXD2)  <-->  [UART-232].TXD
+* [T-Beam].2  (TXD2)  <-->  [UART-232].TXD
 * [T-Beam].13 (RXD2)  <-->  [UART-232].RXD
 * [T-Beam].GND        <-->  [UART-232].GND
 * [T-Beam].5V         <-->  [UART-232].VCC
 
-![](images/asm_tbeam_uart232.png)
+![Board connection](images/asm_tbeam_uart232.jpg)
 
 #### Connect T-Beam with Weather Station through UART-RS232
 
 __Board__ of [the weather station](https://www.nectec.or.th/clipping/news/2009-11-05-5069.pdf) 
-    sends data through DB9 connector.
+    sends data through __DB9 connector__.
 __T-Beam__ receives the data with the transceiver board, __UART-232 module__.
-The signal pins are connected as following: 
+The DB9 pins are connected as following: 
 
 * [station].2 (TX232)  <-->  [UART-232].3 (RX232)
 * [station].3 (RX232)  <-->  [UART-232].2 (TX232)
 * [station].5 (GND)    <-->  [UART-232].5 (GND)
 
-![](images/asm_tbeam_station.png)
+![Weather station board & DB9 connection](images/asm_tbeam_station.png)
 
 
 ### Firmware
