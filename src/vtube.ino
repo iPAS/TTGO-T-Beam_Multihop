@@ -2,8 +2,9 @@
 #include "flood.h"
 
 
-// screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
 // pyserial-miniterm /dev/ttyUSB0 38400 --parity E --eol CRLF
+#define EOL "\r\n"
+
 #define SERIAL_V            Serial2
 #define VTUBE_UART_BAUDRATE 38400  // Determined by the weather station RTU
 #define VTUBE_UART_CONFIG   SERIAL_8E1
@@ -18,10 +19,8 @@
 static String buffer;
 static uint32_t next;
 
-#define EOL "\r\n"
 static const char *weather_station_commands[] = {  // TODO: assign commands to be used
-    "$ sys print_off" EOL,
-    "" EOL,
+    "$ sys print_off",
 };
 
 
@@ -31,10 +30,12 @@ void vtube_setup() {
     SERIAL_V.setRxBufferSize(VTUBE_RX_BUFFER_SIZE);
     SERIAL_V.setTimeout(VTUBE_UART_TMO);
     while (!SERIAL_V);
-    SERIAL_V.print(weather_station_commands[0]);  // Set non-verbose to the weather station.
+
+    vtube_command_to_station(weather_station_commands[0]);  // Set non-verbose to the weather station.
     while (SERIAL_V.available()) {
         SERIAL_V.read();
     }
+
     buffer = "";
     next = millis() + VTUBE_WAIT;
 }
@@ -96,7 +97,7 @@ void vtube_forwarding_process() {
 
 
 void vtube_command_to_station(String cmd) {
-    SERIAL_V.println(cmd);
+    SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
 }
 
 
