@@ -32,7 +32,7 @@ void on_flood_receive(void *message, uint8_t len) {
     Serial.print("> ");
     Serial.println((char *)message);
 
-    // TODO: print out and tell who sent
+    // TODO: print out to Serial to tell that who sent
 }
 
 
@@ -59,7 +59,7 @@ void lora_setup() {
 
 
 void test_routing_send_to_zero() {
-    if (getAddress() == 0)
+    if (getAddress() == SINK_ADDRESS)
         return;
 
     static uint32_t next = millis() + 10000 + ((rand() & 0b011) << 10);

@@ -2,9 +2,6 @@
 
 #include <SPI.h>
 #include <LoRa.h>
-#include <BluetoothSerial.h>
-
-extern BluetoothSerial bt;
 
 
 /**

@@ -3,7 +3,8 @@
 
 
 // screen /dev/ttyUSB1 38400,cs8,parenb,-parodd
-#define SERIAL_V Serial2
+// pyserial-miniterm /dev/ttyUSB0 38400 --parity E --eol CRLF
+#define SERIAL_V            Serial2
 #define VTUBE_UART_BAUDRATE 38400  // Determined by the weather station RTU
 #define VTUBE_UART_CONFIG   SERIAL_8E1
 #define VTUBE_TX 2
@@ -17,6 +18,12 @@
 static String buffer;
 static uint32_t next;
 
+#define EOL "\r\n"
+static const char *weather_station_commands[] = {  // TODO: assign commands to be used
+    "$ sys print_off" EOL,
+    "" EOL,
+};
+
 
 // ----------------------------------------------------------------------------
 void vtube_setup() {
@@ -24,6 +31,7 @@ void vtube_setup() {
     SERIAL_V.setRxBufferSize(VTUBE_RX_BUFFER_SIZE);
     SERIAL_V.setTimeout(VTUBE_UART_TMO);
     while (!SERIAL_V);
+    SERIAL_V.print(weather_station_commands[0]);  // Set non-verbose to the weather station.
     while (SERIAL_V.available()) {
         SERIAL_V.read();
     }
@@ -74,6 +82,15 @@ void vtube_forwarding_process() {
         }
 
         next = millis() + VTUBE_WAIT;
+    }
+
+
+    // ----------------------------------------
+    // TODO: Query the weather station if not node #0
+    // ----------------------------------------
+
+    if (getAddress() != SINK_ADDRESS) {
+
     }
 }
 

@@ -3,8 +3,6 @@
 
 #include "all_headers.h"
 
-extern void vtube_command_to_station(String cmd);
-
 
 SimpleCLI cli;
 Command cmd_help;
