@@ -54,7 +54,6 @@ void vtube_forwarding_process() {
 
     if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next) {
         if (buffer.length() > 0) {
-
             // Transmit to node #0
             if (flood_send_to(0, buffer.c_str(), buffer.length()) == false) {
                 Serial.println("[VTUBE] flood_send_to() error");
@@ -65,7 +64,7 @@ void vtube_forwarding_process() {
 
             // Debug the bulk by testing to extract
             // Serial.println(buffer);  // All at once
-            uint8_t i, j;
+            int16_t i, j;
             for (i = 0; i < buffer.length();) {
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
