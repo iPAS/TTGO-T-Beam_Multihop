@@ -51,9 +51,10 @@ void vtube_setup() {
     SERIAL_V.setTimeout(VTUBE_UART_TMO);
     while (!SERIAL_V)
         vTaskDelay(0);  // Yield
-    vtube_command_to_station(cmd_quiet);  // Set non-verbose to the weather station.
-    while (SERIAL_V.available()) 
+    while (SERIAL_V.available())
         SERIAL_V.read();  // Clear buffer
+
+    vtube_command_to_station(cmd_quiet);  // Set non-verbose to the weather station.
 
     buffer = "";
     next_batch_millis = millis() + VTUBE_BATCH_PERIOD;
@@ -63,12 +64,39 @@ void vtube_setup() {
 
 
 void vtube_forwarding_process() {
+    static String line, sub;
+    int16_t i, j;
+
     // ------------------------------------
     // Aggregate data into a bulk then send
     // ------------------------------------
     if (SERIAL_V.available()) {
-        buffer += SERIAL_V.readStringUntil('\n');  // The terminator character is discarded from the serial buffer.
-        buffer += '\n';  // As a separator.
+        line = SERIAL_V.readStringUntil('\n');  // The terminator character is discarded from the serial buffer.
+                                                // '\n' NOT included.
+
+        // Filter-out unused information
+        for (i = 0; i < line.length();) {       // Cut some response
+            j = line.indexOf('\r', i);          // Separated with '\r'
+            if (j < 0) break;
+            if (j > i) {                        // Ignore a single '\r'.
+                sub = line.substring(i, j);     // @ [j] NOT included
+
+
+                // Serial.print("  ");  // XXX: for debugging
+                // Serial.print(i);
+                // Serial.print(',');
+                // Serial.print(j - 1);
+                // Serial.println("\t" + sub);
+
+
+                // Filtering mechanism
+                if (sub[0] == '$') 
+                    ;  // Skip echo
+                else
+                    buffer += sub + '\n';
+            }
+            i = j+1;  // Next char left
+        }
 
         next_batch_millis = millis() + VTUBE_BATCH_PERIOD;  // Reset timeout
     }
@@ -83,32 +111,35 @@ void vtube_forwarding_process() {
             Serial.print(SINK_ADDRESS);
             Serial.println(": ");
 
-            String buffer_sent = "";  // 'buffer' to be sent actually.
-            String line;  // The response from each previous command.
 
-            // Filter-out unused information & debug the bulk by testing to extract
-            int16_t i, j;
-            for (i = 0; i < buffer.length();) {
+            // for (i = 0; i < buffer.length(); i++) {  // XXX: for debugging
+            //     if (buffer[i] == 0x0D  ||  buffer[i] == 0x0A) {
+            //         Serial.println();
+            //         Serial.println(buffer[i], HEX);
+            //     }
+            //     else {
+            //         Serial.print(buffer[i], HEX);
+            //         Serial.print(' ');
+            //     }
+            // }
+            // Serial.println();
+
+
+            for (i = 0; i < buffer.length();) {  // XXX: for debugging
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
-
-                line = buffer.substring(i, j-1);  // -1 for skipping '\n'
-
-                Serial.print("  ");
+                sub = buffer.substring(i, j);
+                Serial.print("  ");  
                 Serial.print(i);
                 Serial.print(',');
-                Serial.print(j-1);
-                Serial.println("\t" + line);
-
-                i = j+1;  // Skip '\n' and the last char.
-
-                // TODO: Filtering mechanism
-                buffer_sent += line + '\n';
+                Serial.print(j - 1);
+                Serial.println("\t" + sub);
+                i = j+1;  // Next char left
             }
-            Serial.println();
+
 
             // Transmit to node 'SINK_ADDRESS'
-            if (flood_send_to(SINK_ADDRESS, buffer_sent.c_str(), buffer_sent.length()) == false) {
+            if (flood_send_to(SINK_ADDRESS, buffer.c_str(), buffer.length()) == false) {
                 Serial.println("[VTUBE] flood_send_to() error");
             }
 
