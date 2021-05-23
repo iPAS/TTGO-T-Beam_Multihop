@@ -11,17 +11,36 @@
 #define VTUBE_TX 2
 #define VTUBE_RX 13
 
-#define VTUBE_RX_BUFFER_SIZE    1024
+#define VTUBE_RX_BUFFER_SIZE    128
 #define VTUBE_UART_TMO          3000
-#define VTUBE_WAIT              30000
+#define VTUBE_BATCH_PERIOD      30000
 #define VTUBE_BATCH_SIZE        60
 
-static String buffer;
-static uint32_t next;
+#define VTUBE_CMD_PERIOD        60000 * 2  // Two minute
 
-static const char *weather_station_commands[] = {  // TODO: assign commands to be used
-    "$ sys print_off",
+static String buffer;
+static uint32_t next_batch_millis, next_cmd_millis;
+static uint8_t count_cmd_sent;
+
+static const char *weather_station_commands[] = {
+    "$ sys print_off",      // $ sys print_off | disable print message
+    "$ route get_nid",      // $ route get_nid | get node ID and network ID
+    "$ rtc get 1",          // $ rtc get 1     | get RTC
+                            // $ rtc set #d #t | update RTC with host RTC
+                            // $ pwrsw on 330  | on sensor power 3.3V
+    "$ i2c get 1099",       // $ i2c get 1099  | read T/H intf
+    "$ wind get 0",         // $ wind get 0    | get wind speed and direction (update every 10 sec.)
+    "$ rain get 0",         // $ rain get 0    | get rain volumn(CC)
+    "$ landsld get 0",      // $ landsld get 0 | get rain volumn24Hr window
+    "$ uc20 get",           // $ uc20 get      | get GSM signal
+    "$ charger get",        // $ charger get   | get Vbatt
+    "$ atod get 22",        // $ atod get 22   | get Charging Current
+    "$ atod get 20",        // $ atod get 20   | get Bus Voltage
 };
+
+static const char *cmd_quiet  = weather_station_commands[0];
+// static const char *cmd_nodeid = weather_station_commands[1];
+// static const char *cmd_rtc    = weather_station_commands[2];
 
 
 // ----------------------------------------------------------------------------
@@ -31,12 +50,14 @@ void vtube_setup() {
     SERIAL_V.setTimeout(VTUBE_UART_TMO);
     while (!SERIAL_V)
         vTaskDelay(0);  // Yield
-    vtube_command_to_station(weather_station_commands[0]);  // Set non-verbose to the weather station.
+    vtube_command_to_station(cmd_quiet);  // Set non-verbose to the weather station.
     while (SERIAL_V.available()) 
         SERIAL_V.read();  // Clear buffer
 
     buffer = "";
-    next = millis() + VTUBE_WAIT;
+    next_batch_millis = millis() + VTUBE_BATCH_PERIOD;
+    next_cmd_millis = millis() + VTUBE_CMD_PERIOD;
+    count_cmd_sent = 0;
 }
 
 
@@ -44,53 +65,64 @@ void vtube_forwarding_process() {
     // ------------------------------------
     // Aggregate data into a bulk then send
     // ------------------------------------
-
     if (SERIAL_V.available()) {
         buffer += SERIAL_V.readStringUntil('\n');  // The terminator character is discarded from the serial buffer.
         buffer += '\n';  // As a separator.
 
-        next = millis() + VTUBE_WAIT;  // Reset timeout
+        next_batch_millis = millis() + VTUBE_BATCH_PERIOD;  // Reset timeout
     }
 
-    if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next) {
+    // -------------
+    // Send the bulk
+    // -------------
+    if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next_batch_millis) {
         if (buffer.length() > 0) {
-            // Transmit to node #0
-            if (flood_send_to(0, buffer.c_str(), buffer.length()) == false) {
-                Serial.println("[VTUBE] flood_send_to() error");
-            }
-
             // Pass 'input' through LoRa network to the node #0 by putting them into sedning queue.
             Serial.println("[VTUBE] To #0: ");
-
-            // Debug the bulk by testing to extract
             // Serial.println(buffer);  // All at once
+
+            String buffer_sent = "";  // 'buffer' to be sent actually.
+            String line;  // The response from each previous command.
+
+            // Filter-out unused information & debug the bulk by testing to extract
             int16_t i, j;
             for (i = 0; i < buffer.length();) {
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
-                String line = buffer.substring(i, j-1);  // -1 for skipping '\n'
+
+                line = buffer.substring(i, j-1);  // -1 for skipping '\n'
+
                 Serial.print(i);
                 Serial.print(',');
                 Serial.print(j-1);
                 Serial.println("\t" + line);
+
                 i = j+1;  // Skip '\n' and the last char.
+
+                // TODO: Filtering mechanism
+                buffer_sent += line + '\n';
             }
             Serial.println();
+
+            // Transmit to node #0
+            if (flood_send_to(0, buffer_sent.c_str(), buffer_sent.length()) == false) {
+                Serial.println("[VTUBE] flood_send_to() error");
+            }
 
             buffer = "";  // Clear the transmitted bulk.
         }
 
-        next = millis() + VTUBE_WAIT;
+        next_batch_millis = millis() + VTUBE_BATCH_PERIOD;
     }
 
-
-    // ----------------------------------------
-    // TODO: Query the weather station if not node #0
-    // ----------------------------------------
-
-    if (getAddress() != SINK_ADDRESS) {
-
-    }
+    // -----------------------------------------------------------
+    // Query the weather station if not node #0 & empty any return
+    // -----------------------------------------------------------
+    if (getAddress() != SINK_ADDRESS)
+        if (count_cmd_sent) {
+        }
+        else {
+        }
 }
 
 
