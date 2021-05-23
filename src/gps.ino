@@ -35,10 +35,10 @@ void gps_setup(bool is_tbeam_version_less_v1) {
     }
 
     SERIAL_GPS.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);
-    while (!SERIAL_GPS);
-    while (SERIAL_GPS.available()) {
-        SERIAL_GPS.read();
-    }
+    while (!SERIAL_GPS)
+        vTaskDelay(0);  // Yield
+    while (SERIAL_GPS.available())
+        SERIAL_GPS.read();  // Clear buffer
 }
 
 

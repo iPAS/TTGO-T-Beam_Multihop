@@ -100,7 +100,8 @@ void bt_setup() {
 // ---------- Setup ----------
 void setup() {
     Serial.begin(115200);
-    while (!Serial);
+    while (!Serial)
+        vTaskDelay(0);  // Yield
 
     bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
 

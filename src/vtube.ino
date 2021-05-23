@@ -29,12 +29,11 @@ void vtube_setup() {
     SERIAL_V.begin(VTUBE_UART_BAUDRATE, VTUBE_UART_CONFIG, VTUBE_RX, VTUBE_TX);
     SERIAL_V.setRxBufferSize(VTUBE_RX_BUFFER_SIZE);
     SERIAL_V.setTimeout(VTUBE_UART_TMO);
-    while (!SERIAL_V);
-
+    while (!SERIAL_V)
+        vTaskDelay(0);  // Yield
     vtube_command_to_station(weather_station_commands[0]);  // Set non-verbose to the weather station.
-    while (SERIAL_V.available()) {
-        SERIAL_V.read();
-    }
+    while (SERIAL_V.available()) 
+        SERIAL_V.read();  // Clear buffer
 
     buffer = "";
     next = millis() + VTUBE_WAIT;
