@@ -16,13 +16,14 @@
 #define VTUBE_BATCH_PERIOD      30000
 #define VTUBE_BATCH_SIZE        60
 
+#define VTUBE_CMD_GAP           2000
 #define VTUBE_CMD_PERIOD        60000 * 2  // Two minute
 
 static String buffer;
 static uint32_t next_batch_millis, next_cmd_millis;
 static uint8_t count_cmd_sent;
 
-static const char *weather_station_commands[] = {
+static const char *ws_commands[] = {  // weather_station_commands
     "$ sys print_off",      // $ sys print_off | disable print message
     "$ route get_nid",      // $ route get_nid | get node ID and network ID
     "$ rtc get 1",          // $ rtc get 1     | get RTC
@@ -38,9 +39,9 @@ static const char *weather_station_commands[] = {
     "$ atod get 20",        // $ atod get 20   | get Bus Voltage
 };
 
-static const char *cmd_quiet  = weather_station_commands[0];
-// static const char *cmd_nodeid = weather_station_commands[1];
-// static const char *cmd_rtc    = weather_station_commands[2];
+static const char *cmd_quiet  = ws_commands[0];
+// static const char *cmd_nodeid = ws_commands[1];
+// static const char *cmd_rtc    = ws_commands[2];
 
 
 // ----------------------------------------------------------------------------
@@ -119,15 +120,26 @@ void vtube_forwarding_process() {
     // Query the weather station if not node #0 & empty any return
     // -----------------------------------------------------------
     if (getAddress() != SINK_ADDRESS)
-        if (count_cmd_sent) {
-        }
-        else {
+        if (millis() > next_cmd_millis) {
+            if (count_cmd_sent < sizeof(ws_commands)/sizeof(ws_commands[0])) {
+                vtube_command_to_station(ws_commands[count_cmd_sent]);
+
+                next_cmd_millis = millis() + VTUBE_CMD_GAP;
+                count_cmd_sent++;
+            }
+            else {
+                next_cmd_millis = millis() + VTUBE_CMD_PERIOD;
+                count_cmd_sent = 0;
+            }
         }
 }
 
 
 void vtube_command_to_station(String cmd) {
     SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
+    Serial.print("[VTUBE] send cmd: '");
+    Serial.print(cmd);
+    Serial.println("'");
 }
 
 
