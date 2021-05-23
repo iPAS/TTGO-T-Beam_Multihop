@@ -71,11 +71,12 @@ The DB9 pins are connected as following:
 
 On purpose, these commands could be send to T-Beam through __UART0__, debugging port.
 
+* ```help``` for listing all commands.
 * ```hello``` for testing only.
 * ```node_id``` for setting node id, e.g., 
     * ```node_id``` for asking the current node id.
     * ```node_id <id>``` for setting the new id where <id> in [0..25535].
-
+* ```vtube <params>``` for forwarding data through UART2.
 
 
 ## TTGO-T-Beam
