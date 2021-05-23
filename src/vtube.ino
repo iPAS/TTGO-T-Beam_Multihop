@@ -11,7 +11,7 @@
 #define VTUBE_TX 2
 #define VTUBE_RX 13
 
-#define VTUBE_RX_BUFFER_SIZE    128
+#define VTUBE_RX_BUFFER_SIZE    512
 #define VTUBE_UART_TMO          3000
 #define VTUBE_BATCH_PERIOD      30000
 #define VTUBE_BATCH_SIZE        60
@@ -79,8 +79,9 @@ void vtube_forwarding_process() {
     if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next_batch_millis) {
         if (buffer.length() > 0) {
             // Pass 'input' through LoRa network to the node #0 by putting them into sedning queue.
-            Serial.println("[VTUBE] To #0: ");
-            // Serial.println(buffer);  // All at once
+            Serial.print("[VTUBE] To ");
+            Serial.print(SINK_ADDRESS);
+            Serial.println(": ");
 
             String buffer_sent = "";  // 'buffer' to be sent actually.
             String line;  // The response from each previous command.
@@ -93,6 +94,7 @@ void vtube_forwarding_process() {
 
                 line = buffer.substring(i, j-1);  // -1 for skipping '\n'
 
+                Serial.print("  ");
                 Serial.print(i);
                 Serial.print(',');
                 Serial.print(j-1);
@@ -105,8 +107,8 @@ void vtube_forwarding_process() {
             }
             Serial.println();
 
-            // Transmit to node #0
-            if (flood_send_to(0, buffer_sent.c_str(), buffer_sent.length()) == false) {
+            // Transmit to node 'SINK_ADDRESS'
+            if (flood_send_to(SINK_ADDRESS, buffer_sent.c_str(), buffer_sent.length()) == false) {
                 Serial.println("[VTUBE] flood_send_to() error");
             }
 
@@ -137,7 +139,8 @@ void vtube_forwarding_process() {
 
 void vtube_command_to_station(String cmd) {
     SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
-    Serial.print("[VTUBE] send cmd: '");
+
+    Serial.print("[VTUBE] Send cmd: '");
     Serial.print(cmd);
     Serial.println("'");
 }

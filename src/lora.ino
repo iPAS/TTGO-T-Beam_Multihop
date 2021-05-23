@@ -64,7 +64,7 @@ void test_routing_send_to_zero() {
 
     static uint32_t next = millis() + 10000 + ((rand() & 0b011) << 10);
     if (millis() > next) {
-        flood_send_to(0, "Hello", 6);
+        flood_send_to(SINK_ADDRESS, "Hello", 6);
         next = millis() + 10000 + ((rand() & 0b011) << 10);
     }
 }
