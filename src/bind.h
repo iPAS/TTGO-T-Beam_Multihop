@@ -5,9 +5,15 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/timers.h>
 
+#include <BluetoothSerial.h>
+
 #include "all_headers.h"
 
+
 #define SIZE_DEBUG_BUF 255
+
+#define SINK_ADDRESS 0
+
 
 /**
  * Timer
@@ -73,6 +79,13 @@ extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg
  */
 extern void debug(const char *format, ...);
 extern void test_ztimer();
+
+
+/**
+ * Global
+ */
+extern BluetoothSerial bt;
+extern void vtube_command_to_station(String cmd);
 
 
 #endif  // __BIND_H__

@@ -100,7 +100,8 @@ void bt_setup() {
 // ---------- Setup ----------
 void setup() {
     Serial.begin(115200);
-    while (!Serial);
+    while (!Serial)
+        vTaskDelay(1);  // Yield
 
     bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
 
@@ -128,6 +129,9 @@ void loop() {
 
     vtube_forwarding_process();  // Forward Data received from Virtual Tube
     cli_interpreting_process();  // Process command-line input
+
+
+    // TODO: heartbeat + cli to stop it
 
 
     // ----------------

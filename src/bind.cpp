@@ -2,9 +2,6 @@
 
 #include <SPI.h>
 #include <LoRa.h>
-#include <BluetoothSerial.h>
-
-extern BluetoothSerial bt;
 
 
 /**
@@ -185,8 +182,10 @@ static void loraOnReceive(int packetLength)
 
     debug("loraOnReceive() received message %d bytes", packetLength);
 
-    if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR)
+    if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR) {
+        vTaskDelay(1);  // Yield
         (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
+    }
 
     free(msg);
 }
