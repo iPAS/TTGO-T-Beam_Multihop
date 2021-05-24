@@ -6,6 +6,7 @@
 #include <freertos/timers.h>
 
 #include <BluetoothSerial.h>
+#include <SimpleCLI.h>
 
 #include "all_headers.h"
 
@@ -86,6 +87,7 @@ extern void test_ztimer();
  */
 extern BluetoothSerial bt;
 extern void vtube_command_to_station(String cmd);
+extern SimpleCLI cli;
 
 
 #endif  // __BIND_H__

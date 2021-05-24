@@ -82,21 +82,6 @@ void oled_setup() {
 }
 
 
-// ---------- Bluetooth-serial ----------
-#define BT_NAME "ESP32-LoRa-Relay"
-BluetoothSerial bt;
-
-
-void bt_setup() {
-    bt.begin(BT_NAME);
-
-    // Using...
-    // if (bt.connected()) {
-    //     bt.println(str);
-    // }
-}
-
-
 // ---------- Setup ----------
 void setup() {
     Serial.begin(115200);
@@ -130,8 +115,7 @@ void loop() {
     vtube_forwarding_process();  // Forward Data received from Virtual Tube
     cli_interpreting_process();  // Process command-line input
 
-
-    // TODO: heartbeat + cli to stop it
+    bt_cli_interpreting_process();  // Process command-line input through Bluetooth-serial
 
 
     // ----------------
