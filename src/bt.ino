@@ -11,7 +11,7 @@ static char bt_name[20];
 
 
 void bt_setup() {
-    sprintf(bt_name, "lora_relay%04X", getAddress());
+    sprintf(bt_name, "lora_relay_%d", getAddress());
     bt.begin(bt_name);
 }
 

@@ -230,17 +230,13 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
  */
 void debug(const char *format, ...)
 {
-    // if (!bt.connected())
-    //     return;
-
     char buf[SIZE_DEBUG_BUF], *p = buf;
     va_list ap;
     va_start(ap, format);
     p += sprintf(p, "[X] ");
     vsnprintf(p, sizeof(buf)-4, format, ap);
 
-    // bt.println(buf);
-    Serial.println(buf);
+    Term_println(buf);
 
     va_end(ap);
 }

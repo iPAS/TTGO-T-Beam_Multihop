@@ -31,23 +31,23 @@ void on_flood_receive(void *message, uint8_t len) {
     uint8_t *data = &((uint8_t *)message)[sizeof(RoutingHeader)];
     uint8_t data_len = len - sizeof(RoutingHeader);
 
-    Serial.print("[LoRa] node ");
-    Serial.print(hdr->finalSink);
-    Serial.print(" recv ");
-    Serial.print(len);
-    Serial.print(" bytes from ");
-    Serial.print(hdr->originSource);
-    Serial.print(" at seqno ");
-    Serial.print(hdr->seqNo);
-    Serial.print(" within ");
-    Serial.print(hdr->hopCount);
-    Serial.println(" hops >");
+    Term_print("[LoRa] node ");
+    Term_print(hdr->finalSink);
+    Term_print(" recv ");
+    Term_print(len);
+    Term_print(" bytes from ");
+    Term_print(hdr->originSource);
+    Term_print(" at seqno ");
+    Term_print(hdr->seqNo);
+    Term_print(" within ");
+    Term_print(hdr->hopCount);
+    Term_println(" hops >");
 
     int16_t i;
     for (i = 0; i < data_len; i++) {
-        Serial.print((char)data[i]);
+        Term_print((char)data[i]);
     }
-    Serial.println("[LoRa]");
+    Term_println("[LoRa]");
 }
 
 
@@ -56,7 +56,7 @@ void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
     if (!LoRa.begin(LORA_BAND)) {
-        Serial.println("[DEBUG] Starting LoRa failed!");
+        Term_println("[DEBUG] Starting LoRa failed!");
         while (1);
     }
 
@@ -69,7 +69,7 @@ void lora_setup() {
     flood_init();
     flood_set_rx_handler(on_flood_receive);
 
-    Serial.println("[DEBUG] Starting LoRa ok");
+    Term_println("[DEBUG] Starting LoRa ok");
 }
 
 

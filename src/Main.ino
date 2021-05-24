@@ -36,10 +36,10 @@ bool axp_setup() {
 
     Wire.begin(AXP_SDA, AXP_SCL);
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
-        Serial.println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
+        Term_println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
         is_tbeam_version_less_v1 = true;
     } else {
-        Serial.println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
+        Term_println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
 
         axp.setLDO2Voltage(3300);   // LoRa VDD
         axp.setLDO3Voltage(3300);   // GPS  VDD
@@ -87,13 +87,13 @@ void setup() {
     Serial.begin(115200);
     while (!Serial)
         vTaskDelay(1);  // Yield
+    bt_setup();  // Bluetooth-Serial
 
     bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
 
     oled_setup();   // OLED
     led_setup(is_tbeam_version_less_v1);  // LED
     lora_setup();   // LoRa
-    bt_setup();     // Bluetooth-Serial
     gps_setup(is_tbeam_version_less_v1);  // GPS
     vtube_setup();  // Virtual Tube connected to weather station
     cli_setup();    // CLI

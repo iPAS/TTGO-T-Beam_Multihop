@@ -43,11 +43,11 @@ boolean isNumeric(String str) {
 // ----------------------------------------------------------------------------
 void on_error_callback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
-    Serial.println("[CLI] " + cmdError.toString());
+    Term_println("[CLI] " + cmdError.toString());
     if (cmdError.hasCommand()) {
-        Serial.print("[CLI] Did you mean \"");
-        Serial.print(cmdError.getCommand().toString());
-        Serial.println("\"?");
+        Term_print("[CLI] Did you mean \"");
+        Term_print(cmdError.getCommand().toString());
+        Term_println("\"?");
     }
 }
 
@@ -61,16 +61,16 @@ void on_cmd_help(cmd *c) {
     };
     uint8_t i;
     Command cmd(c);
-    Serial.println("[CLI] help:");
+    Term_println("[CLI] help:");
     for (i = 0; i < sizeof(desc)/sizeof(desc[0]); i++) {
-        Serial.println(desc[i]);
+        Term_println(desc[i]);
     }
 }
 
 
 void on_cmd_hello(cmd *c) {
     Command cmd(c);
-    Serial.println("[CLI] hello: Hello!");
+    Term_println("[CLI] hello: Hello!");
 }
 
 
@@ -91,17 +91,17 @@ void on_cmd_node_id(cmd *c) {
 
         if (legal_id) {
             // Set new id
-            Serial.print("[CLI] node_id: new id ");
-            Serial.println(setAddress(id));
+            Term_print("[CLI] node_id: new id ");
+            Term_println(setAddress(id));
         } else {
             // Illegal id
-            Serial.println("[CLI] node_id: illegal id");
+            Term_println("[CLI] node_id: illegal id");
         }
 
     } else {  // No argument
         // Ask for current id
-        Serial.print("[CLI] node_id: current id ");
-        Serial.println(getAddress());
+        Term_print("[CLI] node_id: current id ");
+        Term_println(getAddress());
     }
 }
 
@@ -109,7 +109,7 @@ void on_cmd_node_id(cmd *c) {
 void on_cmd_vtube(cmd *c) {
     Command cmd(c);
     String arg = cmd.getArg(0).getValue();
-    Serial.println("[CLI] vtube: '" + arg + "'");
+    Term_println("[CLI] vtube: '" + arg + "'");
     vtube_command_to_station(arg);
 }
 

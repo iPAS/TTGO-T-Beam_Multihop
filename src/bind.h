@@ -15,6 +15,9 @@
 
 #define SINK_ADDRESS 0
 
+#define Term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
+#define Term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
+
 
 /**
  * Timer
