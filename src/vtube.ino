@@ -13,11 +13,13 @@
 
 #define VTUBE_RX_BUFFER_SIZE    512
 #define VTUBE_UART_TMO          3000
-#define VTUBE_BATCH_PERIOD      30000
-#define VTUBE_BATCH_SIZE        60
 
-#define VTUBE_CMD_GAP           2000
-#define VTUBE_CMD_PERIOD        60000 * 2  // Two minute
+#define VTUBE_BATCH_SIZE        60
+#define VTUBE_BATCH_PERIOD      60000
+
+#define VTUBE_CMD_GAP           4000
+#define VTUBE_CMD_PERIOD        60000 * 5  // Five minute
+#define VTUBE_CMD_PERIOD_INIT   10000
 
 static String buffer;
 static uint32_t next_batch_millis, next_cmd_millis;
@@ -50,7 +52,7 @@ void vtube_setup() {
     SERIAL_V.setRxBufferSize(VTUBE_RX_BUFFER_SIZE);
     SERIAL_V.setTimeout(VTUBE_UART_TMO);
     while (!SERIAL_V)
-        vTaskDelay(0);  // Yield
+        vTaskDelay(1);  // Yield
     while (SERIAL_V.available())
         SERIAL_V.read();  // Clear buffer
 
@@ -58,12 +60,15 @@ void vtube_setup() {
 
     buffer = "";
     next_batch_millis = millis() + VTUBE_BATCH_PERIOD;
-    next_cmd_millis = millis() + VTUBE_CMD_PERIOD;
+    next_cmd_millis = millis() + VTUBE_CMD_PERIOD_INIT;
     count_cmd_sent = 0;
 }
 
 
 void vtube_forwarding_process() {
+    if (getAddress() == SINK_ADDRESS)
+        return;
+
     static String line, sub;
     int16_t i, j;
 
@@ -149,22 +154,21 @@ void vtube_forwarding_process() {
         next_batch_millis = millis() + VTUBE_BATCH_PERIOD;
     }
 
-    // -----------------------------------------------------------
-    // Query the weather station if not node #0 & empty any return
-    // -----------------------------------------------------------
-    if (getAddress() != SINK_ADDRESS)
-        if (millis() > next_cmd_millis) {
-            if (count_cmd_sent < sizeof(ws_commands)/sizeof(ws_commands[0])) {
-                vtube_command_to_station(ws_commands[count_cmd_sent]);
+    // -------------------------
+    // Query the weather station
+    // -------------------------
+    if (millis() > next_cmd_millis) {
+        if (count_cmd_sent < sizeof(ws_commands)/sizeof(ws_commands[0])) {
+            vtube_command_to_station(ws_commands[count_cmd_sent]);
 
-                next_cmd_millis = millis() + VTUBE_CMD_GAP;
-                count_cmd_sent++;
-            }
-            else {
-                next_cmd_millis = millis() + VTUBE_CMD_PERIOD;
-                count_cmd_sent = 0;
-            }
+            next_cmd_millis = millis() + VTUBE_CMD_GAP;
+            count_cmd_sent++;
         }
+        else {
+            next_cmd_millis = millis() + VTUBE_CMD_PERIOD;
+            count_cmd_sent = 0;
+        }
+    }
 }
 
 
