@@ -27,12 +27,27 @@
 
 // ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
-    Serial.print("Received <");
-    Serial.print(len);
-    Serial.print("> ");
-    Serial.println((char *)message);
+    RoutingHeader *hdr = (RoutingHeader*)message;
+    uint8_t *data = &((uint8_t *)message)[sizeof(RoutingHeader)];
+    uint8_t data_len = len - sizeof(RoutingHeader);
 
-    // TODO: print out to Serial to tell that who sent
+    Serial.print("[LoRa] node ");
+    Serial.print(hdr->finalSink);
+    Serial.print(" recv ");
+    Serial.print(len);
+    Serial.print(" bytes from ");
+    Serial.print(hdr->originSource);
+    Serial.print(" at seqno ");
+    Serial.print(hdr->seqNo);
+    Serial.print(" within ");
+    Serial.print(hdr->hopCount);
+    Serial.println(" hops >");
+
+    int16_t i;
+    for (i = 0; i < data_len; i++) {
+        Serial.print((char)data[i]);
+    }
+    Serial.println("[LoRa]");
 }
 
 
