@@ -19,12 +19,6 @@ static uint8_t gps_rx;
 #define GPS_REPORT_PERIOD 60000 * 5  // Five munites
 
 static TinyGPSPlus gps;
-static String gps_datetime = "@ --";
-static String gps_sat      = "SAT --";
-static String gps_loc      = "LAT --, LON --, ALT --";
-static String gps_rssi     = "RSSI --";
-static String gps_snr      = "SNR --";
-
 static uint32_t next_report_millis;
 
 
@@ -53,31 +47,27 @@ void gps_decoding_process() {
         gps.encode(SERIAL_GPS.read());
     }
 
-    if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
-        // Example: http://arduiniana.org/libraries/tinygpsplus/
-        // "T --, SAT --, LAT --, LON --, ALT --, ";
-        // gps_datetime = "@ "         + String(gps.date.day())  + ":" + String(gps.date.month())  + ":" + String(gps.date.year()) + " ";
-        // gps_datetime = gps_datetime + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
-        char s_datetime[25];
-        sprintf(s_datetime, "@ %02u-%02u-%04u %02u:%02u:%02u",
-            gps.date.day(),  gps.date.month(),  gps.date.year(),
-            gps.time.hour(), gps.time.minute(), gps.time.second());
-        gps_datetime = String(s_datetime);
-
-        gps_sat = "SAT " + String(gps.satellites.value());
-
-        gps_loc =                  "LAT " + String(gps.location.lat(), 6);
-        gps_loc = gps_loc + ", " + "LON " + String(gps.location.lng(), 6);
-        gps_loc = gps_loc + ", " + "ALT " + String(gps.altitude.meters());
-
-        gps_rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
-        gps_snr  = "SNR "  + String(LoRa.packetSnr(), 2);
-    }
-
-    // TODO: print time cyclingly.
+    // --------------------
+    // Print time cyclingly
+    // --------------------
     if (millis() > next_report_millis) {
 
-        
+        if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
+            // Example: http://arduiniana.org/libraries/tinygpsplus/
+            static char buf[200];
+            snprintf(buf, sizeof(buf),
+                "[GPS] %02u-%02u-%04u %02u:%02u:%02u, "
+                "SAT %d, LAT %f, LON %f, ALT %f, "
+                "RSSI %f, SNR %f",
+                gps.date.day(),  gps.date.month(),  gps.date.year(),
+                gps.time.hour(), gps.time.minute(), gps.time.second(),
+                gps.satellites.value(), gps.location.lat(), gps.location.lng(), gps.altitude.meters(),
+                LoRa.packetRssi(), LoRa.packetSnr());
+
+            String s_buf(buf);
+            Term_println(s_buf);
+        }
+
         next_report_millis = millis() + GPS_REPORT_PERIOD;
     }
 }
