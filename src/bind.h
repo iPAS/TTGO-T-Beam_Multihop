@@ -13,10 +13,12 @@
 
 #define SIZE_DEBUG_BUF 255
 
-#define SINK_ADDRESS 0
-
 #define Term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
 #define Term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
+
+typedef enum {
+    R_NODE_ID,
+} pref_reg_t;
 
 
 /**
@@ -48,6 +50,7 @@ extern void zTimerTest();
 /**
  * Radio
  */
+#define SINK_ADDRESS ((Address)0)
 #define BROADCAST_ADDR ((Address)0xFFFF)
 typedef uint16_t Address;
 typedef uint8_t MessageType;
@@ -86,12 +89,15 @@ extern void test_ztimer();
 
 
 /**
- * Global
+ * Global, seen by default but prevent ide confused
  */
 extern BluetoothSerial bt;
 extern SimpleCLI cli;
 extern void oled_update_display();
 extern void vtube_command_to_station(String cmd);
+
+extern void config_save(pref_reg_t reg);
+extern void config_load(pref_reg_t reg);
 
 
 #endif  // __BIND_H__

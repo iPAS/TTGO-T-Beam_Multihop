@@ -121,6 +121,7 @@
                 "/home/ipas/Workspace/Arduino/libraries/LoRa/src",
                 "/home/ipas/Workspace/Arduino/libraries/TinyGPSPlus/src",
                 "/home/ipas/Workspace/Arduino/libraries/SimpleCLI/src",
+                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/Preferences/src",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/xtensa-esp32-elf",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/backward",

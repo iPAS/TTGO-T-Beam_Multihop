@@ -56,7 +56,7 @@ void on_cmd_help(cmd *c) {
     const char *desc[] = {
         "\thelp",
         "\thello",
-        "\tnode_id [new_id]",
+        "\tnode_id [new_id]  -- assign BROADCAST_ADDR for built-in",
         "\tvtube ...",
     };
     uint8_t i;
@@ -94,6 +94,7 @@ void on_cmd_node_id(cmd *c) {
             Term_print("[CLI] node_id: new id ");
             Term_println(setAddress(id));
             oled_update_display();
+            config_save(R_NODE_ID);
         } else {
             // Illegal id
             Term_println("[CLI] node_id: illegal id");

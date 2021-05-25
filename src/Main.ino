@@ -66,6 +66,8 @@ void setup() {
     Serial.begin(115200);
     while (!Serial)
         vTaskDelay(1);  // Yield
+
+    config_setup();  // Load configuration
     bt_setup();  // Bluetooth-Serial
     oled_setup();   // OLED
 
