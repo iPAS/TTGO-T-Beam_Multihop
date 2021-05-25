@@ -24,17 +24,17 @@ void led_blinking_process() {
 
     if (millis() > next) {
         switch (state) {
-        case 0:
-            digitalWrite(led_io, led_active);
-            next = millis() + BLINK_ON_PERIOD;
-            state = 1;
-            break;
+            case 0:
+                digitalWrite(led_io, led_active);
+                next = millis() + BLINK_ON_PERIOD;
+                state = 1;
+                break;
 
-        case 1:
-            digitalWrite(led_io, !led_active);
-            next = millis() + BLINK_OFF_PERIOD;
-            state = 0;
-            break;
+            case 1:
+                digitalWrite(led_io, !led_active);
+                next = millis() + BLINK_OFF_PERIOD;
+                state = 0;
+                break;
         }
     }
 }
