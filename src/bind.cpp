@@ -230,7 +230,8 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
  */
 void debug(const char *format, ...)
 {
-    char buf[SIZE_DEBUG_BUF], *p = buf;
+    static char buf[SIZE_DEBUG_BUF];
+    char *p = buf;
     va_list ap;
     va_start(ap, format);
     p += sprintf(p, "[X] ");

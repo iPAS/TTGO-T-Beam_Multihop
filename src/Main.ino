@@ -25,10 +25,11 @@
 
 
 // ---------- AXP192 ----------
-AXP20X_Class axp;
 #define AXP_SDA 21
 #define AXP_SCL 22
 #define AXP_IRQ 35
+
+static AXP20X_Class axp;
 
 
 bool axp_setup() {

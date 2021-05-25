@@ -5,10 +5,10 @@
 
 
 SimpleCLI cli;
-Command cmd_help;
-Command cmd_hello;
-Command cmd_node_id;
-Command cmd_vtube;
+static Command cmd_help;
+static Command cmd_hello;
+static Command cmd_node_id;
+static Command cmd_vtube;
 
 
 // ----------------------------------------------------------------------------

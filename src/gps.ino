@@ -16,12 +16,16 @@ static uint8_t gps_rx;
 #define GPS_TX_V10 12
 #define GPS_RX_V10 34
 
-TinyGPSPlus gps;
-String gps_datetime = "@ --";
-String gps_sat      = "SAT --";
-String gps_loc      = "LAT --, LON --, ALT --";
-String gps_rssi     = "RSSI --";
-String gps_snr      = "SNR --";
+#define GPS_REPORT_PERIOD 60000 * 5  // Five munites
+
+static TinyGPSPlus gps;
+static String gps_datetime = "@ --";
+static String gps_sat      = "SAT --";
+static String gps_loc      = "LAT --, LON --, ALT --";
+static String gps_rssi     = "RSSI --";
+static String gps_snr      = "SNR --";
+
+static uint32_t next_report_millis;
 
 
 // ----------------------------------------------------------------------------
@@ -39,6 +43,8 @@ void gps_setup(bool is_tbeam_version_less_v1) {
         vTaskDelay(1);  // Yield
     while (SERIAL_GPS.available())
         SERIAL_GPS.read();  // Clear buffer
+
+    next_report_millis = millis();
 }
 
 
@@ -66,5 +72,12 @@ void gps_decoding_process() {
 
         gps_rssi = "RSSI " + String(LoRa.packetRssi(), DEC);
         gps_snr  = "SNR "  + String(LoRa.packetSnr(), 2);
+    }
+
+    // TODO: print time cyclingly.
+    if (millis() > next_report_millis) {
+
+        
+        next_report_millis = millis() + GPS_REPORT_PERIOD;
     }
 }
