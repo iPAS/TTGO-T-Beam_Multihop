@@ -66,6 +66,8 @@ void lora_setup() {
     // LoRa.setGain(0);    // Supported values are between 0 and 6. If gain is 0, AGC will be enabled and LNA gain will not be used.
                         // Else if gain is from 1 to 6, AGC will be disabled and LNA gain will be used.
 
+    LoRa.enableCrc();
+
     flood_init();
     flood_set_rx_handler(on_flood_receive);
 
