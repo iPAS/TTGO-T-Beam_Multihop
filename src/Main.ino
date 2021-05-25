@@ -68,17 +68,26 @@ SSD1306 display(0x3C, 21, 22);
 void oled_setup() {
     display.init();
     display.flipScreenVertically();
-    display.setFont(ArialMT_Plain_10);
-    delay(100);
 
-    // Using...
-    // display.clear();
-    // display.setTextAlignment(TEXT_ALIGN_LEFT);
-    // display.setFont(ArialMT_Plain_10);
+    display.setFont(ArialMT_Plain_10);
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+
+    // delay(100);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
+    oled_update_display();
+}
+
+
+void oled_update_display() {
+    display.clear();
+
     // display.drawString(0, 0, rssi + ", " + snr);
     // display.drawString(0, 15, "Recv: " + packSize + " bytes");
     // display.drawStringMaxWidth(0, 26, 128, packet);
-    // display.display();
+
+    display.drawString(0, 0, String("Address: ") + getAddress());
+
+    display.display();
 }
 
 
@@ -88,13 +97,14 @@ void setup() {
     while (!Serial)
         vTaskDelay(1);  // Yield
     bt_setup();  // Bluetooth-Serial
+    oled_setup();   // OLED
 
     bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
 
-    oled_setup();   // OLED
     led_setup(is_tbeam_version_less_v1);  // LED
     lora_setup();   // LoRa
     gps_setup(is_tbeam_version_less_v1);  // GPS
+
     vtube_setup();  // Virtual Tube connected to weather station
     cli_setup();    // CLI
 

@@ -93,6 +93,7 @@ void on_cmd_node_id(cmd *c) {
             // Set new id
             Term_print("[CLI] node_id: new id ");
             Term_println(setAddress(id));
+            oled_update_display();
         } else {
             // Illegal id
             Term_println("[CLI] node_id: illegal id");
@@ -123,6 +124,8 @@ void cli_setup() {
     cmd_node_id = cli.addCommand("node_id", on_cmd_node_id);
     cmd_node_id.addPositionalArgument("id", "");
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
+
+    // TODO: command send 'xxx' to <node id> 
 }
 
 

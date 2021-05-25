@@ -89,8 +89,9 @@ extern void test_ztimer();
  * Global
  */
 extern BluetoothSerial bt;
-extern void vtube_command_to_station(String cmd);
 extern SimpleCLI cli;
+extern void oled_update_display();
+extern void vtube_command_to_station(String cmd);
 
 
 #endif  // __BIND_H__
