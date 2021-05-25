@@ -5,7 +5,7 @@
 #include "all_headers.h"
 
 
-// ---------- Bluetooth-serial ----------
+// ----------------------------------------------------------------------------
 BluetoothSerial bt;
 static char bt_name[20];
 
