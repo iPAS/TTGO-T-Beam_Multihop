@@ -96,8 +96,12 @@ void loop() {
     gps_decoding_process();  // Process GPS data
 
     vtube_forwarding_process();  // Forward Data received from Virtual Tube
-    cli_interpreting_process();  // Process command-line input
 
+    #ifndef LORA_CALLBACK_MODE
+    lora_parsing_process();  // Parsing LoRa received packet
+    #endif
+
+    cli_interpreting_process();  // Process command-line input
     bt_cli_interpreting_process();  // Process command-line input through Bluetooth-serial
 
 

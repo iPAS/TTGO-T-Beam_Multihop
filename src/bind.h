@@ -50,6 +50,8 @@ extern void zTimerTest();
 /**
  * Radio
  */
+#define LORA_CALLBACK_MODE
+
 #define SINK_ADDRESS ((Address)0)
 #define BROADCAST_ADDR ((Address)0xFFFF)
 typedef uint16_t Address;
@@ -79,6 +81,7 @@ extern Address getAddress();
 extern Address setAddress(Address addr);
 extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
+extern void loraOnReceive(int packetLength);
 
 
 /**

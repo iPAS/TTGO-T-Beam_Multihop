@@ -162,7 +162,7 @@ Address setAddress(Address addr)
 
 static RadioRxHandler radioRxHandler;
 
-static void loraOnReceive(int packetLength)
+void loraOnReceive(int packetLength)
 {
     uint8_t *msg = (uint8_t *)malloc(packetLength);
     if (msg == NULL)
@@ -193,9 +193,12 @@ static void loraOnReceive(int packetLength)
 void radioSetRxHandler(RadioRxHandler rxHandler)
 {
     radioRxHandler = rxHandler;
-    LoRa.onReceive(loraOnReceive);
 
+    #ifdef LORA_CALLBACK_MODE
+    LoRa.onReceive(loraOnReceive);  // XXX: Change from interrupt routine to a function call inside loop().
+                                    // This function will be called by lora_parsing_process() from lora.ino
     LoRa.receive();  // Begin reception-mode
+    #endif
 }
 
 
@@ -216,7 +219,9 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
     LoRa.write((uint8_t *)msg, len);
     RadioStatus ret = (LoRa.endPacket())? RADIO_OK : RADIO_FAILED;
 
+    #ifdef LORA_CALLBACK_MODE
     LoRa.receive();  // Back to reception-mode
+    #endif
 
     if (radioTxDone != NULL)
         (*radioTxDone)(ret);
