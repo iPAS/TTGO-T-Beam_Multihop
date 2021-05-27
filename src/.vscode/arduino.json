@@ -1,6 +1,6 @@
 {
     "board": "espressif:esp32:t-beam",
-    "configuration": "PSRAM=disabled,FlashFreq=80,UploadSpeed=921600,DebugLevel=none",
+    "configuration": "PSRAM=disabled,FlashFreq=80,UploadSpeed=921600,DebugLevel=verbose",
     "port": "/dev/ttyUSB0",
     "output": "tmp",
     "sketch": "Main.ino"
