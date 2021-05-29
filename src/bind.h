@@ -16,6 +16,9 @@
 #define term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
 #define term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
 
+#define debug(args...) term_printf("[X] " args)
+extern void term_printf(const char *format, ...);
+
 typedef enum {
     R_NODE_ID,
 } pref_reg_t;
@@ -85,9 +88,8 @@ extern void loraOnReceive(int packetLength);
 
 
 /**
- * Others
+ * Testers
  */
-extern void debug(const char *format, ...);
 extern void test_ztimer();
 
 

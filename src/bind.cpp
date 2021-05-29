@@ -231,16 +231,15 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
 
 
 /**
- * Debug
+ * For debugging
  */
-void debug(const char *format, ...)
+void term_printf(const char *format, ...)
 {
     static char buf[SIZE_DEBUG_BUF];
     char *p = buf;
     va_list ap;
     va_start(ap, format);
-    p += sprintf(p, "[X] ");
-    vsnprintf(p, sizeof(buf)-4, format, ap);
+    vsnprintf(p, sizeof(buf), format, ap);
 
     term_println(buf);
 
