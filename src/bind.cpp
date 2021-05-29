@@ -242,7 +242,7 @@ void debug(const char *format, ...)
     p += sprintf(p, "[X] ");
     vsnprintf(p, sizeof(buf)-4, format, ap);
 
-    Term_println(buf);
+    term_println(buf);
 
     va_end(ap);
 }

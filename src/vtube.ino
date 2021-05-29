@@ -87,11 +87,11 @@ void vtube_forwarding_process() {
                 sub = line.substring(i, j);     // @ [j] NOT included
 
 
-                // Term_print("  ");  // XXX: for debugging
-                // Term_print(i);
-                // Term_print(',');
-                // Term_print(j - 1);
-                // Term_println("\t" + sub);
+                // term_print("  ");  // XXX: for debugging
+                // term_print(i);
+                // term_print(',');
+                // term_print(j - 1);
+                // term_println("\t" + sub);
 
 
                 // Filtering mechanism
@@ -112,40 +112,40 @@ void vtube_forwarding_process() {
     if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next_batch_millis) {
         if (buffer.length() > 0) {
             // Pass 'input' through LoRa network to the node #0 by putting them into sedning queue.
-            Term_print("[VTUBE] To ");
-            Term_print(SINK_ADDRESS);
-            Term_println(": ");
+            term_print("[VTUBE] To ");
+            term_print(SINK_ADDRESS);
+            term_println(": ");
 
 
             // for (i = 0; i < buffer.length(); i++) {  // XXX: for debugging
             //     if (buffer[i] == 0x0D  ||  buffer[i] == 0x0A) {
-            //         Term_println();
-            //         Term_println(buffer[i], HEX);
+            //         term_println();
+            //         term_println(buffer[i], HEX);
             //     }
             //     else {
-            //         Term_print(buffer[i], HEX);
-            //         Term_print(' ');
+            //         term_print(buffer[i], HEX);
+            //         term_print(' ');
             //     }
             // }
-            // Term_println();
+            // term_println();
 
 
             for (i = 0; i < buffer.length();) {  // XXX: for debugging
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
                 sub = buffer.substring(i, j);
-                Term_print("  ");  
-                Term_print(i);
-                Term_print(',');
-                Term_print(j - 1);
-                Term_println("\t" + sub);
+                term_print("  ");  
+                term_print(i);
+                term_print(',');
+                term_print(j - 1);
+                term_println("\t" + sub);
                 i = j+1;  // Next char left
             }
 
 
             // Transmit to node 'SINK_ADDRESS'
             if (flood_send_to(SINK_ADDRESS, buffer.c_str(), buffer.length()) == false) {
-                Term_println("[VTUBE] flood_send_to() error");
+                term_println("[VTUBE] flood_send_to() error");
             }
 
             buffer = "";  // Clear the transmitted bulk.
@@ -175,9 +175,9 @@ void vtube_forwarding_process() {
 void vtube_command_to_station(String cmd) {
     SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
 
-    Term_print("[VTUBE] Send cmd: '");
-    Term_print(cmd);
-    Term_println("'");
+    term_print("[VTUBE] Send cmd: '");
+    term_print(cmd);
+    term_println("'");
 }
 
 
@@ -185,14 +185,14 @@ void test_vtube_loopback() {
     while (true) {
         if (SERIAL_V.available()) {
             String input = SERIAL_V.readStringUntil('\n');
-            Term_print("[VTUBE] Recv: ");
-            Term_println(input);
+            term_print("[VTUBE] Recv: ");
+            term_println(input);
         }
 
         if (Serial.available()) {
             String input = Serial.readStringUntil('\n');
-            Term_print("[VTUBE] Send: ");
-            Term_println(input);
+            term_print("[VTUBE] Send: ");
+            term_println(input);
             SERIAL_V.println(input);
         }
     }

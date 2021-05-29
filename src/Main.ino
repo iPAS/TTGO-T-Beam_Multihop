@@ -37,10 +37,10 @@ bool axp_setup() {
 
     Wire.begin(AXP_SDA, AXP_SCL);
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
-        Term_println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
+        term_println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
         is_tbeam_version_less_v1 = true;
     } else {
-        Term_println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
+        term_println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
 
         axp.setLDO2Voltage(3300);   // LoRa VDD
         axp.setLDO3Voltage(3300);   // GPS  VDD

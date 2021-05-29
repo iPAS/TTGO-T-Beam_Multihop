@@ -43,11 +43,11 @@ boolean isNumeric(String str) {
 // ----------------------------------------------------------------------------
 void on_error_callback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
-    Term_println("[CLI] " + cmdError.toString());
+    term_println("[CLI] " + cmdError.toString());
     if (cmdError.hasCommand()) {
-        Term_print("[CLI] Did you mean \"");
-        Term_print(cmdError.getCommand().toString());
-        Term_println("\"?");
+        term_print("[CLI] Did you mean \"");
+        term_print(cmdError.getCommand().toString());
+        term_println("\"?");
     }
 }
 
@@ -61,16 +61,16 @@ void on_cmd_help(cmd *c) {
     };
     uint8_t i;
     Command cmd(c);
-    Term_println("[CLI] help:");
+    term_println("[CLI] help:");
     for (i = 0; i < sizeof(desc)/sizeof(desc[0]); i++) {
-        Term_println(desc[i]);
+        term_println(desc[i]);
     }
 }
 
 
 void on_cmd_hello(cmd *c) {
     Command cmd(c);
-    Term_println("[CLI] hello: Hello!");
+    term_println("[CLI] hello: Hello!");
 }
 
 
@@ -91,19 +91,19 @@ void on_cmd_node_id(cmd *c) {
 
         if (legal_id) {
             // Set new id
-            Term_print("[CLI] node_id: new id ");
-            Term_println(setAddress(id));
+            term_print("[CLI] node_id: new id ");
+            term_println(setAddress(id));
             oled_update_display();
             config_save(R_NODE_ID);
         } else {
             // Illegal id
-            Term_println("[CLI] node_id: illegal id");
+            term_println("[CLI] node_id: illegal id");
         }
 
     } else {  // No argument
         // Ask for current id
-        Term_print("[CLI] node_id: current id ");
-        Term_println(getAddress());
+        term_print("[CLI] node_id: current id ");
+        term_println(getAddress());
     }
 }
 
@@ -111,7 +111,7 @@ void on_cmd_node_id(cmd *c) {
 void on_cmd_vtube(cmd *c) {
     Command cmd(c);
     String arg = cmd.getArg(0).getValue();
-    Term_println("[CLI] vtube: '" + arg + "'");
+    term_println("[CLI] vtube: '" + arg + "'");
     vtube_command_to_station(arg);
 }
 

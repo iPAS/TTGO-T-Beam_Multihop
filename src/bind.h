@@ -13,8 +13,8 @@
 
 #define SIZE_DEBUG_BUF 255
 
-#define Term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
-#define Term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
+#define term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
+#define term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
 
 typedef enum {
     R_NODE_ID,

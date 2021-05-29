@@ -65,7 +65,7 @@ void gps_decoding_process() {
                 LoRa.packetRssi(), LoRa.packetSnr());
 
             String s_buf(buf);
-            Term_println(s_buf);
+            term_println(s_buf);
         }
 
         next_report_millis = millis() + GPS_REPORT_PERIOD;
