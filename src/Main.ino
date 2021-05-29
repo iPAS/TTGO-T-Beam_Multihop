@@ -64,9 +64,7 @@ bool axp_setup() {
 
 // ---------- Setup ----------
 void setup() {
-    Serial.begin(115200);
-    while (!Serial)
-        vTaskDelay(1);  // Yield
+    cli_setup();    // CLI
 
     config_setup();  // Load configuration
     bt_setup();  // Bluetooth-Serial
@@ -79,7 +77,6 @@ void setup() {
     gps_setup(is_tbeam_version_less_v1);  // GPS
 
     vtube_setup();  // Virtual Tube connected to weather station
-    cli_setup();    // CLI
 
 
     // ----------------

@@ -118,6 +118,10 @@ void on_cmd_vtube(cmd *c) {
 
 // ----------------------------------------------------------------------------
 void cli_setup() {
+    Serial.begin(115200);
+    while (!Serial)
+        vTaskDelay(1);  // Yield
+
     cli.setOnError(on_error_callback); // Set error Callback
 
     cmd_help = cli.addCommand("help", on_cmd_help);
