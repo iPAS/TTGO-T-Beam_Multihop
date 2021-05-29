@@ -9,6 +9,7 @@ static Command cmd_help;
 static Command cmd_hello;
 static Command cmd_node_id;
 static Command cmd_vtube;
+static Command cmd_flood_send;
 
 
 // ----------------------------------------------------------------------------
@@ -56,8 +57,9 @@ void on_cmd_help(cmd *c) {
     const char *desc[] = {
         "\thelp",
         "\thello",
-        "\tnode_id [new_id]  -- assign BROADCAST_ADDR for built-in",
-        "\tvtube ...",
+        "\tnode_id [new_id] -- set/get id (BROADCAST_ADDR for built-in)",
+        "\tvtube ... -- send following through VTube port",
+        "\tsend [sink_id] -- send to sink for testing [default 0]",
     };
     uint8_t i;
     Command cmd(c);
@@ -82,9 +84,10 @@ void on_cmd_node_id(cmd *c) {
 
     if (idArg.isSet()) {  // The argument is provided.
         if (id == 0) {
-            if (isNumeric(idArg.getValue()))
+            if (isNumeric(idArg.getValue()))  // Re-check
                 legal_id = true;
-        } else
+        }
+        else
         if (id > 0 && id < 65536) {
             legal_id = true;
         }
@@ -95,12 +98,14 @@ void on_cmd_node_id(cmd *c) {
             term_println(setAddress(id));
             oled_update_display();
             config_save(R_NODE_ID);
-        } else {
+        }
+        else {
             // Illegal id
             term_println("[CLI] node_id: illegal id");
         }
 
-    } else {  // No argument
+    }
+    else {  // No argument
         // Ask for current id
         term_print("[CLI] node_id: current id ");
         term_println(getAddress());
@@ -116,6 +121,33 @@ void on_cmd_vtube(cmd *c) {
 }
 
 
+void on_cmd_flood_send(cmd *c) {
+    Command cmd(c);
+    Argument idArg = cmd.getArgument("sink");
+    long id = idArg.getValue().toInt();
+    bool legal_id = false;
+
+    if (id == 0) {
+        if (isNumeric(idArg.getValue()))  // Re-check
+            legal_id = true;
+    }
+    else
+    if (id > 0 && id < 65536) {
+        legal_id = true;
+    }
+
+    if (legal_id == false) {
+        term_println("[CLI] send: illegal sink id");  // Illegal id
+    }
+    else {
+        const char data[] = "hello\n";
+        if (flood_send_to(id, data, sizeof(data)) == false) {
+            term_println("[CLI] flood_send_to() error");
+        }
+    }
+}
+
+
 // ----------------------------------------------------------------------------
 void cli_setup() {
     Serial.begin(115200);
@@ -127,10 +159,10 @@ void cli_setup() {
     cmd_help = cli.addCommand("help", on_cmd_help);
     cmd_hello = cli.addCommand("hello", on_cmd_hello);
     cmd_node_id = cli.addCommand("node_id", on_cmd_node_id);
-    cmd_node_id.addPositionalArgument("id", "");
+    cmd_node_id.addPositionalArgument("id", "");  // Default value is ""
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
-
-    // TODO: command send 'xxx' to <node id> 
+    cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
+    cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
 }
 
 
