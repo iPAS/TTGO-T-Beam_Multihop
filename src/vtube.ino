@@ -85,14 +85,7 @@ void vtube_forwarding_process() {
             if (j < 0) break;
             if (j > i) {                        // Ignore a single '\r'.
                 sub = line.substring(i, j);     // @ [j] NOT included
-
-
-                // term_print("  ");  // XXX: for debugging
-                // term_print(i);
-                // term_print(',');
-                // term_print(j - 1);
-                // term_println("\t" + sub);
-
+                // term_printf("  %d,%d\t%s", i, j-1, sub.c_str());  // XXX: for debugging
 
                 // Filtering mechanism
                 if (sub[0] == '$') 
@@ -112,9 +105,7 @@ void vtube_forwarding_process() {
     if(buffer.length() > VTUBE_BATCH_SIZE  ||  millis() > next_batch_millis) {
         if (buffer.length() > 0) {
             // Pass 'input' through LoRa network to the node #0 by putting them into sedning queue.
-            term_print("[VTUBE] To ");
-            term_print(SINK_ADDRESS);
-            term_println(": ");
+            term_printf("[VTUBE] To %d:", SINK_ADDRESS);
 
 
             // for (i = 0; i < buffer.length(); i++) {  // XXX: for debugging
@@ -134,11 +125,7 @@ void vtube_forwarding_process() {
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
                 sub = buffer.substring(i, j);
-                term_print("  ");  
-                term_print(i);
-                term_print(',');
-                term_print(j - 1);
-                term_println("\t" + sub);
+                term_printf("  %d,%d\t%s", i, j-1, sub.c_str());
                 i = j+1;  // Next char left
             }
 
@@ -175,9 +162,7 @@ void vtube_forwarding_process() {
 void vtube_command_to_station(String cmd) {
     SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
 
-    term_print("[VTUBE] Send cmd: '");
-    term_print(cmd);
-    term_println("'");
+    term_printf("[VTUBE] Send cmd: '%s'", cmd.c_str());
 }
 
 

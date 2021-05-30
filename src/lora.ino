@@ -31,17 +31,8 @@ void on_flood_receive(void *message, uint8_t len) {
     uint8_t *data = &((uint8_t *)message)[sizeof(RoutingHeader)];
     uint8_t data_len = len - sizeof(RoutingHeader);
 
-    term_print("[LoRa] node ");
-    term_print(hdr->finalSink);
-    term_print(" recv ");
-    term_print(len);
-    term_print(" bytes from ");
-    term_print(hdr->originSource);
-    term_print(" at seqno ");
-    term_print(hdr->seqNo);
-    term_print(" within ");
-    term_print(hdr->hopCount);
-    term_println(" hops >");
+    term_printf("[LoRa] @%d recv:%d frm @%d #%d ^%d >",
+        hdr->finalSink, len, hdr->originSource, hdr->seqNo, hdr->hopCount);
 
     int16_t i;
     for (i = 0; i < data_len; i++) {

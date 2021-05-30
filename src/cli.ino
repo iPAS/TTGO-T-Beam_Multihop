@@ -46,9 +46,7 @@ void on_error_callback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
     term_println("[CLI] " + cmdError.toString());
     if (cmdError.hasCommand()) {
-        term_print("[CLI] Did you mean \"");
-        term_print(cmdError.getCommand().toString());
-        term_println("\"?");
+        term_printf("[CLI] Did you mean '%s' ?", cmdError.getCommand().toString().c_str());
     }
 }
 
@@ -94,8 +92,7 @@ void on_cmd_node_id(cmd *c) {
 
         if (legal_id) {
             // Set new id
-            term_print("[CLI] node_id: new id ");
-            term_println(setAddress(id));
+            term_printf("[CLI] node_id: new id %d", setAddress(id));
             oled_update_display();
             config_save(R_NODE_ID);
         }
@@ -107,8 +104,7 @@ void on_cmd_node_id(cmd *c) {
     }
     else {  // No argument
         // Ask for current id
-        term_print("[CLI] node_id: current id ");
-        term_println(getAddress());
+        term_printf("[CLI] node_id: current id %d", getAddress());
     }
 }
 

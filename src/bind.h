@@ -53,7 +53,7 @@ extern void zTimerTest();
 /**
  * Radio
  */
-// #define LORA_CALLBACK_MODE
+#define LORA_CALLBACK_MODE
 
 #define SINK_ADDRESS ((Address)0)
 #define BROADCAST_ADDR ((Address)0xFFFF)
