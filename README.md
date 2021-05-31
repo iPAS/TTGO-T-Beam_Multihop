@@ -106,6 +106,9 @@ On purpose, these commands could be send to T-Beam through __UART0__, debugging 
 * [LiLy TTGO T-Beam 1.1](http://www.lilygo.cn/claprod_view.aspx?TypeId=62&Id=1281&FId=t28:62:28)
 
 * [Examples for each peripheral on T-Beam](https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series)
+
 * [Low-power design guide for T-Beam](https://github.com/JoepSchyns/Low_power_TTGO_T-beam)
 * [Most comprehensive resource on Riot-OS website](https://doc.riot-os.org/group__boards__esp32__ttgo-t-beam.html)
+
+* [SPI Bug Fix on Sendeepmistry's LoRa Library](https://github.com/eduautomatiza/arduino-LoRa/commit/6d1d8e48d216c24618c9d230c795160a00f510dd) -- reconfirmed with [Arduino SPI Library](https://www.e-tinkers.com/2020/03/do-you-know-arduino-spi-and-arduino-spi-library/)
 
