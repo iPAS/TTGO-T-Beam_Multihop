@@ -161,17 +161,40 @@ Address setAddress(Address addr)
 
 
 static StackType_t stackLoRaRecvTask[LORARECV_TASK_STACK_SIZE];
-static StaticTask_t bufferLoRaRecvTask;
+static StaticTask_t dsLoRaRecvTask;
 static TaskHandle_t handleLoRaRecvTask;
+
+static uint8_t storageLoRaRecvQ[LORARECV_Q_LENGTH * LORARECV_Q_ITEM_SIZE];
+static StaticQueue_t dsLoRaRecvQ;
+static QueueHandle_t handleLoRaRecvQ;
 
 static void loraOnReceiveTask(void *pvParameters) {
     while (true) {
-        vTaskSuspend(NULL);
+        // vTaskSuspend(NULL);
 
-        term_printf("task_lora_receive");
+        LoRaRecvQueueItem_t item;
+        if (xQueueReceive(handleLoRaRecvQ, &item, portMAX_DELAY) == pdTRUE) {
+            term_printf("task_lora_receive ok");
+        }
+        else {
+            term_printf("task_lora_receive fail");
+        }
     }
 
     vTaskDelete(NULL);
+}
+
+static void loraSendToReceiveTask(uint8_t *data, uint16_t len) {
+    // xTaskResumeFromISR(handleLoRaRecvTask);
+
+    LoRaRecvQueueItem_t item = {data, len};
+    BaseType_t xHigherPriorityTaskWoken = pdTRUE;
+    xQueueSendFromISR(handleLoRaRecvQ, &item, &xHigherPriorityTaskWoken);
+
+    if( xHigherPriorityTaskWoken )  // Now the buffer is empty we can switch context if necessary. 
+    {
+        portYIELD_FROM_ISR();
+    }
 }
 
 
@@ -179,8 +202,6 @@ static RadioRxHandler radioRxHandler;
 
 void loraOnReceive(int packetLength)
 {
-    xTaskResumeFromISR(handleLoRaRecvTask);
-
     uint8_t *msg = (uint8_t *)malloc(packetLength);
     if (msg == NULL)
     {
@@ -203,6 +224,11 @@ void loraOnReceive(int packetLength)
         // portYIELD_FROM_ISR();
         (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
     }
+
+
+    loraSendToReceiveTask(msg, packetLength);  // XXX: test
+
+
 
     free(msg);
 }
@@ -248,7 +274,9 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
 
 
 void radio_setup() {
-
+    handleLoRaRecvQ = xQueueCreateStatic(
+        LORARECV_Q_LENGTH, LORARECV_Q_ITEM_SIZE, storageLoRaRecvQ, &dsLoRaRecvQ);
+    configASSERT(handleLoRaRecvQ);
 
     handleLoRaRecvTask = xTaskCreateStaticPinnedToCore(
         loraOnReceiveTask,      // Routine
@@ -257,13 +285,9 @@ void radio_setup() {
         NULL,                   // pvParameters
         configMAX_PRIORITIES-1, // Priority
         stackLoRaRecvTask,      // Stack
-        &bufferLoRaRecvTask,    // Task's data structure
+        &dsLoRaRecvTask,    // Task's data structure
         LORARECV_TASK_CORE_ID);
-
-    if (handleLoRaRecvTask == NULL) {
-        term_println("[DEBUG] Starting LoRa fail! on task creation");
-        while (1);
-    }
+    configASSERT(handleLoRaRecvTask);
 }
 
 

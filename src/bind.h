@@ -57,6 +57,14 @@ extern void zTimerTest();
 #define LORARECV_TASK_STACK_SIZE 1024
 #define LORARECV_TASK_CORE_ID 0
 
+#define LORARECV_Q_LENGTH 5
+#define LORARECV_Q_ITEM_SIZE sizeof(LoRaRecvQueueItem_t)
+typedef struct
+{
+    uint8_t *data;
+    uint16_t len;
+} LoRaRecvQueueItem_t;
+
 #define SINK_ADDRESS ((Address)0)
 #define BROADCAST_ADDR ((Address)0xFFFF)
 typedef uint16_t Address;
