@@ -164,6 +164,8 @@ static RadioRxHandler radioRxHandler;
 
 void loraOnReceive(int packetLength)
 {
+    lora_receive();
+
     uint8_t *msg = (uint8_t *)malloc(packetLength);
     if (msg == NULL)
     {

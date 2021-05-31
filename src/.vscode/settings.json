@@ -8,6 +8,7 @@
         "arduino.h": "c",
         "stdint.h": "c",
         "*.tcc": "cpp",
-        "bind.h": "c"
+        "bind.h": "c",
+        "timers.h": "c"
     }
 }
