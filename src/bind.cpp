@@ -160,11 +160,26 @@ Address setAddress(Address addr)
 }
 
 
+static StackType_t stackLoRaRecvTask[LORARECV_TASK_STACK_SIZE];
+static StaticTask_t bufferLoRaRecvTask;
+static TaskHandle_t handleLoRaRecvTask;
+
+static void loraOnReceiveTask(void *pvParameters) {
+    while (true) {
+        vTaskSuspend(NULL);
+
+        term_printf("task_lora_receive");
+    }
+
+    vTaskDelete(NULL);
+}
+
+
 static RadioRxHandler radioRxHandler;
 
 void loraOnReceive(int packetLength)
 {
-    lora_receive();
+    xTaskResumeFromISR(handleLoRaRecvTask);
 
     uint8_t *msg = (uint8_t *)malloc(packetLength);
     if (msg == NULL)
@@ -229,6 +244,26 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
         (*radioTxDone)(ret);
 
     return ret;
+}
+
+
+void radio_setup() {
+
+
+    handleLoRaRecvTask = xTaskCreateStaticPinnedToCore(
+        loraOnReceiveTask,      // Routine
+        "LoRaRecvTask",         // Task's name
+        LORARECV_TASK_STACK_SIZE,  // Stack size
+        NULL,                   // pvParameters
+        configMAX_PRIORITIES-1, // Priority
+        stackLoRaRecvTask,      // Stack
+        &bufferLoRaRecvTask,    // Task's data structure
+        LORARECV_TASK_CORE_ID);
+
+    if (handleLoRaRecvTask == NULL) {
+        term_println("[DEBUG] Starting LoRa fail! on task creation");
+        while (1);
+    }
 }
 
 

@@ -3,7 +3,6 @@
 
 
 #include <freertos/FreeRTOS.h>
-#include <freertos/timers.h>
 
 #include <BluetoothSerial.h>
 #include <SimpleCLI.h>
@@ -55,6 +54,9 @@ extern void zTimerTest();
  */
 #define LORA_CALLBACK_MODE
 
+#define LORARECV_TASK_STACK_SIZE 1024
+#define LORARECV_TASK_CORE_ID 0
+
 #define SINK_ADDRESS ((Address)0)
 #define BROADCAST_ADDR ((Address)0xFFFF)
 typedef uint16_t Address;
@@ -85,6 +87,7 @@ extern Address setAddress(Address addr);
 extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 extern void loraOnReceive(int packetLength);
+extern void radio_setup();
 
 
 /**

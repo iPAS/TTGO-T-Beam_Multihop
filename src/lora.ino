@@ -50,51 +50,8 @@ void lora_parsing_process() {
 
 
 // ----------------------------------------------------------------------------
-#define LORARECV_STACK_SIZE 1024
-#define LORARECV_CORE_ID 0
-
-static StackType_t stackLoRaRecvTask[LORARECV_STACK_SIZE];
-static StaticTask_t bufferLoRaRecvTask;
-static TaskHandle_t handleLoRaRecvTask;
-
-
-static void task_lora_receive(void *pvParameters) {
-    while (true) {
-        vTaskSuspend(NULL);
-
-        term_printf("task_lora_receive");
-    }
-
-    vTaskDelete(NULL);
-}
-
-
-void lora_receive() {
-    xTaskResumeFromISR(handleLoRaRecvTask);
-}
-
-
-static void task_lora_setup() {
-    handleLoRaRecvTask = xTaskCreateStaticPinnedToCore(
-        task_lora_receive,      // Routine
-        "LoRaRecvTask",         // Task's name
-        LORARECV_STACK_SIZE,    // Stack size
-        NULL,                   // pvParameters
-        configMAX_PRIORITIES-1, // Priority
-        stackLoRaRecvTask,      // Stack
-        &bufferLoRaRecvTask,    // Task's data structure
-        LORARECV_CORE_ID);
-
-    if (handleLoRaRecvTask == NULL) {
-        term_println("[DEBUG] Starting LoRa fail! on task creation");
-        while (1);
-    }
-}
-
-
-// ----------------------------------------------------------------------------
 void lora_setup() {
-    task_lora_setup();
+    radio_setup();
 
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);

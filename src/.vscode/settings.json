@@ -9,6 +9,7 @@
         "stdint.h": "c",
         "*.tcc": "cpp",
         "bind.h": "c",
-        "timers.h": "c"
+        "timers.h": "c",
+        "freertos.h": "c"
     }
 }
