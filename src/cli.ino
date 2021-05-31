@@ -136,9 +136,12 @@ void on_cmd_flood_send(cmd *c) {
         term_println("[CLI] send: illegal sink id");  // Illegal id
     }
     else {
-        const char data[] = "hello\n";
-        if (flood_send_to(id, data, sizeof(data)) == false) {
-            term_println("[CLI] flood_send_to() error");
+        const char msg[] = "hello\n";
+        if (flood_send_to(id, msg, sizeof(msg)) == false) {
+            term_println("[CLI] send: flood_send_to() error");
+        }
+        else {
+            term_printf("[CLI] send: '%s' to %d", msg, id);
         }
     }
 }

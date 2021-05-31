@@ -52,7 +52,7 @@ extern void zTimerTest();
 /**
  * Radio
  */
-// #define LORA_CALLBACK_MODE   // XXX: still buggy!!
+#define LORA_CALLBACK_MODE   // XXX: still buggy!!
 // #define LORA_TASK            // XXX: still buggy!!
 
 #define LORARECV_TASK_STACK_SIZE 1024
