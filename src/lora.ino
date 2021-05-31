@@ -51,7 +51,9 @@ void lora_parsing_process() {
 
 // ----------------------------------------------------------------------------
 void lora_setup() {
+    #ifdef LORA_TASK
     radio_setup();
+    #endif
 
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);

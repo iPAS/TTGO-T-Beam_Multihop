@@ -172,10 +172,9 @@ static QueueHandle_t handleLoRaRecvQ;
 
 static void loraOnReceiveTask(void *pvParameters) {
     while (true) {
-        // vTaskSuspend(NULL);
-
         LoRaRecvQueueItem_t item;
         if (xQueueReceive(handleLoRaRecvQ, &item, portMAX_DELAY) == pdTRUE) {
+
             uint8_t *msg = item.data;
             MessageHeader *hdr = (MessageHeader *)msg;
 
@@ -193,19 +192,6 @@ static void loraOnReceiveTask(void *pvParameters) {
     }
 
     vTaskDelete(NULL);
-}
-
-static void loraSendToReceiveTask(uint8_t *data, uint16_t len) {
-    // xTaskResumeFromISR(handleLoRaRecvTask);
-
-    LoRaRecvQueueItem_t item = {data, len};
-    BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-    xQueueSendFromISR(handleLoRaRecvQ, &item, &xHigherPriorityTaskWoken);
-
-    if( xHigherPriorityTaskWoken )  // Now the buffer is empty we can switch context if necessary. 
-    {
-        portYIELD_FROM_ISR();
-    }
 }
 
 void loraOnReceive(int packetLength)
@@ -226,12 +212,22 @@ void loraOnReceive(int packetLength)
         *p++ = LoRa.read();
     }
 
-    // if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR) {
-    //     (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
-    // }
-    // free(msg);
+    #ifdef LORA_TASK
+    LoRaRecvQueueItem_t item = {msg, packetLength};
 
-    loraSendToReceiveTask(msg, packetLength);
+    #ifdef LORA_CALLBACK_MODE
+    xQueueSendFromISR(handleLoRaRecvQ, &item, NULL);
+    #else
+    xQueueSend(handleLoRaRecvQ, &item, NULL);
+    #endif
+
+    return;
+    #endif
+
+    if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR) {
+        (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
+    }
+    free(msg);
 }
 
 void radioSetRxHandler(RadioRxHandler rxHandler)
@@ -279,15 +275,14 @@ void radio_setup() {
         LORARECV_Q_LENGTH, LORARECV_Q_ITEM_SIZE, storageLoRaRecvQ, &dsLoRaRecvQ);
     configASSERT(handleLoRaRecvQ);
 
-    handleLoRaRecvTask = xTaskCreateStaticPinnedToCore(
+    handleLoRaRecvTask = xTaskCreateStatic(
         loraOnReceiveTask,      // Routine
         "LoRaRecvTask",         // Task's name
         LORARECV_TASK_STACK_SIZE,  // Stack size
         NULL,                   // pvParameters
         configMAX_PRIORITIES-1, // Priority
         stackLoRaRecvTask,      // Stack
-        &dsLoRaRecvTask,    // Task's data structure
-        LORARECV_TASK_CORE_ID);
+        &dsLoRaRecvTask);       // Task's data structure
     configASSERT(handleLoRaRecvTask);
 }
 

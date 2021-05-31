@@ -52,11 +52,10 @@ extern void zTimerTest();
 /**
  * Radio
  */
-#define LORA_CALLBACK_MODE
+// #define LORA_CALLBACK_MODE   // XXX: still buggy!!
+// #define LORA_TASK            // XXX: still buggy!!
 
 #define LORARECV_TASK_STACK_SIZE 1024
-#define LORARECV_TASK_CORE_ID 0
-
 #define LORARECV_Q_LENGTH 5
 #define LORARECV_Q_ITEM_SIZE sizeof(LoRaRecvQueueItem_t)
 typedef struct
