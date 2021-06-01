@@ -52,6 +52,14 @@ extern void zTimerTest();
 /**
  * Radio
  */
+#define LORARECV_Q_SIZE 10
+#define LORARECV_Q_ITEM_SIZE sizeof(LoRaRecvQueueItem_t)
+
+typedef struct
+{
+    uint16_t packet_length;
+} LoRaRecvQueueItem_t;
+
 #define LORARECV_TASK_STACK_SIZE 8192
 
 #define SINK_ADDRESS ((Address)0)
