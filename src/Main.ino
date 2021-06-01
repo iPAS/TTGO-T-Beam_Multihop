@@ -67,7 +67,6 @@ void setup() {
     cli_setup();    // CLI
 
     config_setup();  // Load configuration
-    bt_setup();  // Bluetooth-Serial
     oled_setup();   // OLED
 
     bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
@@ -95,7 +94,6 @@ void loop() {
     vtube_forwarding_process();  // Forward Data received from Virtual Tube
 
     cli_interpreting_process();  // Process command-line input
-    bt_cli_interpreting_process();  // Process command-line input through Bluetooth-serial
 
 
     // ----------------

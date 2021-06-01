@@ -4,7 +4,6 @@
 
 #include <freertos/FreeRTOS.h>
 
-#include <BluetoothSerial.h>
 #include <SimpleCLI.h>
 
 #include "all_headers.h"
@@ -12,8 +11,8 @@
 
 #define SIZE_DEBUG_BUF 255
 
-#define term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
-#define term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
+#define term_print(arg)   { Serial.print(arg); }
+#define term_println(arg) { Serial.println(arg); }
 
 #define debug(args...) term_printf("[X] " args)
 extern void term_printf(const char *format, ...);
@@ -104,7 +103,6 @@ extern void test_ztimer();
 /**
  * Global, seen by default but prevent ide confused
  */
-extern BluetoothSerial bt;
 extern SimpleCLI cli;
 extern void oled_update_display();
 extern void vtube_command_to_station(String cmd);
