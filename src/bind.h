@@ -4,7 +4,6 @@
 
 #include <freertos/FreeRTOS.h>
 
-#include <BluetoothSerial.h>
 #include <SimpleCLI.h>
 
 #include "all_headers.h"
@@ -12,11 +11,14 @@
 
 #define SIZE_DEBUG_BUF 255
 
-#define term_print(arg)   { Serial.print(arg);   if (bt.connected()) bt.print(arg); }
-#define term_println(arg) { Serial.println(arg); if (bt.connected()) bt.println(arg); }
+#define term_print(arg)   { Serial.print(arg); }
+#define term_println(arg) { Serial.println(arg); }
+extern void term_printf(const char *format, ...);
 
 #define debug(args...) term_printf("[X] " args)
-extern void term_printf(const char *format, ...);
+#ifndef debug
+#define debug(args...)
+#endif
 
 typedef enum {
     R_NODE_ID,
@@ -52,17 +54,15 @@ extern void zTimerTest();
 /**
  * Radio
  */
-#define LORA_CALLBACK_MODE   // XXX: still buggy!!
-// #define LORA_TASK            // XXX: still buggy!!
-
-#define LORARECV_TASK_STACK_SIZE 1024
-#define LORARECV_Q_LENGTH 5
+#define LORARECV_Q_SIZE 10
 #define LORARECV_Q_ITEM_SIZE sizeof(LoRaRecvQueueItem_t)
+
 typedef struct
 {
-    uint8_t *data;
-    uint16_t len;
+    uint16_t packet_length;
 } LoRaRecvQueueItem_t;
+
+#define LORARECV_TASK_STACK_SIZE 8192
 
 #define SINK_ADDRESS ((Address)0)
 #define BROADCAST_ADDR ((Address)0xFFFF)
@@ -106,7 +106,6 @@ extern void test_ztimer();
 /**
  * Global, seen by default but prevent ide confused
  */
-extern BluetoothSerial bt;
 extern SimpleCLI cli;
 extern void oled_update_display();
 extern void vtube_command_to_station(String cmd);

@@ -148,7 +148,7 @@
                 "ARDUINO_BOARD=\"TBeam\"",
                 "ARDUINO_VARIANT=\"tbeam\"",
                 "ESP32",
-                "CORE_DEBUG_LEVEL=5",
+                "CORE_DEBUG_LEVEL=1",
                 "__DBL_MIN_EXP__=(-1021)",
                 "__UINT_LEAST16_MAX__=0xffff",
                 "__ATOMIC_ACQUIRE=2",
