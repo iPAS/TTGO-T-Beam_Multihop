@@ -64,9 +64,8 @@ bool axp_setup() {
 
 // ---------- Setup ----------
 void setup() {
+    config_setup(); // Load configuration
     cli_setup();    // CLI
-
-    config_setup();  // Load configuration
     oled_setup();   // OLED
 
     bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
