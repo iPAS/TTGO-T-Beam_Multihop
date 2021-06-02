@@ -166,8 +166,19 @@ void cli_setup() {
 
 
 void cli_interpreting_process() {
-    if (Serial.available()) {
-        String input = Serial.readStringUntil('\n');  // Read out string from the serial monitor
-        cli.parse(input);  // Parse the user input into the CLI
+    static String line = "";
+
+    while (Serial.available()) {
+        if (Serial.peek() == '\n'  ||  Serial.peek() == '\r') {
+            char c = Serial.read();  // Just ignore
+            if (c == '\n') {
+                cli.parse(line);  // Parse the user input into the CLI
+                line = "";
+                break;
+            }
+        }
+        else {
+            line += (char)Serial.read();
+        }
     }
 }
