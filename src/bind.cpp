@@ -290,7 +290,7 @@ void radio_setup()
             "LoRaRecvTask",         // Task's name
             LORARECV_TASK_STACK_SIZE,  // Stack size
             NULL,                   // pvParameters
-            uxTaskPriorityGet(NULL),  // Priority -- https://blog.bachi.net/?p=9690
+            uxTaskPriorityGet(NULL)+1,  // Priority -- https://blog.bachi.net/?p=9690
             &handleLoRaRecvTask    // Task's data structure
             ) != pdPASS)
     {

@@ -13,9 +13,12 @@
 
 #define term_print(arg)   { Serial.print(arg); }
 #define term_println(arg) { Serial.println(arg); }
+extern void term_printf(const char *format, ...);
 
 #define debug(args...) term_printf("[X] " args)
-extern void term_printf(const char *format, ...);
+#ifndef debug
+#define debug(args...)
+#endif
 
 typedef enum {
     R_NODE_ID,
