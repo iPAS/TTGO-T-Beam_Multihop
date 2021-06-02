@@ -42,15 +42,10 @@ void on_flood_receive(void *message, uint8_t len) {
 }
 
 
-void lora_parsing_process() {
-    int len = LoRa.parsePacket();
-    if (len > 0)
-        loraOnReceive(len);
-}
-
-
 // ----------------------------------------------------------------------------
 void lora_setup() {
+    radio_setup();
+
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
     if (!LoRa.begin(LORA_BAND)) {

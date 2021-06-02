@@ -161,9 +161,63 @@ Address setAddress(Address addr)
 
 
 static RadioRxHandler radioRxHandler;
+static QueueHandle_t handleLoRaRecvQueue;
+static TaskHandle_t handleLoRaRecvTask;
+
+static void loraOnReceiveTask(void *pvParameters)
+{
+    uint8_t msg[512];
+
+    while (true)
+    {
+        // vTaskSuspend(NULL);
+
+        LoRaRecvQueueItem_t item;
+        if (xQueueReceive(handleLoRaRecvQueue, &item, portMAX_DELAY) != pdTRUE)
+            continue;
+
+        uint16_t packetLength = item.packet_length;
+        uint8_t *msg = (uint8_t *)malloc(packetLength);
+        if (msg == NULL)
+        {
+            debug("loraOnReceive() cannot allocate memory");
+            return;
+        }
+
+        uint8_t *p = msg;
+        MessageHeader *hdr = (MessageHeader *)msg;
+        uint16_t i;
+        for (i = 0; i < packetLength  &&  LoRa.available() > 0; i++)
+        {
+            *p++ = LoRa.read();
+        }
+
+        if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR)
+        {
+            (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
+        }
+        free(msg);
+    }
+
+    vTaskDelete(NULL);
+}
 
 void loraOnReceive(int packetLength)
 {
+    // vTaskResume(handleLoRaRecvTask);
+
+    BaseType_t xHigherPrioritTaskWoken = pdTRUE;  // The task was woken at the start of the ISR.
+    LoRaRecvQueueItem_t item;
+    item.packet_length = packetLength;
+    xQueueSendFromISR(handleLoRaRecvQueue, &item, &xHigherPrioritTaskWoken);
+    if(xHigherPrioritTaskWoken)
+    {
+        // taskYIELD();
+        portYIELD_FROM_ISR();
+    }
+    return;
+
+
     uint8_t *msg = (uint8_t *)malloc(packetLength);
     if (msg == NULL)
     {
@@ -174,19 +228,15 @@ void loraOnReceive(int packetLength)
     uint8_t *p = msg;
     MessageHeader *hdr = (MessageHeader *)msg;
     uint16_t i;
-
     for (i = 0; i < packetLength  &&  LoRa.available() > 0; i++)
     {
         *p++ = LoRa.read();
     }
 
-    debug("loraOnReceive() received message %d bytes", packetLength);
-
-    if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR) {
-        vTaskDelay(1);  // Yield
+    if (hdr->dst == getAddress()  ||  hdr->dst == BROADCAST_ADDR)
+    {
         (*radioRxHandler)(hdr->src, hdr->type, &msg[sizeof(MessageHeader)], hdr->data_len);
     }
-
     free(msg);
 }
 
@@ -194,11 +244,9 @@ void radioSetRxHandler(RadioRxHandler rxHandler)
 {
     radioRxHandler = rxHandler;
 
-    #ifdef LORA_CALLBACK_MODE
     LoRa.onReceive(loraOnReceive);  // XXX: Change from interrupt routine to a function call inside loop().
                                     // This function will be called by lora_parsing_process() from lora.ino
     LoRa.receive();  // Begin reception-mode
-    #endif
 }
 
 
@@ -219,14 +267,36 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
     LoRa.write((uint8_t *)msg, len);
     RadioStatus ret = (LoRa.endPacket())? RADIO_OK : RADIO_FAILED;
 
-    #ifdef LORA_CALLBACK_MODE
     LoRa.receive();  // Back to reception-mode
-    #endif
 
     if (radioTxDone != NULL)
         (*radioTxDone)(ret);
 
     return ret;
+}
+
+
+void radio_setup()
+{
+    handleLoRaRecvQueue = xQueueCreate(LORARECV_Q_SIZE, LORARECV_Q_ITEM_SIZE);
+    if (handleLoRaRecvQueue == NULL)
+    {
+        debug("xQueueCreate() problem");
+        while (1);
+    }
+
+    if (xTaskCreate(
+            loraOnReceiveTask,      // Routine
+            "LoRaRecvTask",         // Task's name
+            LORARECV_TASK_STACK_SIZE,  // Stack size
+            NULL,                   // pvParameters
+            uxTaskPriorityGet(NULL)+1,  // Priority -- https://blog.bachi.net/?p=9690
+            &handleLoRaRecvTask    // Task's data structure
+            ) != pdPASS)
+    {
+        debug("xTaskCreate() problem");
+        while (1);
+    }
 }
 
 
