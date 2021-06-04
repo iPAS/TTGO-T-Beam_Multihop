@@ -170,8 +170,8 @@ void cli_interpreting_process() {
 
     while (Serial.available()) {
         if (Serial.peek() == '\n'  ||  Serial.peek() == '\r') {
-            char c = Serial.read();  // Just ignore
-            if (c == '\n') {
+            Serial.read();  // Just ignore
+            if (line.length() > 0) {
                 cli.parse(line);  // Parse the user input into the CLI
                 line = "";
                 break;
