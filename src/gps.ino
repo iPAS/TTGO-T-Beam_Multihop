@@ -16,7 +16,7 @@ static uint8_t gps_rx;
 #define GPS_TX_V10 12
 #define GPS_RX_V10 34
 
-#define GPS_REPORT_PERIOD 60000 * 5  // Five munites
+#define GPS_REPORT_PERIOD 60000 * 1  // One munites
 
 static TinyGPSPlus gps;
 static uint32_t next_report_millis;
