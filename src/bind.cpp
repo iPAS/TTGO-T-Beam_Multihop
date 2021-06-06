@@ -160,6 +160,12 @@ Address setAddress(Address addr)
 }
 
 
+void radioGetRxStatus(RadioRxStatus* status)
+{
+    // TODO:
+}
+
+
 static RadioRxHandler radioRxHandler;
 static QueueHandle_t handleLoRaRecvQueue;
 static TaskHandle_t handleLoRaRecvTask;

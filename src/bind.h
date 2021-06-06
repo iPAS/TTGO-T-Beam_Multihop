@@ -86,11 +86,17 @@ typedef enum
     RADIO_FAILED, ///< Previous request is not ready or not successful
 } RadioStatus;
 
+typedef struct
+{
+    uint8_t rssi;
+} RadioRxStatus;
+
 typedef void (*RadioRxHandler)(Address source, MessageType type, void *message, uint8_t len);
 typedef void (*RadioTxDone)(RadioStatus status);
 
 extern Address getAddress();
 extern Address setAddress(Address addr);
+extern void radioGetRxStatus(RadioRxStatus* status);
 extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 extern void loraOnReceive(int packetLength);
