@@ -1,9 +1,23 @@
 #include "flood.h"
 #include "delivery_hist.h"
+#include "neighbor.h"
 
 
 static uint8_t txSeqNo;
 static on_rx_sink on_approach_sink;  // Handler called if being the last node in the route.
+
+
+/**
+ * Update sending neighbor's information.
+ */
+static
+void update_neighbor_info(Address source)
+{
+    neighbor_t *nb = neighbor_find(source);
+    RadioRxStatus sts;
+    radioGetRxStatus(&sts);
+    nb->rssi = sts.rssi;
+}
 
 
 /**
@@ -25,12 +39,13 @@ bool broadcast(void *message, uint8_t len)
 static
 void on_receive(Address source, MessageType type, void *message, uint8_t len)
 {
-    RoutingHeader *hdr = (RoutingHeader*)message;
-    delivery_history_t *hist;
+    update_neighbor_info(source);  // Update date about our neighbor 'source'
 
-    // Historical data based on the 'originSource'.
-    // It could be NULL if the 'originSource' is here.
-    hist = (hdr->originSource == getAddress())? NULL : hist_find(hdr);
+    RoutingHeader *hdr = (RoutingHeader*)message;
+
+    delivery_history_t *hist;
+    hist = (hdr->originSource == getAddress())? NULL : hist_find(hdr);  // Historical data based on the 'originSource'.
+                                                                        // It could be NULL if the 'originSource' is here.
 
     // ------------------------------------------------------------------------
     if (type == FLOOD_MSG_TYPE)
@@ -159,9 +174,11 @@ void on_receive(Address source, MessageType type, void *message, uint8_t len)
         }
     }
 
-    // Save the header to history table
+    // Update the history table with the latest header
     if (hist != NULL)
+    {
         memcpy(&hist->latestHdr, hdr, sizeof(hist->latestHdr));
+    }
 }
 
 
@@ -204,12 +221,36 @@ bool flood_send_to(Address sink, const void *msg, uint8_t len)
 
 
 /**
+ * Send node's status to
+ */
+bool flood_send_status_to(Address sink)
+{
+    neighbor_status_t status[MAX_NEIGHBOR];
+    neighbor_status_t *sts = status;
+    neighbor_t *nb = neighbor_table();
+    uint8_t i, cnt;
+    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++)
+    {
+        if (nb->addr != BROADCAST_ADDR)
+        {
+            sts->addr = nb->addr;
+            sts->rssi = nb->rssi;
+            sts++;
+            cnt++;
+        }
+    }
+    return flood_send_to(sink, status, cnt*sizeof(neighbor_status_t));
+}
+
+
+/**
  * Init
  */
 void flood_init(void)
 {
     cq_init();  // Initial communication queue
     hist_init();  // Initial delivery history for memeorizing a received packet.
+    neighbor_init();  // Initial the info. man. of neighbor relation.
 
     txSeqNo = 1;  // Other nodes will assume that 'originSource' has a greater seqNo than themselves.
     on_approach_sink = NULL;
