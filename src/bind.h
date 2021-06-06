@@ -118,6 +118,13 @@ typedef struct
     float snr;
 } neighbor_t;
 
+typedef struct __attribute__((packed))  // For sending through the network.
+{
+    Address addr;
+    uint8_t rssi;   // Degree 0-255 of RSSI
+    float snr;
+} neighbor_status_t;
+
 
 /**
  * Global, seen by default but prevent ide confused

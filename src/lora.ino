@@ -28,10 +28,31 @@
 // ----------------------------------------------------------------------------
 void on_neighbor_update(neighbor_t *nb)
 {
-    RadioRxStatus sts;
-    radioGetRxStatus(&sts);
-    nb->rssi = sts.rssi;
-    nb->snr = sts.snr;
+    RadioRxStatus status;
+    radioGetRxStatus(&status);
+    nb->rssi = status.rssi;
+    nb->snr = status.snr;
+}
+
+// ----------------------------------------------------------------------------
+bool send_status_to(Address sink)
+{
+    neighbor_status_t statuses[MAX_NEIGHBOR];
+    neighbor_status_t *sts = statuses;
+    neighbor_t *nb = neighbor_table();
+    uint8_t i, cnt;
+    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++)
+    {
+        if (nb->addr != BROADCAST_ADDR)
+        {
+            sts->addr = nb->addr;
+            sts->rssi = nb->rssi;
+            sts->snr = nb->snr;
+            sts++;
+            cnt++;
+        }
+    }
+    return flood_send_to(sink, statuses, cnt*sizeof(neighbor_status_t));
 }
 
 // ----------------------------------------------------------------------------

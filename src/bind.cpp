@@ -172,7 +172,8 @@ Address setAddress(Address addr)
 
 void radioGetRxStatus(RadioRxStatus* status)
 {
-    // TODO:
+    status->rssi = LoRa.packetRssi();
+    status->snr = LoRa.packetSnr();
 }
 
 
