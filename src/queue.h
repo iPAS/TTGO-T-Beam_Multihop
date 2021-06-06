@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 typedef struct linklist_t
 {
     void *data;

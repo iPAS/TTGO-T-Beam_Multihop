@@ -5,6 +5,7 @@
 #include "all_headers.h"
 #include "commqueue.h"
 
+
 #define FLOOD_MSG_TYPE  0x01
 #define REPORT_MSG_TYPE 0x22
 
@@ -12,7 +13,7 @@
 #define WAIT_PARENT     10000
 
 #define MAX_HISTORY     16  // XXX: maximum node sources that can exist.
-#define MAX_NEIGHBOR    8  // Max kept information of neighbors.
+#define MAX_NEIGHBOR    6   // Max kept information of neighbors.
 
 typedef struct __attribute__((packed))
 {
@@ -23,12 +24,6 @@ typedef struct __attribute__((packed))
 } RoutingHeader;
 
 typedef void (*on_rx_sink)(void *message, uint8_t len);
-
-typedef struct __attribute__((packed))  // For sending through the network.
-{
-    Address addr;
-    uint8_t rssi;
-} neighbor_status_t;
 
 extern void flood_init(void);
 extern void flood_set_rx_handler(on_rx_sink fn);
