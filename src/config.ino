@@ -12,13 +12,12 @@
 
 static Preferences pref;
 
-
 // ----------------------------------------------------------------------------
 void config_setup() {
     config_load(R_NODE_ID);
 }
 
-
+// ----------------------------------------------------------------------------
 void config_save(pref_reg_t reg) {
     pref.begin(PREF_NAME_SPACE, false);
 
@@ -31,7 +30,7 @@ void config_save(pref_reg_t reg) {
     pref.end();
 }
 
-
+// ----------------------------------------------------------------------------
 void config_load(pref_reg_t reg) {
     pref.begin(PREF_NAME_SPACE, true);
 

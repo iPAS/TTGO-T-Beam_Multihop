@@ -42,9 +42,6 @@ static const char *ws_commands[] = {  // weather_station_commands
 };
 
 static const char *cmd_quiet  = ws_commands[0];
-// static const char *cmd_nodeid = ws_commands[1];
-// static const char *cmd_rtc    = ws_commands[2];
-
 
 // ----------------------------------------------------------------------------
 void vtube_setup() {
@@ -64,7 +61,7 @@ void vtube_setup() {
     count_cmd_sent = 0;
 }
 
-
+// ----------------------------------------------------------------------------
 void vtube_forwarding_process() {
     if (getAddress() == SINK_ADDRESS)
         return;
@@ -158,14 +155,14 @@ void vtube_forwarding_process() {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void vtube_command_to_station(String cmd) {
     SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
 
     term_printf("[VTUBE] Send cmd: '%s'", cmd.c_str());
 }
 
-
+// ----------------------------------------------------------------------------
 void test_vtube_loopback() {
     while (true) {
         if (SERIAL_V.available()) {

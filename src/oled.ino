@@ -5,7 +5,6 @@
 
 static SSD1306 display(0x3C, 21, 22);
 
-
 // ----------------------------------------------------------------------------
 void oled_setup() {
     display.init();
@@ -19,7 +18,7 @@ void oled_setup() {
     oled_update_display();
 }
 
-
+// ----------------------------------------------------------------------------
 void oled_update_display() {
     display.clear();
 

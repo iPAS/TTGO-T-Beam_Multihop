@@ -21,7 +21,6 @@ static uint8_t gps_rx;
 static TinyGPSPlus gps;
 static uint32_t next_report_millis;
 
-
 // ----------------------------------------------------------------------------
 void gps_setup(bool is_tbeam_version_less_v1) {
     if (is_tbeam_version_less_v1) {
@@ -41,7 +40,7 @@ void gps_setup(bool is_tbeam_version_less_v1) {
     next_report_millis = millis();
 }
 
-
+// ----------------------------------------------------------------------------
 void gps_decoding_process() {
     while (SERIAL_GPS.available()) {
         gps.encode(SERIAL_GPS.read());

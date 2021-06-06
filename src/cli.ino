@@ -11,7 +11,6 @@ static Command cmd_node_id;
 static Command cmd_vtube;
 static Command cmd_flood_send;
 
-
 // ----------------------------------------------------------------------------
 boolean isNumeric(String str) {
     // http://tripsintech.com/arduino-isnumeric-function/
@@ -40,7 +39,6 @@ boolean isNumeric(String str) {
     return true;
 }
 
-
 // ----------------------------------------------------------------------------
 void on_error_callback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
@@ -50,7 +48,7 @@ void on_error_callback(cmd_error *e) {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_help(cmd *c) {
     const char *desc[] = {
         "\thelp",
@@ -67,13 +65,13 @@ void on_cmd_help(cmd *c) {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_hello(cmd *c) {
     Command cmd(c);
     term_println("[CLI] hello: Hello!");
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_node_id(cmd *c) {
     Command cmd(c);
     Argument idArg = cmd.getArgument("id");
@@ -108,7 +106,7 @@ void on_cmd_node_id(cmd *c) {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_vtube(cmd *c) {
     Command cmd(c);
     String arg = cmd.getArg(0).getValue();
@@ -116,7 +114,7 @@ void on_cmd_vtube(cmd *c) {
     vtube_command_to_station(arg);
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_flood_send(cmd *c) {
     Command cmd(c);
     Argument idArg = cmd.getArgument("sink");
@@ -146,7 +144,6 @@ void on_cmd_flood_send(cmd *c) {
     }
 }
 
-
 // ----------------------------------------------------------------------------
 void cli_setup() {
     Serial.begin(115200);
@@ -164,7 +161,7 @@ void cli_setup() {
     cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
 }
 
-
+// ----------------------------------------------------------------------------
 void cli_interpreting_process() {
     static String line = "";
 

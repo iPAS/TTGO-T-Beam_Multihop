@@ -24,7 +24,6 @@
 #define LORA_DI0  26  // GPIO26 -- SX1278's IRQ(Interrupt Request)
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
 
-
 // ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
     RoutingHeader *hdr = (RoutingHeader*)message;
@@ -40,7 +39,6 @@ void on_flood_receive(void *message, uint8_t len) {
     }
     term_println("[LoRa]");
 }
-
 
 // ----------------------------------------------------------------------------
 void lora_setup() {
@@ -67,7 +65,7 @@ void lora_setup() {
     term_println("[DEBUG] Starting LoRa ok");
 }
 
-
+// ----------------------------------------------------------------------------
 void test_routing_send_to_zero() {
     if (getAddress() == SINK_ADDRESS)
         return;
