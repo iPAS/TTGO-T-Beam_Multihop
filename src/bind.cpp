@@ -4,6 +4,8 @@
 #include <LoRa.h>
 
 
+// ----------------------------------------------------------------------------
+
 /**
  * zTimer
  */
@@ -13,10 +15,12 @@ static void zTimerInit(zTimer *timer)
     timer->callback_fn = NULL;
 }
 
+
 void zTimerCreate(zTimer *timer)
 {
     zTimerInit(timer);
 }
+
 
 static void vTimerCallback(TimerHandle_t xTimer)
 {
@@ -26,6 +30,7 @@ static void vTimerCallback(TimerHandle_t xTimer)
     else
         (*timer->callback_fn)(timer);
 }
+
 
 void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired onFired)
 {
@@ -79,6 +84,7 @@ void zTimerStart(zTimer *timer, TimerType type, uint16_t interval, zTimerFired o
     }
 }
 
+
 void zTimerStop(zTimer *timer)
 {
     xTimerStop(timer->timerHandle, 0);  // Stop it suddenly.
@@ -87,14 +93,16 @@ void zTimerStop(zTimer *timer)
     // zTimerInit(timer);  // Re-init
 }
 
+
 uint16_t zTimerTicks()
 {
     return millis();
 }
 
 
+// ----------------------------------------------------------------------------
 /**
- * zTimer Test
+ * Test: zTimer
  */
 static void zTimerTestFired(zTimer *arg)
 {
@@ -114,6 +122,7 @@ static void zTimerTestFired(zTimer *arg)
         debug("zTimer Test #%d, next in %d ms", counter, period);
     }
 }
+
 
 void test_ztimer()
 {
@@ -135,10 +144,17 @@ void test_ztimer()
 }
 
 
+// ----------------------------------------------------------------------------
 /**
  * Radio
  */
 static Address node_address = BROADCAST_ADDR;
+
+static RadioRxHandler radioRxHandler;
+static QueueHandle_t handleLoRaRecvQueue;
+static TaskHandle_t handleLoRaRecvTask;
+static RadioTxDone radioTxDoneHandler;
+
 
 Address getAddress()
 {
@@ -153,6 +169,7 @@ Address getAddress()
     return addr;
 }
 
+
 Address setAddress(Address addr)
 {
     node_address = addr;
@@ -165,10 +182,6 @@ void radioGetRxStatus(RadioRxStatus* status)
     // TODO:
 }
 
-
-static RadioRxHandler radioRxHandler;
-static QueueHandle_t handleLoRaRecvQueue;
-static TaskHandle_t handleLoRaRecvTask;
 
 static void loraOnReceiveTask(void *pvParameters)
 {
@@ -208,6 +221,7 @@ static void loraOnReceiveTask(void *pvParameters)
     vTaskDelete(NULL);
 }
 
+
 void loraOnReceive(int packetLength)
 {
     // vTaskResume(handleLoRaRecvTask);
@@ -246,6 +260,7 @@ void loraOnReceive(int packetLength)
     free(msg);
 }
 
+
 void radioSetRxHandler(RadioRxHandler rxHandler)
 {
     radioRxHandler = rxHandler;
@@ -256,11 +271,9 @@ void radioSetRxHandler(RadioRxHandler rxHandler)
 }
 
 
-static RadioTxDone radioTxDone;
-
 RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone)
 {
-    radioTxDone = (txDone == NULL)? NULL : txDone;
+    radioTxDoneHandler = (txDone == NULL)? NULL : txDone;
 
     MessageHeader hdr;
     hdr.src = getAddress();
@@ -275,8 +288,8 @@ RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8
 
     LoRa.receive();  // Back to reception-mode
 
-    if (radioTxDone != NULL)
-        (*radioTxDone)(ret);
+    if (radioTxDoneHandler != NULL)
+        (*radioTxDoneHandler)(ret);
 
     return ret;
 }
@@ -306,6 +319,7 @@ void radio_setup()
 }
 
 
+// ----------------------------------------------------------------------------
 /**
  * For debugging
  */

@@ -50,6 +50,8 @@ extern void zTimerStop(zTimer *timer);
 extern uint16_t zTimerTicks();
 extern void zTimerTest();
 
+extern void test_ztimer();
+
 
 /**
  * Radio
@@ -101,12 +103,6 @@ extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 extern void loraOnReceive(int packetLength);
 extern void radio_setup();
-
-
-/**
- * Testers
- */
-extern void test_ztimer();
 
 
 /**
