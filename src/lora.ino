@@ -6,6 +6,7 @@
 #include <LoRa.h>
 
 #include "all_headers.h"
+#include "neighbor.h"
 #include "flood.h"
 
 
@@ -23,6 +24,15 @@
 #define LORA_SS   18  // GPIO18 -- SX1278's CS
 #define LORA_DI0  26  // GPIO26 -- SX1278's IRQ(Interrupt Request)
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
+
+// ----------------------------------------------------------------------------
+void on_neighbor_update(neighbor_t *nb)
+{
+    RadioRxStatus sts;
+    radioGetRxStatus(&sts);
+    nb->rssi = sts.rssi;
+    nb->snr = sts.snr;
+}
 
 // ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
@@ -61,6 +71,7 @@ void lora_setup() {
 
     flood_init();
     flood_set_rx_handler(on_flood_receive);
+    neighbor_set_update_handler(on_neighbor_update);
 
     term_println("[DEBUG] Starting LoRa ok");
 }

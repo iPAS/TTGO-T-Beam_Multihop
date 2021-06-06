@@ -91,6 +91,7 @@ typedef enum
 typedef struct
 {
     uint8_t rssi;
+    float snr;
 } RadioRxStatus;
 
 typedef void (*RadioRxHandler)(Address source, MessageType type, void *message, uint8_t len);
@@ -103,6 +104,19 @@ extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 extern void loraOnReceive(int packetLength);
 extern void radio_setup();
+
+
+/**
+ * Neighbor
+ */
+typedef struct
+{
+    Address addr;
+    uint32_t timestamp;
+
+    uint8_t rssi;
+    float snr;
+} neighbor_t;
 
 
 /**
