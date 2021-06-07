@@ -19,7 +19,7 @@ static uint8_t gps_rx;
 #define GPS_REPORT_PERIOD 60000 * 1  // One munites
 
 static TinyGPSPlus gps;
-static uint32_t next_report_millis;
+static uint32_t next_stamp_millis;
 
 // ----------------------------------------------------------------------------
 void gps_setup(bool is_tbeam_version_less_v1) {
@@ -37,7 +37,7 @@ void gps_setup(bool is_tbeam_version_less_v1) {
     while (SERIAL_GPS.available())
         SERIAL_GPS.read();  // Clear buffer
 
-    next_report_millis = millis();
+    next_stamp_millis = millis();
 }
 
 // ----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ void gps_decoding_process() {
     // --------------------
     // Print time cyclingly
     // --------------------
-    if (millis() > next_report_millis) {
+    if (millis() > next_stamp_millis) {
 
         if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
             // Example: http://arduiniana.org/libraries/tinygpsplus/
@@ -67,6 +67,6 @@ void gps_decoding_process() {
             term_println(s_buf);
         }
 
-        next_report_millis = millis() + GPS_REPORT_PERIOD;
+        next_stamp_millis = millis() + GPS_REPORT_PERIOD;
     }
 }

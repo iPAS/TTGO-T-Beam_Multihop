@@ -54,6 +54,7 @@ void loop() {
 
     cli_interpreting_process();  // Process command-line input
 
+    lora_reporting_process();  // Report node status to #0
 
     // ----------------
     // XXX: For testing only

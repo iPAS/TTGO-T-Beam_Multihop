@@ -25,6 +25,11 @@
 #define LORA_DI0  26  // GPIO26 -- SX1278's IRQ(Interrupt Request)
 #define LORA_RST  23  // GPIO23 -- SX1278's RESET
 
+#define LORA_REPORT_PERIOD_INIT 20000
+#define LORA_REPORT_PERIOD      (60000*10)  // Ten minute
+
+static uint32_t next_report_millis;
+
 // ----------------------------------------------------------------------------
 void on_neighbor_update(neighbor_t *nb)
 {
@@ -61,14 +66,14 @@ void on_flood_receive(void *message, uint8_t len) {
     uint8_t *data = &((uint8_t *)message)[sizeof(RoutingHeader)];
     uint8_t data_len = len - sizeof(RoutingHeader);
 
-    term_printf("[LoRa] @%d recv:%d frm @%d #%d ^%d >",
+    term_printf("[D] @%d recv:%d frm @%d #%d ^%d >",
         hdr->finalSink, len, hdr->originSource, hdr->seqNo, hdr->hopCount);
 
     int16_t i;
     for (i = 0; i < data_len; i++) {
         term_print((char)data[i]);
     }
-    term_println("[LoRa]");
+    term_println("[D]");
 }
 
 // ----------------------------------------------------------------------------
@@ -95,6 +100,17 @@ void lora_setup() {
     neighbor_set_update_handler(on_neighbor_update);
 
     term_println("[DEBUG] Starting LoRa ok");
+
+    next_report_millis = millis() + LORA_REPORT_PERIOD_INIT;
+}
+
+// ----------------------------------------------------------------------------
+void lora_reporting_process() {
+    if (millis() > next_report_millis) {
+        term_printf("[LORA] Report status to %d:", SINK_ADDRESS);
+        send_status_to(SINK_ADDRESS);
+        next_report_millis = millis() + LORA_REPORT_PERIOD;
+    }
 }
 
 // ----------------------------------------------------------------------------

@@ -18,7 +18,7 @@
 #define VTUBE_BATCH_PERIOD      60000
 
 #define VTUBE_CMD_GAP           4000
-#define VTUBE_CMD_PERIOD        60000 * 5  // Five minute
+#define VTUBE_CMD_PERIOD        (60000*5)  // Five minute
 #define VTUBE_CMD_PERIOD_INIT   10000
 
 static String buffer;
