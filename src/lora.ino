@@ -61,6 +61,30 @@ bool send_status_to(Address sink)
 }
 
 // ----------------------------------------------------------------------------
+bool report_status_to(Address sink)
+{
+    char buf[100];  // Guess max payload as per LoRa packet
+    char *p = buf;
+    uint8_t i, cnt;
+    neighbor_t *nb = neighbor_table();
+    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++)
+    {
+        if (nb->addr != BROADCAST_ADDR)
+        {
+            uint8_t len = snprintf(p, sizeof(buf)-cnt, "#%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
+            p += len;
+            cnt += len;
+            if (cnt >= sizeof(buf)-1)
+            {
+                term_println("[LORA] buffer full/overflow in report_status_to()");
+                break;
+            }
+        }
+    }
+    return flood_send_to(sink, buf, cnt);
+}
+
+// ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
     RoutingHeader *hdr = (RoutingHeader*)message;
     uint8_t *data = &((uint8_t *)message)[sizeof(RoutingHeader)];
@@ -83,7 +107,7 @@ void lora_setup() {
     SPI.begin(LORA_SCK, LORA_MISO, LORA_MOSI, LORA_SS);
     LoRa.setPins(LORA_SS, LORA_RST, LORA_DI0);
     if (!LoRa.begin(LORA_BAND)) {
-        term_println("[DEBUG] Starting LoRa failed!");
+        term_println("[LORA] Starting failed!");
         while (1);
     }
 
@@ -108,7 +132,8 @@ void lora_setup() {
 void lora_reporting_process() {
     if (millis() > next_report_millis) {
         term_printf("[LORA] Report status to %d:", SINK_ADDRESS);
-        send_status_to(SINK_ADDRESS);
+        // send_status_to(SINK_ADDRESS);  // XXX: as binary
+        report_status_to(SINK_ADDRESS);
         next_report_millis = millis() + LORA_REPORT_PERIOD;
     }
 }
