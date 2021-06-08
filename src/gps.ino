@@ -28,6 +28,7 @@ static bool gps_updated;
 static char str_gps_datetime[20];
 static char str_gps_loc[32];
 static char str_gps_quality[10];
+static char str_gps[sizeof(str_gps_datetime) + sizeof(str_gps_loc) + sizeof(str_gps_quality) + 10];
 
 // ----------------------------------------------------------------------------
 void gps_setup(bool is_tbeam_version_less_v1) {
@@ -59,8 +60,6 @@ void gps_decoding_process() {
     // --------------------
     // Print time cyclingly
     // --------------------
-    static char buf[sizeof(str_gps_datetime) + sizeof(str_gps_loc) + sizeof(str_gps_quality) + 10];
-
     if (millis() > next_gps_stamp_millis) {
 
         if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
@@ -70,8 +69,8 @@ void gps_decoding_process() {
             snprintf(str_gps_loc, sizeof(str_gps_loc), "(%f,%f,%.2f)", gps.location.lat(), gps.location.lng(), gps.altitude.meters());
             snprintf(str_gps_quality, sizeof(str_gps_quality), "Sat:%d", gps.satellites.value());
 
-            snprintf(buf, sizeof(buf), "[GPS] %s, %s, %s", str_gps_datetime, str_gps_loc, str_gps_quality);
-            term_println(buf);
+            snprintf(str_gps, sizeof(str_gps), "[GPS] %s, %s, %s", str_gps_datetime, str_gps_loc, str_gps_quality);
+            term_println(str_gps);
 
             gps_updated = true;
         }
@@ -79,12 +78,16 @@ void gps_decoding_process() {
         next_gps_stamp_millis = millis() + GPS_STAMP_PERIOD;
     }
 
-    if (millis() > next_gps_report_millis  &&  gps_updated) {
-        if (flood_send_to(SINK_ADDRESS, buf, strlen(buf))) {  // Not send NULL.
-            term_println("[GPS] Reporting failed!");
-        }
+    if (getAddress() != SINK_ADDRESS) {
+        if (millis() > next_gps_report_millis  &&  gps_updated) {
+            snprintf(str_gps, sizeof(str_gps), "%s\n, %s\n, %s\n", str_gps_datetime, str_gps_loc, str_gps_quality);
 
-        gps_updated = false;
-        next_gps_report_millis = millis() + GPS_REPORT_PERIOD;
+            if (flood_send_to(SINK_ADDRESS, str_gps, strlen(str_gps)) == false) {  // Not send NULL.
+                term_println("[GPS] Reporting failed!");
+            }
+
+            gps_updated = false;
+            next_gps_report_millis = millis() + GPS_REPORT_PERIOD;
+        }
     }
 }
