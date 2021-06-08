@@ -80,7 +80,7 @@ void gps_decoding_process() {
 
     if (getAddress() != SINK_ADDRESS) {
         if (millis() > next_gps_report_millis  &&  gps_updated) {
-            snprintf(str_gps, sizeof(str_gps), "%s\n, %s\n, %s\n", str_gps_datetime, str_gps_loc, str_gps_quality);
+            snprintf(str_gps, sizeof(str_gps), "%s\n%s\n%s\n", str_gps_datetime, str_gps_loc, str_gps_quality);
 
             if (flood_send_to(SINK_ADDRESS, str_gps, strlen(str_gps)) == false) {  // Not send NULL.
                 term_println("[GPS] Reporting failed!");
