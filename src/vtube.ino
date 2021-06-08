@@ -122,10 +122,10 @@ void vtube_forwarding_process() {
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
                 sub = buffer.substring(i, j);
-                term_printf("  %d,%d\t%s", i, j-1, sub.c_str());
+                term_printf("%d,%d\t%s", i, j-1, sub.c_str());
                 i = j+1;  // Next char left
             }
-
+            term_println("[/VTUBE]");
 
             // Transmit to node 'SINK_ADDRESS'
             if (flood_send_to(SINK_ADDRESS, buffer.c_str(), buffer.length()) == false) {

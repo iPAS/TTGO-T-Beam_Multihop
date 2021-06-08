@@ -63,7 +63,7 @@ bool send_status_to(Address sink)
 // ----------------------------------------------------------------------------
 bool report_status_to(Address sink)
 {
-    char buf[100];  // Guess max payload as per LoRa packet
+    char buf[100];  // Guess max payload as per LoRa packet. Max = sizeof(buf)-1
     char *p = buf;
     uint8_t i, cnt;
     neighbor_t *nb = neighbor_table();
@@ -76,12 +76,18 @@ bool report_status_to(Address sink)
             cnt += len;
             if (cnt >= sizeof(buf)-1)
             {
-                term_println("[LORA] buffer full/overflow in report_status_to()");
+                sprintf(p-3, "...");  // 'more' indicator
                 break;
             }
         }
     }
-    return flood_send_to(sink, buf, cnt);
+    term_printf("[LORA] Report status of node %d", getAddress());
+    term_print(buf);
+    term_println("[/LORA]");
+
+    if (getAddress() == SINK_ADDRESS)
+        return true;  // SINK_ADDRESS needs none transaction.
+    return flood_send_to(sink, buf, cnt);  // Not send NULL.
 }
 
 // ----------------------------------------------------------------------------
@@ -97,7 +103,7 @@ void on_flood_receive(void *message, uint8_t len) {
     for (i = 0; i < data_len; i++) {
         term_print((char)data[i]);
     }
-    term_println("[D]");
+    term_println("[/D]");
 }
 
 // ----------------------------------------------------------------------------
