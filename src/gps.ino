@@ -16,11 +16,19 @@ static uint8_t gps_rx;
 #define GPS_TX_V10 12
 #define GPS_RX_V10 34
 
-#define GPS_REPORT_PERIOD 60000 * 1  // One munites
+#define GPS_STAMP_PERIOD 60000 * 1  // One minutes
+#define GPS_REPORT_PERIOD 60000 * 10  // Five minutes
+#define GPS_REPORT_PERIOD_INIT 60000 * 1
 
 static TinyGPSPlus gps;
-static uint32_t next_report_millis;
+static uint32_t next_gps_stamp_millis;
+static uint32_t next_gps_report_millis;
+static bool gps_updated;
 
+static char str_gps_datetime[20];
+static char str_gps_loc[32];
+static char str_gps_quality[10];
+static char str_gps[sizeof(str_gps_datetime) + sizeof(str_gps_loc) + sizeof(str_gps_quality) + 10];
 
 // ----------------------------------------------------------------------------
 void gps_setup(bool is_tbeam_version_less_v1) {
@@ -38,10 +46,12 @@ void gps_setup(bool is_tbeam_version_less_v1) {
     while (SERIAL_GPS.available())
         SERIAL_GPS.read();  // Clear buffer
 
-    next_report_millis = millis();
+    next_gps_stamp_millis = millis();
+    next_gps_report_millis = millis() + GPS_REPORT_PERIOD_INIT;
+    gps_updated = false;
 }
 
-
+// ----------------------------------------------------------------------------
 void gps_decoding_process() {
     while (SERIAL_GPS.available()) {
         gps.encode(SERIAL_GPS.read());
@@ -50,24 +60,34 @@ void gps_decoding_process() {
     // --------------------
     // Print time cyclingly
     // --------------------
-    if (millis() > next_report_millis) {
+    if (millis() > next_gps_stamp_millis) {
 
         if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
             // Example: http://arduiniana.org/libraries/tinygpsplus/
-            static char buf[200];
-            snprintf(buf, sizeof(buf),
-                "[GPS] %02u-%02u-%04u %02u:%02u:%02u, "
-                "SAT %d, LAT %f, LON %f, ALT %f, "
-                "RSSI %f, SNR %f",
-                gps.date.day(),  gps.date.month(),  gps.date.year(),
-                gps.time.hour(), gps.time.minute(), gps.time.second(),
-                gps.satellites.value(), gps.location.lat(), gps.location.lng(), gps.altitude.meters(),
-                LoRa.packetRssi(), LoRa.packetSnr());
+            snprintf(str_gps_datetime, sizeof(str_gps_datetime), "%02u-%02u-%04u %02u:%02u:%02u",
+                gps.date.day(),  gps.date.month(),  gps.date.year(), gps.time.hour(), gps.time.minute(), gps.time.second());
+            snprintf(str_gps_loc, sizeof(str_gps_loc), "(%f,%f,%.2f)", gps.location.lat(), gps.location.lng(), gps.altitude.meters());
+            snprintf(str_gps_quality, sizeof(str_gps_quality), "Sat:%d", gps.satellites.value());
 
-            String s_buf(buf);
-            term_println(s_buf);
+            snprintf(str_gps, sizeof(str_gps), "[GPS] %s, %s, %s", str_gps_datetime, str_gps_loc, str_gps_quality);
+            term_println(str_gps);
+
+            gps_updated = true;
         }
 
-        next_report_millis = millis() + GPS_REPORT_PERIOD;
+        next_gps_stamp_millis = millis() + GPS_STAMP_PERIOD;
+    }
+
+    if (getAddress() != SINK_ADDRESS) {
+        if (millis() > next_gps_report_millis  &&  gps_updated) {
+            snprintf(str_gps, sizeof(str_gps), "%s\n, %s\n, %s\n", str_gps_datetime, str_gps_loc, str_gps_quality);
+
+            if (flood_send_to(SINK_ADDRESS, str_gps, strlen(str_gps)) == false) {  // Not send NULL.
+                term_println("[GPS] Reporting failed!");
+            }
+
+            gps_updated = false;
+            next_gps_report_millis = millis() + GPS_REPORT_PERIOD;
+        }
     }
 }

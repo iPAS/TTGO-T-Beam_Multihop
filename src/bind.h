@@ -50,6 +50,8 @@ extern void zTimerStop(zTimer *timer);
 extern uint16_t zTimerTicks();
 extern void zTimerTest();
 
+extern void test_ztimer();
+
 
 /**
  * Radio
@@ -86,11 +88,18 @@ typedef enum
     RADIO_FAILED, ///< Previous request is not ready or not successful
 } RadioStatus;
 
+typedef struct
+{
+    uint8_t rssi;
+    float snr;
+} RadioRxStatus;
+
 typedef void (*RadioRxHandler)(Address source, MessageType type, void *message, uint8_t len);
 typedef void (*RadioTxDone)(RadioStatus status);
 
 extern Address getAddress();
 extern Address setAddress(Address addr);
+extern void radioGetRxStatus(RadioRxStatus* status);
 extern void radioSetRxHandler(RadioRxHandler rxHandler);
 extern RadioStatus radioRequestTx(Address dst, MessageType type, const void *msg, uint8_t len, RadioTxDone txDone);
 extern void loraOnReceive(int packetLength);
@@ -98,18 +107,36 @@ extern void radio_setup();
 
 
 /**
- * Testers
+ * Neighbor
  */
-extern void test_ztimer();
+typedef struct
+{
+    Address addr;
+    uint32_t timestamp;
+
+    uint8_t rssi;
+    float snr;
+} neighbor_t;
+
+typedef struct __attribute__((packed))  // For sending through the network.
+{
+    Address addr;
+    uint8_t rssi;   // Degree 0-255 of RSSI
+    float snr;
+} neighbor_status_t;
 
 
 /**
  * Global, seen by default but prevent ide confused
  */
 extern SimpleCLI cli;
+
 extern void oled_update_display();
+
 extern void vtube_command_to_station(String cmd);
+
 extern void lora_receive();
+extern bool report_status_to(Address sink);
 
 extern void config_save(pref_reg_t reg);
 extern void config_load(pref_reg_t reg);

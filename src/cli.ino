@@ -2,15 +2,15 @@
 #include <SimpleCLI.h>
 
 #include "all_headers.h"
+#include "flood.h"
 
 
 SimpleCLI cli;
 static Command cmd_help;
-static Command cmd_hello;
 static Command cmd_node_id;
 static Command cmd_vtube;
 static Command cmd_flood_send;
-
+static Command cmd_report;
 
 // ----------------------------------------------------------------------------
 boolean isNumeric(String str) {
@@ -40,7 +40,6 @@ boolean isNumeric(String str) {
     return true;
 }
 
-
 // ----------------------------------------------------------------------------
 void on_error_callback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
@@ -50,14 +49,14 @@ void on_error_callback(cmd_error *e) {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_help(cmd *c) {
     const char *desc[] = {
         "\thelp",
-        "\thello",
         "\tnode_id [new_id] -- set/get id (BROADCAST_ADDR for built-in)",
         "\tvtube ... -- send following through VTube port",
         "\tsend [sink_id] -- send to sink for testing [default 0]",
+        "\treport -- send report to sink",
     };
     uint8_t i;
     Command cmd(c);
@@ -67,13 +66,7 @@ void on_cmd_help(cmd *c) {
     }
 }
 
-
-void on_cmd_hello(cmd *c) {
-    Command cmd(c);
-    term_println("[CLI] hello: Hello!");
-}
-
-
+// ----------------------------------------------------------------------------
 void on_cmd_node_id(cmd *c) {
     Command cmd(c);
     Argument idArg = cmd.getArgument("id");
@@ -108,7 +101,7 @@ void on_cmd_node_id(cmd *c) {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_vtube(cmd *c) {
     Command cmd(c);
     String arg = cmd.getArg(0).getValue();
@@ -116,7 +109,7 @@ void on_cmd_vtube(cmd *c) {
     vtube_command_to_station(arg);
 }
 
-
+// ----------------------------------------------------------------------------
 void on_cmd_flood_send(cmd *c) {
     Command cmd(c);
     Argument idArg = cmd.getArgument("sink");
@@ -138,7 +131,7 @@ void on_cmd_flood_send(cmd *c) {
     else {
         const char msg[] = "hello\n";
         if (flood_send_to(id, msg, sizeof(msg)-1) == false) {
-            term_println("[CLI] send: flood_send_to() error");
+            term_println("[CLI] send: flood_send_to() failed!");
         }
         else {
             term_printf("[CLI] send: '%s' to %d", msg, id);
@@ -146,6 +139,11 @@ void on_cmd_flood_send(cmd *c) {
     }
 }
 
+// ----------------------------------------------------------------------------
+void on_cmd_report(cmd *c) {
+    term_println("[CLI] Report status to sink..");
+    report_status_to(SINK_ADDRESS);
+}
 
 // ----------------------------------------------------------------------------
 void cli_setup() {
@@ -156,15 +154,15 @@ void cli_setup() {
     cli.setOnError(on_error_callback); // Set error Callback
 
     cmd_help = cli.addCommand("help", on_cmd_help);
-    cmd_hello = cli.addCommand("hello", on_cmd_hello);
     cmd_node_id = cli.addCommand("node_id", on_cmd_node_id);
     cmd_node_id.addPositionalArgument("id", "");  // Default value is ""
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
     cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
     cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
+    cmd_report = cli.addCommand("report", on_cmd_report);
 }
 
-
+// ----------------------------------------------------------------------------
 void cli_interpreting_process() {
     static String line = "";
 

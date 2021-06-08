@@ -22,18 +22,18 @@ void hist_init()
 delivery_history_t *hist_find(RoutingHeader *hdr)
 {
     delivery_history_t *hist = delivery_history,
-                       *free_hist = NULL,
-                       *oldest_hist = NULL;
-    uint32_t oldest_timestamp = 0,
+                       *hist_free = NULL,
+                       *hist_oldest = NULL;
+    uint32_t ts_oldest = 0,
              now = zTimerTicks();
     uint8_t i;
 
     // Find in the table
     for (i = 0; i < MAX_HISTORY; i++, hist++)
     {
-        if (!hist->available)
+        if (hist->available == false)
         {
-            free_hist = hist;  // Memorize a free slot.
+            hist_free = hist;  // Memorize a free slot.
         }
         else
         {
@@ -45,19 +45,25 @@ delivery_history_t *hist_find(RoutingHeader *hdr)
             }
 
             // Not found, find the oldest
-            if (hist->timestamp > now)
-                hist->timestamp = 0;  // Reset if overflow
-
-            if (hist->timestamp >= oldest_timestamp)
+            if (hist->timestamp > now)  // Long-time no see, forget it.
             {
-                oldest_timestamp = hist->timestamp;
-                oldest_hist = hist;
+                hist->available = true;
+                hist->timestamp = 0;
+                hist->parent = BROADCAST_ADDR;
+                hist_free = hist;  // Memorize a free slot.
+                continue;
+            }
+
+            if (hist->timestamp >= ts_oldest)
+            {
+                ts_oldest = hist->timestamp;
+                hist_oldest = hist;
             }
         }
     }
 
     // In case of not found, select an available slot, or, the oldest.
-    hist = (free_hist != NULL)? free_hist : oldest_hist;
+    hist = (hist_free != NULL)? hist_free : hist_oldest;
     hist->available = true;
     hist->timestamp = now;
     memcpy(&hist->latestHdr, hdr, sizeof(hist->latestHdr));

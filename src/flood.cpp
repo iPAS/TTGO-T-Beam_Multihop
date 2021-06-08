@@ -1,5 +1,6 @@
 #include "flood.h"
 #include "delivery_hist.h"
+#include "neighbor.h"
 
 
 static uint8_t txSeqNo;
@@ -25,12 +26,13 @@ bool broadcast(void *message, uint8_t len)
 static
 void on_receive(Address source, MessageType type, void *message, uint8_t len)
 {
-    RoutingHeader *hdr = (RoutingHeader*)message;
-    delivery_history_t *hist;
+    neighbor_update_info(source);  // Update date about our neighbor 'source'
 
-    // Historical data based on the 'originSource'.
-    // It could be NULL if the 'originSource' is here.
-    hist = (hdr->originSource == getAddress())? NULL : hist_find(hdr);
+    RoutingHeader *hdr = (RoutingHeader*)message;
+
+    delivery_history_t *hist;
+    hist = (hdr->originSource == getAddress())? NULL : hist_find(hdr);  // Historical data based on the 'originSource'.
+                                                                        // It could be NULL if the 'originSource' is here.
 
     // ------------------------------------------------------------------------
     if (type == FLOOD_MSG_TYPE)
@@ -159,9 +161,11 @@ void on_receive(Address source, MessageType type, void *message, uint8_t len)
         }
     }
 
-    // Save the header to history table
+    // Update the history table with the latest header
     if (hist != NULL)
+    {
         memcpy(&hist->latestHdr, hdr, sizeof(hist->latestHdr));
+    }
 }
 
 
@@ -210,6 +214,7 @@ void flood_init(void)
 {
     cq_init();  // Initial communication queue
     hist_init();  // Initial delivery history for memeorizing a received packet.
+    neighbor_init();  // Initial the info. man. of neighbor relation.
 
     txSeqNo = 1;  // Other nodes will assume that 'originSource' has a greater seqNo than themselves.
     on_approach_sink = NULL;

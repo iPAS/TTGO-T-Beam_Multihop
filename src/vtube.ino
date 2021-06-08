@@ -18,7 +18,7 @@
 #define VTUBE_BATCH_PERIOD      60000
 
 #define VTUBE_CMD_GAP           4000
-#define VTUBE_CMD_PERIOD        60000 * 5  // Five minute
+#define VTUBE_CMD_PERIOD        (60000*5)  // Five minute
 #define VTUBE_CMD_PERIOD_INIT   10000
 
 static String buffer;
@@ -42,9 +42,6 @@ static const char *ws_commands[] = {  // weather_station_commands
 };
 
 static const char *cmd_quiet  = ws_commands[0];
-// static const char *cmd_nodeid = ws_commands[1];
-// static const char *cmd_rtc    = ws_commands[2];
-
 
 // ----------------------------------------------------------------------------
 void vtube_setup() {
@@ -64,7 +61,7 @@ void vtube_setup() {
     count_cmd_sent = 0;
 }
 
-
+// ----------------------------------------------------------------------------
 void vtube_forwarding_process() {
     if (getAddress() == SINK_ADDRESS)
         return;
@@ -125,10 +122,10 @@ void vtube_forwarding_process() {
                 j = buffer.indexOf('\n', i);
                 if (j < 0) break;
                 sub = buffer.substring(i, j);
-                term_printf("  %d,%d\t%s", i, j-1, sub.c_str());
+                term_printf("%d,%d\t%s", i, j-1, sub.c_str());
                 i = j+1;  // Next char left
             }
-
+            term_println("[/VTUBE]");
 
             // Transmit to node 'SINK_ADDRESS'
             if (flood_send_to(SINK_ADDRESS, buffer.c_str(), buffer.length()) == false) {
@@ -158,14 +155,14 @@ void vtube_forwarding_process() {
     }
 }
 
-
+// ----------------------------------------------------------------------------
 void vtube_command_to_station(String cmd) {
     SERIAL_V.print(cmd + EOL);  // The weather station needs the end-of-line symbol as '\r\n'.
 
     term_printf("[VTUBE] Send cmd: '%s'", cmd.c_str());
 }
 
-
+// ----------------------------------------------------------------------------
 void test_vtube_loopback() {
     while (true) {
         if (SERIAL_V.available()) {

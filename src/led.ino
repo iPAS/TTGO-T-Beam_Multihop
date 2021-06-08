@@ -9,7 +9,6 @@
 
 static uint8_t led_io, led_active;
 
-
 // ----------------------------------------------------------------------------
 void led_setup(bool is_tbeam_version_less_v1) {
     led_io = (is_tbeam_version_less_v1)? LED_IO_V07 : LED_IO_V10;
@@ -18,7 +17,7 @@ void led_setup(bool is_tbeam_version_less_v1) {
     digitalWrite(led_io, !led_active);
 }
 
-
+// ----------------------------------------------------------------------------
 void led_blinking_process() {
     static uint8_t state = 0;
     static uint32_t next = 0;
