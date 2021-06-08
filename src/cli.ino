@@ -131,7 +131,7 @@ void on_cmd_flood_send(cmd *c) {
     else {
         const char msg[] = "hello\n";
         if (flood_send_to(id, msg, sizeof(msg)-1) == false) {
-            term_println("[CLI] send: flood_send_to() error");
+            term_println("[CLI] send: flood_send_to() failed!");
         }
         else {
             term_printf("[CLI] send: '%s' to %d", msg, id);
