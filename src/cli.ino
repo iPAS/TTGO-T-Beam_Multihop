@@ -2,14 +2,15 @@
 #include <SimpleCLI.h>
 
 #include "all_headers.h"
+#include "flood.h"
 
 
 SimpleCLI cli;
 static Command cmd_help;
-static Command cmd_hello;
 static Command cmd_node_id;
 static Command cmd_vtube;
 static Command cmd_flood_send;
+static Command cmd_report;
 
 // ----------------------------------------------------------------------------
 boolean isNumeric(String str) {
@@ -52,10 +53,10 @@ void on_error_callback(cmd_error *e) {
 void on_cmd_help(cmd *c) {
     const char *desc[] = {
         "\thelp",
-        "\thello",
         "\tnode_id [new_id] -- set/get id (BROADCAST_ADDR for built-in)",
         "\tvtube ... -- send following through VTube port",
         "\tsend [sink_id] -- send to sink for testing [default 0]",
+        "\treport -- send report to sink",
     };
     uint8_t i;
     Command cmd(c);
@@ -63,12 +64,6 @@ void on_cmd_help(cmd *c) {
     for (i = 0; i < sizeof(desc)/sizeof(desc[0]); i++) {
         term_println(desc[i]);
     }
-}
-
-// ----------------------------------------------------------------------------
-void on_cmd_hello(cmd *c) {
-    Command cmd(c);
-    term_println("[CLI] hello: Hello!");
 }
 
 // ----------------------------------------------------------------------------
@@ -145,6 +140,12 @@ void on_cmd_flood_send(cmd *c) {
 }
 
 // ----------------------------------------------------------------------------
+void on_cmd_report(cmd *c) {
+    term_println("[CLI] Report status to sink..");
+    report_status_to(SINK_ADDRESS);
+}
+
+// ----------------------------------------------------------------------------
 void cli_setup() {
     Serial.begin(115200);
     while (!Serial)
@@ -153,12 +154,12 @@ void cli_setup() {
     cli.setOnError(on_error_callback); // Set error Callback
 
     cmd_help = cli.addCommand("help", on_cmd_help);
-    cmd_hello = cli.addCommand("hello", on_cmd_hello);
     cmd_node_id = cli.addCommand("node_id", on_cmd_node_id);
     cmd_node_id.addPositionalArgument("id", "");  // Default value is ""
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
     cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
     cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
+    cmd_report = cli.addCommand("report", on_cmd_report);
 }
 
 // ----------------------------------------------------------------------------

@@ -57,7 +57,14 @@ bool send_status_to(Address sink)
             cnt++;
         }
     }
-    return flood_send_to(sink, statuses, cnt*sizeof(neighbor_status_t));
+    cnt *= sizeof(neighbor_status_t);
+
+    term_printf("[LORA] Report status node %d to %d, %d bytes", getAddress(), sink, cnt);
+
+    if (getAddress() == sink)
+        return true;  // 'sink' needs none transaction.
+
+    return flood_send_to(sink, statuses, cnt);
 }
 
 // ----------------------------------------------------------------------------
@@ -81,12 +88,14 @@ bool report_status_to(Address sink)
             }
         }
     }
-    term_printf("[LORA] Report status of node %d", getAddress());
+
+    term_printf("[LORA] Report status node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(buf);
     term_println("[/LORA]");
 
-    if (getAddress() == SINK_ADDRESS)
-        return true;  // SINK_ADDRESS needs none transaction.
+    if (getAddress() == sink)
+        return true;  // 'sink' needs none transaction.
+
     return flood_send_to(sink, buf, cnt);  // Not send NULL.
 }
 
@@ -137,7 +146,6 @@ void lora_setup() {
 // ----------------------------------------------------------------------------
 void lora_reporting_process() {
     if (millis() > next_report_millis) {
-        term_printf("[LORA] Report status to %d:", SINK_ADDRESS);
         // send_status_to(SINK_ADDRESS);  // XXX: as binary
         report_status_to(SINK_ADDRESS);
         next_report_millis = millis() + LORA_REPORT_PERIOD;

@@ -130,9 +130,13 @@ typedef struct __attribute__((packed))  // For sending through the network.
  * Global, seen by default but prevent ide confused
  */
 extern SimpleCLI cli;
+
 extern void oled_update_display();
+
 extern void vtube_command_to_station(String cmd);
+
 extern void lora_receive();
+extern bool report_status_to(Address sink);
 
 extern void config_save(pref_reg_t reg);
 extern void config_load(pref_reg_t reg);
