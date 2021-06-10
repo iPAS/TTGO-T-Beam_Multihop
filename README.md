@@ -2,7 +2,7 @@
 
 This project tries to implement multihopping data relay on the network of ESP32 modules
   -- _TTGO-T-Beam_ nodes.
-
+It uses flood routing from the project: [Flood Routing with Motelib](https://github.com/iPAS/motelib_flooding.git).
 
 
 ## Quick Start
@@ -49,7 +49,6 @@ The DB9 pins are connected as following:
 * The work flow is explained in the [next section](#how-formware-work).
 
 
-
 ## System Overview
 
 
@@ -64,7 +63,9 @@ The DB9 pins are connected as following:
 
 ### Routing
 
-* [TODO]
+* Project that is provided the [routing mechanism](https://github.com/iPAS/motelib_flooding).
+
+[![Multi-source + Hybrid-node Test](https://img.youtube.com/vi/CcUM0YgV6Vg/0.jpg)](https://youtu.be/CcUM0YgV6Vg?t=35s "Multi-source/Hybrid Test")
 
 
 ### Terminal Commands
@@ -111,4 +112,3 @@ On purpose, these commands could be send to T-Beam through __UART0__, debugging 
 * [Most comprehensive resource on Riot-OS website](https://doc.riot-os.org/group__boards__esp32__ttgo-t-beam.html)
 
 * [SPI Bug Fix on Sendeepmistry's LoRa Library](https://github.com/eduautomatiza/arduino-LoRa/commit/6d1d8e48d216c24618c9d230c795160a00f510dd) -- reconfirmed with [Arduino SPI Library](https://www.e-tinkers.com/2020/03/do-you-know-arduino-spi-and-arduino-spi-library/)
-
