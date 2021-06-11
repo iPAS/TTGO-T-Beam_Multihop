@@ -133,6 +133,8 @@ extern SimpleCLI cli;
 
 extern void oled_update_display();
 
+extern int gps_update_str(char *str, size_t maxlen, const char *fmt);
+
 extern void vtube_command_to_station(String cmd);
 
 extern void lora_receive();
