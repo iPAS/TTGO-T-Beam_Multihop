@@ -14,7 +14,7 @@ static Command cmd_status_report;
 static Command cmd_gps_report;
 
 // ----------------------------------------------------------------------------
-boolean isNumeric(String str) {
+static boolean is_numeric(String str) {
     // http://tripsintech.com/arduino-isnumeric-function/
     unsigned int stringLength = str.length();
 
@@ -39,6 +39,11 @@ boolean isNumeric(String str) {
         return false;
     }
     return true;
+}
+
+// ----------------------------------------------------------------------------
+static bool extract_id(cmd *c, long *ret) {
+
 }
 
 // ----------------------------------------------------------------------------
@@ -77,7 +82,7 @@ void on_cmd_node_id(cmd *c) {
 
     if (idArg.isSet()) {  // The argument is provided.
         if (id == 0) {
-            if (isNumeric(idArg.getValue()))  // Re-check
+            if (is_numeric(idArg.getValue()))  // Re-check
                 legal_id = true;
         }
         else
@@ -114,12 +119,12 @@ void on_cmd_vtube(cmd *c) {
 // ----------------------------------------------------------------------------
 void on_cmd_flood_send(cmd *c) {
     Command cmd(c);
-    Argument idArg = cmd.getArgument("sink");
+    Argument idArg = cmd.getArgument("id");
     long id = idArg.getValue().toInt();
     bool legal_id = false;
 
     if (id == 0) {
-        if (isNumeric(idArg.getValue()))  // Re-check
+        if (is_numeric(idArg.getValue()))  // Re-check
             legal_id = true;
     }
     else
@@ -167,7 +172,7 @@ void cli_setup() {
     cmd_node_id.addPositionalArgument("id", "");  // Default value is ""
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
     cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
-    cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
+    cmd_flood_send.addPositionalArgument("id", "0");  // Default value is "0"
     cmd_status_report = cli.addCommand("report", on_cmd_status_report);
     cmd_gps_report = cli.addCommand("gps", on_cmd_gps_report);
 }
