@@ -10,7 +10,8 @@ static Command cmd_help;
 static Command cmd_node_id;
 static Command cmd_vtube;
 static Command cmd_flood_send;
-static Command cmd_report;
+static Command cmd_status_report;
+static Command cmd_gps_report;
 
 // ----------------------------------------------------------------------------
 boolean isNumeric(String str) {
@@ -56,7 +57,8 @@ void on_cmd_help(cmd *c) {
         "\tnode_id [new_id] -- set/get id (BROADCAST_ADDR for built-in)",
         "\tvtube ... -- send following through VTube port",
         "\tsend [sink_id] -- send to sink for testing [default 0]",
-        "\treport -- send report to sink",
+        "\treport -- send status report to sink",
+        "\tgps -- send GPS report to sink",
     };
     uint8_t i;
     Command cmd(c);
@@ -140,9 +142,16 @@ void on_cmd_flood_send(cmd *c) {
 }
 
 // ----------------------------------------------------------------------------
-void on_cmd_report(cmd *c) {
+void on_cmd_status_report(cmd *c) {
     term_println("[CLI] Report status to sink..");
     report_status_to(SINK_ADDRESS);
+}
+
+// ----------------------------------------------------------------------------
+void on_cmd_gps_report(cmd *c) {
+    term_println("[CLI] Report GPS to sink..");
+    gps_update_data();
+    report_gps_to(SINK_ADDRESS);
 }
 
 // ----------------------------------------------------------------------------
@@ -159,7 +168,8 @@ void cli_setup() {
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
     cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
     cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
-    cmd_report = cli.addCommand("report", on_cmd_report);
+    cmd_status_report = cli.addCommand("report", on_cmd_status_report);
+    cmd_gps_report = cli.addCommand("gps", on_cmd_gps_report);
 }
 
 // ----------------------------------------------------------------------------
