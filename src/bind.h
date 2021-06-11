@@ -133,10 +133,14 @@ extern SimpleCLI cli;
 
 extern void oled_update_display();
 
+extern void gps_update_data();
+extern char *gps_update_str(const char *fmt);
+
 extern void vtube_command_to_station(String cmd);
 
 extern void lora_receive();
 extern bool report_status_to(Address sink);
+extern bool report_gps_to(Address sink);
 
 extern void config_save(pref_reg_t reg);
 extern void config_load(pref_reg_t reg);

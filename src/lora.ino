@@ -31,8 +31,7 @@
 static uint32_t next_report_millis;
 
 // ----------------------------------------------------------------------------
-void on_neighbor_update(neighbor_t *nb)
-{
+void on_neighbor_update(neighbor_t *nb) {
     RadioRxStatus status;
     radioGetRxStatus(&status);
     nb->rssi = status.rssi;
@@ -40,8 +39,7 @@ void on_neighbor_update(neighbor_t *nb)
 }
 
 // ----------------------------------------------------------------------------
-bool send_status_to(Address sink)
-{
+bool send_status_to(Address sink) {
     neighbor_status_t statuses[MAX_NEIGHBOR];
     neighbor_status_t *sts = statuses;
     neighbor_t *nb = neighbor_table();
@@ -68,8 +66,7 @@ bool send_status_to(Address sink)
 }
 
 // ----------------------------------------------------------------------------
-bool report_status_to(Address sink)
-{
+bool report_status_to(Address sink) {
     char buf[100];  // Guess max payload as per LoRa packet. Max = sizeof(buf)-1
     char *p = buf;
     uint8_t i, cnt;
@@ -97,6 +94,17 @@ bool report_status_to(Address sink)
         return true;  // 'sink' needs none transaction.
 
     return flood_send_to(sink, buf, cnt);  // Not send NULL.
+}
+
+// ----------------------------------------------------------------------------
+bool report_gps_to(Address sink) {
+    char *str = gps_update_str("%s\n%s\n%s\n");
+    uint8_t cnt = strlen(str);
+    term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_print(str);
+    term_println("[/LORA]");
+
+    return flood_send_to(SINK_ADDRESS, str, cnt);
 }
 
 // ----------------------------------------------------------------------------

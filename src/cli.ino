@@ -10,10 +10,11 @@ static Command cmd_help;
 static Command cmd_node_id;
 static Command cmd_vtube;
 static Command cmd_flood_send;
-static Command cmd_report;
+static Command cmd_status_report;
+static Command cmd_gps_report;
 
 // ----------------------------------------------------------------------------
-boolean isNumeric(String str) {
+static boolean is_numeric(String str) {
     // http://tripsintech.com/arduino-isnumeric-function/
     unsigned int stringLength = str.length();
 
@@ -41,6 +42,26 @@ boolean isNumeric(String str) {
 }
 
 // ----------------------------------------------------------------------------
+static bool extract_id(Argument arg, long *ret) {
+    String value = arg.getValue();
+    long id = value.toInt();
+
+    if (id == 0) {
+        if (is_numeric(value)) {  // Re-check
+            *ret = id;
+            return true;
+        }
+    }
+    else
+    if (id > 0 && id < 65536) {
+        *ret = id;
+        return true;
+    }
+
+    return false;
+}
+
+// ----------------------------------------------------------------------------
 void on_error_callback(cmd_error *e) {
     CommandError cmdError(e); // Create wrapper object
     term_println("[CLI] " + cmdError.toString());
@@ -56,7 +77,8 @@ void on_cmd_help(cmd *c) {
         "\tnode_id [new_id] -- set/get id (BROADCAST_ADDR for built-in)",
         "\tvtube ... -- send following through VTube port",
         "\tsend [sink_id] -- send to sink for testing [default 0]",
-        "\treport -- send report to sink",
+        "\tstatus [sink_id] -- send status report to sink [default 0]",
+        "\tgps [sink_id] -- send GPS report to sink [default 0]",
     };
     uint8_t i;
     Command cmd(c);
@@ -69,20 +91,11 @@ void on_cmd_help(cmd *c) {
 // ----------------------------------------------------------------------------
 void on_cmd_node_id(cmd *c) {
     Command cmd(c);
-    Argument idArg = cmd.getArgument("id");
-    long id = idArg.getValue().toInt();
-    bool legal_id = false;
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
 
-    if (idArg.isSet()) {  // The argument is provided.
-        if (id == 0) {
-            if (isNumeric(idArg.getValue()))  // Re-check
-                legal_id = true;
-        }
-        else
-        if (id > 0 && id < 65536) {
-            legal_id = true;
-        }
-
+    if (arg.isSet()) {  // The argument is provided.
         if (legal_id) {
             // Set new id
             term_printf("[CLI] node_id: new id %d", setAddress(id));
@@ -112,37 +125,63 @@ void on_cmd_vtube(cmd *c) {
 // ----------------------------------------------------------------------------
 void on_cmd_flood_send(cmd *c) {
     Command cmd(c);
-    Argument idArg = cmd.getArgument("sink");
-    long id = idArg.getValue().toInt();
-    bool legal_id = false;
-
-    if (id == 0) {
-        if (isNumeric(idArg.getValue()))  // Re-check
-            legal_id = true;
-    }
-    else
-    if (id > 0 && id < 65536) {
-        legal_id = true;
-    }
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
 
     if (legal_id == false) {
         term_println("[CLI] send: illegal sink id");  // Illegal id
     }
     else {
         const char msg[] = "hello\n";
-        if (flood_send_to(id, msg, sizeof(msg)-1) == false) {
-            term_println("[CLI] send: flood_send_to() failed!");
+        if (flood_send_to(id, msg, sizeof(msg)-1)) {
+            term_printf("[CLI] send: '%s' to %d", msg, id);
         }
         else {
-            term_printf("[CLI] send: '%s' to %d", msg, id);
+            term_println("[CLI] send: flood_send_to() failed!");
         }
     }
 }
 
 // ----------------------------------------------------------------------------
-void on_cmd_report(cmd *c) {
-    term_println("[CLI] Report status to sink..");
-    report_status_to(SINK_ADDRESS);
+void on_cmd_status_report(cmd *c) {
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] status: illegal sink id");  // Illegal id
+    }
+    else {
+        if (report_status_to(id)) {
+            term_printf("[CLI] status: report to %d", id);
+        }
+        else {
+            term_println("[CLI] status: report_status_to() failed!");
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+void on_cmd_gps_report(cmd *c) {
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] gps: illegal sink id");  // Illegal id
+    }
+    else {
+        gps_update_data();
+        if (report_gps_to(id)) {
+            term_printf("[CLI] gps: report to %d", id);
+        }
+        else {
+            term_println("[CLI] gps: report_gps_to() failed!");
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -158,8 +197,11 @@ void cli_setup() {
     cmd_node_id.addPositionalArgument("id", "");  // Default value is ""
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
     cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
-    cmd_flood_send.addPositionalArgument("sink", "0");  // Default value is "0"
-    cmd_report = cli.addCommand("report", on_cmd_report);
+    cmd_flood_send.addPositionalArgument("id", "0");  // Default value is "0"
+    cmd_status_report = cli.addCommand("status", on_cmd_status_report);
+    cmd_status_report.addPositionalArgument("id", "0");  // Default value is "0"
+    cmd_gps_report = cli.addCommand("gps", on_cmd_gps_report);
+    cmd_gps_report.addPositionalArgument("id", "0");  // Default value is "0"
 }
 
 // ----------------------------------------------------------------------------
