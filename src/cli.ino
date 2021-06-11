@@ -42,8 +42,23 @@ static boolean is_numeric(String str) {
 }
 
 // ----------------------------------------------------------------------------
-static bool extract_id(cmd *c, long *ret) {
+static bool extract_id(Argument arg, long *ret) {
+    String value = arg.getValue();
+    long id = value.toInt();
 
+    if (id == 0) {
+        if (is_numeric(value)) {  // Re-check
+            *ret = id;
+            return true;
+        }
+    }
+    else
+    if (id > 0 && id < 65536) {
+        *ret = id;
+        return true;
+    }
+
+    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -76,20 +91,11 @@ void on_cmd_help(cmd *c) {
 // ----------------------------------------------------------------------------
 void on_cmd_node_id(cmd *c) {
     Command cmd(c);
-    Argument idArg = cmd.getArgument("id");
-    long id = idArg.getValue().toInt();
-    bool legal_id = false;
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
 
-    if (idArg.isSet()) {  // The argument is provided.
-        if (id == 0) {
-            if (is_numeric(idArg.getValue()))  // Re-check
-                legal_id = true;
-        }
-        else
-        if (id > 0 && id < 65536) {
-            legal_id = true;
-        }
-
+    if (arg.isSet()) {  // The argument is provided.
         if (legal_id) {
             // Set new id
             term_printf("[CLI] node_id: new id %d", setAddress(id));
@@ -119,18 +125,9 @@ void on_cmd_vtube(cmd *c) {
 // ----------------------------------------------------------------------------
 void on_cmd_flood_send(cmd *c) {
     Command cmd(c);
-    Argument idArg = cmd.getArgument("id");
-    long id = idArg.getValue().toInt();
-    bool legal_id = false;
-
-    if (id == 0) {
-        if (is_numeric(idArg.getValue()))  // Re-check
-            legal_id = true;
-    }
-    else
-    if (id > 0 && id < 65536) {
-        legal_id = true;
-    }
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
 
     if (legal_id == false) {
         term_println("[CLI] send: illegal sink id");  // Illegal id
