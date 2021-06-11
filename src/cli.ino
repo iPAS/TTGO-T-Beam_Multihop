@@ -77,8 +77,8 @@ void on_cmd_help(cmd *c) {
         "\tnode_id [new_id] -- set/get id (BROADCAST_ADDR for built-in)",
         "\tvtube ... -- send following through VTube port",
         "\tsend [sink_id] -- send to sink for testing [default 0]",
-        "\treport -- send status report to sink",
-        "\tgps -- send GPS report to sink",
+        "\tstatus [sink_id] -- send status report to sink [default 0]",
+        "\tgps [sink_id] -- send GPS report to sink [default 0]",
     };
     uint8_t i;
     Command cmd(c);
@@ -134,26 +134,54 @@ void on_cmd_flood_send(cmd *c) {
     }
     else {
         const char msg[] = "hello\n";
-        if (flood_send_to(id, msg, sizeof(msg)-1) == false) {
-            term_println("[CLI] send: flood_send_to() failed!");
+        if (flood_send_to(id, msg, sizeof(msg)-1)) {
+            term_printf("[CLI] send: '%s' to %d", msg, id);
         }
         else {
-            term_printf("[CLI] send: '%s' to %d", msg, id);
+            term_println("[CLI] send: flood_send_to() failed!");
         }
     }
 }
 
 // ----------------------------------------------------------------------------
 void on_cmd_status_report(cmd *c) {
-    term_println("[CLI] Report status to sink..");
-    report_status_to(SINK_ADDRESS);
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] status: illegal sink id");  // Illegal id
+    }
+    else {
+        if (report_status_to(id)) {
+            term_printf("[CLI] status: report to %d", id);
+        }
+        else {
+            term_println("[CLI] status: report_status_to() failed!");
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
 void on_cmd_gps_report(cmd *c) {
-    term_println("[CLI] Report GPS to sink..");
-    gps_update_data();
-    report_gps_to(SINK_ADDRESS);
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] gps: illegal sink id");  // Illegal id
+    }
+    else {
+        gps_update_data();
+        if (report_gps_to(id)) {
+            term_printf("[CLI] gps: report to %d", id);
+        }
+        else {
+            term_println("[CLI] gps: report_gps_to() failed!");
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -170,8 +198,10 @@ void cli_setup() {
     cmd_vtube = cli.addSingleArgumentCommand("vtube", on_cmd_vtube);
     cmd_flood_send = cli.addCommand("send", on_cmd_flood_send);
     cmd_flood_send.addPositionalArgument("id", "0");  // Default value is "0"
-    cmd_status_report = cli.addCommand("report", on_cmd_status_report);
+    cmd_status_report = cli.addCommand("status", on_cmd_status_report);
+    cmd_status_report.addPositionalArgument("id", "0");  // Default value is "0"
     cmd_gps_report = cli.addCommand("gps", on_cmd_gps_report);
+    cmd_gps_report.addPositionalArgument("id", "0");  // Default value is "0"
 }
 
 // ----------------------------------------------------------------------------
