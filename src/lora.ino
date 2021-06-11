@@ -99,7 +99,12 @@ bool report_status_to(Address sink) {
 // ----------------------------------------------------------------------------
 bool report_gps_to(Address sink) {
     char *str = gps_update_str("%s\n%s\n%s\n");
-    return flood_send_to(SINK_ADDRESS, str, strlen(str));
+    uint8_t cnt = strlen(str);
+    term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_print(str);
+    term_println("[/LORA]");
+
+    return flood_send_to(SINK_ADDRESS, str, cnt);
 }
 
 // ----------------------------------------------------------------------------
