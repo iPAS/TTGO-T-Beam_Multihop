@@ -100,11 +100,17 @@ On purpose, these commands could be send to T-Beam through __UART0__, debugging 
 
 ### Resources
 
+#### Hardware References
+
 * [All versions' schematics](https://github.com/Xinyuan-LilyGO/LilyGO-T-Beam)
 * [V0.7 information](https://tinymicros.com/wiki/TTGO_T-Beam)
 
 * [LiLy TTGO T-Beam 0.7](http://www.lilygo.cn/prod_view.aspx?TypeId=50033&Id=1237&FId=t3:50033:3)
 * [LiLy TTGO T-Beam 1.1](http://www.lilygo.cn/claprod_view.aspx?TypeId=62&Id=1281&FId=t28:62:28)
+
+* [SoftRF](https://github.com/lyusupov/SoftRF/wiki/Prime-Edition-MkII)
+
+#### Examples
 
 * [Examples for each peripheral on T-Beam](https://github.com/Xinyuan-LilyGO/LilyGo-LoRa-Series)
 
