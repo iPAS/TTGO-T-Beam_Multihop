@@ -166,7 +166,7 @@ Address getAddress()
 Address setAddress(Address addr)
 {
     node_address = addr;
-    return node_address;
+    return getAddress();
 }
 
 
