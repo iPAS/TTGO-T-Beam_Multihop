@@ -5,8 +5,9 @@
 #include <axp20x.h>
 
 
-#define AXP_LOG_PERIOD 60000 * 15
-#define AXP_LOG_PERIOD_INIT 45000
+#define AXP_LOG_PERIOD 60000 * 2
+#define AXP_REPORT_PERIOD_INIT 45000
+#define AXP_REPORT_PERIOD 60000 * 10
 
 #define AXP_SDA 21
 #define AXP_SCL 22
@@ -14,6 +15,7 @@
 
 static AXP20X_Class axp;
 static uint32_t next_axp_log_millis;
+static uint32_t next_axp_report_millis;
 
 static char str_axp_temp[10];
 static char str_axp_acin[20];
@@ -46,7 +48,8 @@ bool axp_setup() {
     axp.ClearCoulombcounter();
     axp.EnableCoulombcounter();
 
-    next_axp_log_millis = millis() + AXP_LOG_PERIOD_INIT;
+    next_axp_log_millis = millis();
+    next_axp_report_millis = millis() + AXP_REPORT_PERIOD_INIT;
 
     return true;
 }
@@ -56,8 +59,16 @@ void axp_logging_process() {
     if (millis() > next_axp_log_millis) {
         axp_update_data();
         term_println( axp_update_str("[AXP] %s, %s, %s, %s") );
-
         next_axp_log_millis = millis() + AXP_LOG_PERIOD;
+
+        if (getAddress() != SINK_ADDRESS) {
+            if (millis() > next_axp_report_millis) {
+                if (report_axp_to(SINK_ADDRESS) == false) {
+                    term_println("[AXP] Reporting failed!");
+                }
+                next_axp_report_millis = millis() + AXP_REPORT_PERIOD;
+            }
+        }
     }
 }
 

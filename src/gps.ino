@@ -24,7 +24,6 @@ static uint8_t gps_rx;
 static TinyGPSPlus gps;
 static uint32_t next_gps_stamp_millis;
 static uint32_t next_gps_report_millis;
-static bool gps_updated;
 
 static char str_gps_datetime[20];
 static char str_gps_loc[32];
@@ -49,7 +48,6 @@ void gps_setup(bool do_axp_exist) {
 
     next_gps_stamp_millis = millis();
     next_gps_report_millis = millis() + GPS_REPORT_PERIOD_INIT;
-    gps_updated = false;
 }
 
 // ----------------------------------------------------------------------------

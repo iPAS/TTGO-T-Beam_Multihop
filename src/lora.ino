@@ -110,6 +110,17 @@ bool report_gps_to(Address sink) {
 }
 
 // ----------------------------------------------------------------------------
+bool report_axp_to(Address sink) {
+    char *str = axp_update_str("*%s\n%s\n%s\n%s\n");
+    uint8_t cnt = strlen(str);
+    term_printf("[LORA] Report AXP node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_print(str);
+    term_println("[/LORA]");
+
+    return flood_send_to(SINK_ADDRESS, str, cnt);
+}
+
+// ----------------------------------------------------------------------------
 void on_flood_receive(void *message, uint8_t len) {
     RoutingHeader *hdr = (RoutingHeader*)message;
     uint8_t *data = &((uint8_t *)message)[sizeof(RoutingHeader)];
