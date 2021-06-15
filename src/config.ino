@@ -1,10 +1,6 @@
-// #include <EEPROM.h>
-// EEPROM.write(address, value);
-// EEPROM.update(address, value);
-// EEPROM.read(address);
-#include <Preferences.h>
-
 #include "all_headers.h"
+
+#include <Preferences.h>
 
 
 #define PREF_NAME_SPACE "LORA_RELAY"  // Max 15 chars

@@ -1,7 +1,7 @@
+#include "all_headers.h"
+
 #include <strings.h>
 #include <TinyGPS++.h>
-
-#include "all_headers.h"
 
 
 #define SERIAL_GPS Serial1

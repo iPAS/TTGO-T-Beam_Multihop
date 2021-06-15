@@ -1,11 +1,18 @@
 /**
- * 
+ * @file Main.ino
+ * @brief LoRa Relay Implementation on T-Beam ESP32 Platform with Motelib Flood Routing Support
+ *
+ * @author Pasakorn Tiwatthanont
+ *
  * Serial as DEBUG & CLI
  * Serial1 as GPS
  * Serial2 as VTube connected with RTU
  * BT as data log
- * 
+ *
  */
+#include "all_headers.h"
+#include "flood.h"
+
 #include "images.h"  // Note on a bug: arduino-vscode cannot find the header
                      //   named with alphabet comming before the main .ino file.
 #include <strings.h>
@@ -20,8 +27,6 @@
 #include <TinyGPS++.h>
 #include <SimpleCLI.h>
 
-#include "all_headers.h"
-#include "flood.h"
 
 // ---------- Setup ----------
 void setup() {

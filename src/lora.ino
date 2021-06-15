@@ -1,13 +1,12 @@
-#include <strings.h>
-
-#include <SSD1306.h>
-
-#include <SPI.h>
-#include <LoRa.h>
-
 #include "all_headers.h"
 #include "neighbor.h"
 #include "flood.h"
+
+#include <strings.h>
+
+#include <SSD1306.h>
+#include <SPI.h>
+#include <LoRa.h>
 
 
 // Computed with https://www.thethingsnetwork.org/airtime-calculator

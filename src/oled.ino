@@ -1,6 +1,6 @@
-#include <SSD1306.h>
-
 #include "all_headers.h"
+
+#include <SSD1306.h>
 
 
 static SSD1306 display(0x3C, 21, 22);

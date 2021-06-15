@@ -1,8 +1,8 @@
-#include <strings.h>
-#include <SimpleCLI.h>
-
 #include "all_headers.h"
 #include "flood.h"
+
+#include <strings.h>
+#include <SimpleCLI.h>
 
 
 SimpleCLI cli;
