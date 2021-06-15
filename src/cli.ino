@@ -12,6 +12,7 @@ static Command cmd_vtube;
 static Command cmd_flood_send;
 static Command cmd_status_report;
 static Command cmd_gps_report;
+static Command cmd_axp_report;
 
 // ----------------------------------------------------------------------------
 static boolean is_numeric(String str) {
@@ -79,6 +80,7 @@ void on_cmd_help(cmd *c) {
         "\tsend [sink_id] -- send to sink for testing [default 0]",
         "\tstatus [sink_id] -- send status report to sink [default 0]",
         "\tgps [sink_id] -- send GPS report to sink [default 0]",
+        "\taxp [sink_id] -- send AXP report to sink [default 0]",
     };
     uint8_t i;
     Command cmd(c);
@@ -185,6 +187,27 @@ void on_cmd_gps_report(cmd *c) {
 }
 
 // ----------------------------------------------------------------------------
+void on_cmd_axp_report(cmd *c) {
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] axp: illegal sink id");  // Illegal id
+    }
+    else {
+        axp_update_data();
+        if (report_axp_to(id)) {
+            term_printf("[CLI] axp: report to %d", id);
+        }
+        else {
+            term_println("[CLI] axp: report_axp_to() failed!");
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 void cli_setup() {
     Serial.begin(115200);
     while (!Serial)
@@ -202,6 +225,8 @@ void cli_setup() {
     cmd_status_report.addPositionalArgument("id", "0");  // Default value is "0"
     cmd_gps_report = cli.addCommand("gps", on_cmd_gps_report);
     cmd_gps_report.addPositionalArgument("id", "0");  // Default value is "0"
+    cmd_axp_report = cli.addCommand("axp", on_cmd_axp_report);
+    cmd_axp_report.addPositionalArgument("id", "0");  // Default value is "0"
 }
 
 // ----------------------------------------------------------------------------
