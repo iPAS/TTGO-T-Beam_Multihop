@@ -1,13 +1,12 @@
-#include <strings.h>
-
-#include <SSD1306.h>
-
-#include <SPI.h>
-#include <LoRa.h>
-
 #include "all_headers.h"
 #include "neighbor.h"
 #include "flood.h"
+
+#include <strings.h>
+
+#include <SSD1306.h>
+#include <SPI.h>
+#include <LoRa.h>
 
 
 // Computed with https://www.thethingsnetwork.org/airtime-calculator
@@ -71,20 +70,28 @@ bool report_status_to(Address sink) {
     char *p = buf;
     uint8_t i, cnt;
     neighbor_t *nb = neighbor_table();
-    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++)
-    {
-        if (nb->addr != BROADCAST_ADDR)
-        {
-            uint8_t len = snprintf(p, sizeof(buf)-cnt, "#%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
+    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++) {
+        if (nb->addr != BROADCAST_ADDR) {
+            uint8_t len;
+
+            if (cnt == 0) {
+                len = snprintf(p, sizeof(buf)-cnt, "@STS\n");
+                p += len;
+                cnt += len;
+            }
+
+            len = snprintf(p, sizeof(buf)-cnt, "#%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
             p += len;
             cnt += len;
-            if (cnt >= sizeof(buf)-1)
-            {
+            if (cnt >= sizeof(buf)-1) {
                 sprintf(p-3, "...");  // 'more' indicator
                 break;
             }
         }
     }
+
+    if (cnt == 0)
+        return true;  // No any relation data
 
     term_printf("[LORA] Report status node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(buf);
@@ -98,9 +105,22 @@ bool report_status_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_gps_to(Address sink) {
-    char *str = gps_update_str("%s\n%s\n%s\n");
+    char *str = gps_update_str("@GPS %s\n%s\n%s\n");
     uint8_t cnt = strlen(str);
+
     term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_print(str);
+    term_println("[/LORA]");
+
+    return flood_send_to(SINK_ADDRESS, str, cnt);
+}
+
+// ----------------------------------------------------------------------------
+bool report_axp_to(Address sink) {
+    char *str = axp_update_str("@AXP %s\n%s\n%s\n");
+    uint8_t cnt = strlen(str);
+
+    term_printf("[LORA] Report AXP node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(str);
     term_println("[/LORA]");
 
