@@ -70,15 +70,20 @@ bool report_status_to(Address sink) {
     char *p = buf;
     uint8_t i, cnt;
     neighbor_t *nb = neighbor_table();
-    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++)
-    {
-        if (nb->addr != BROADCAST_ADDR)
-        {
-            uint8_t len = snprintf(p, sizeof(buf)-cnt, "#%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
+    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++) {
+        if (nb->addr != BROADCAST_ADDR) {
+            uint8_t len;
+
+            if (cnt == 0) {
+                len = snprintf(p, sizeof(buf)-cnt, "@STS\n");
+                p += len;
+                cnt += len;
+            }
+
+            len = snprintf(p, sizeof(buf)-cnt, "#%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
             p += len;
             cnt += len;
-            if (cnt >= sizeof(buf)-1)
-            {
+            if (cnt >= sizeof(buf)-1) {
                 sprintf(p-3, "...");  // 'more' indicator
                 break;
             }
@@ -100,7 +105,7 @@ bool report_status_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_gps_to(Address sink) {
-    char *str = gps_update_str("@%s\n%s\n%s\n");
+    char *str = gps_update_str("@GPS %s\n%s\n%s\n");
     uint8_t cnt = strlen(str);
     term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(str);
@@ -111,7 +116,8 @@ bool report_gps_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_axp_to(Address sink) {
-    char *str = axp_update_str("*%s\n%s\n%s\n%s\n");
+    // char *str = axp_update_str("X %s\n%s\n%s\n%s\n");
+    char *str = axp_update_str("@AXP %s\n%s\n%s\n");
     uint8_t cnt = strlen(str);
     term_printf("[LORA] Report AXP node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(str);

@@ -63,7 +63,7 @@ void gps_decoding_process() {
         if (gps.satellites.isValid() && gps.time.isUpdated() && gps.location.isValid()) {
             // Example: http://arduiniana.org/libraries/tinygpsplus/
             gps_update_data();
-            term_println( gps_update_str("[GPS] %s, %s, %s") );
+            term_println( gps_update_str("[GPS] %s, (%s), Sat:%s") );
         }
         next_gps_stamp_millis = millis() + GPS_STAMP_PERIOD;
 
@@ -83,9 +83,9 @@ void gps_update_data() {
     snprintf(str_gps_datetime, sizeof(str_gps_datetime), "%02u-%02u-%04u %02u:%02u:%02u",
         gps.date.day(),  gps.date.month(),  gps.date.year(),
         gps.time.hour(), gps.time.minute(), gps.time.second());
-    snprintf(str_gps_loc, sizeof(str_gps_loc), "(%f,%f,%.2f)",
+    snprintf(str_gps_loc, sizeof(str_gps_loc), "%.6f, %.6f, %.2f",
         gps.location.lat(), gps.location.lng(), gps.altitude.meters());
-    snprintf(str_gps_quality, sizeof(str_gps_quality), "Sat:%d",
+    snprintf(str_gps_quality, sizeof(str_gps_quality), "%d",
         gps.satellites.value());
 }
 
