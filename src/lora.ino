@@ -85,6 +85,9 @@ bool report_status_to(Address sink) {
         }
     }
 
+    if (cnt == 0)
+        return true;  // No any relation data
+
     term_printf("[LORA] Report status node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(buf);
     term_println("[/LORA]");
@@ -97,7 +100,7 @@ bool report_status_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_gps_to(Address sink) {
-    char *str = gps_update_str("%s\n%s\n%s\n");
+    char *str = gps_update_str("@%s\n%s\n%s\n");
     uint8_t cnt = strlen(str);
     term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(str);
