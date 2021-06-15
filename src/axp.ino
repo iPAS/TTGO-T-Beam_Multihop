@@ -1,5 +1,7 @@
 #include "all_headers.h"
 
+#include <strings.h>
+
 #include <axp20x.h>
 
 
@@ -11,7 +13,12 @@
 #define AXP_IRQ 35
 
 static AXP20X_Class axp;
-static uint32_t next_log_millis;
+static uint32_t next_axp_log_millis;
+
+static char str_axp_temp[10];
+static char str_axp_acin[20];
+static char str_axp_bus[20];
+static char str_axp_bat[40];
 
 // ----------------------------------------------------------------------------
 bool axp_setup() {
@@ -37,41 +44,41 @@ bool axp_setup() {
 
         // axp.setChgLEDMode(AXP20X_LED_BLINK_1HZ);
 
+        axp.ClearCoulombcounter();
+        axp.EnableCoulombcounter();
+
         is_tbeam_version_less_v1 = false;
     }
 
-    next_log_millis = millis() + AXP_LOG_PERIOD_INIT;
+    next_axp_log_millis = millis() + AXP_LOG_PERIOD_INIT;
 
     return is_tbeam_version_less_v1;
 }
 
 // ----------------------------------------------------------------------------
 void axp_logging_process() {
-    if (millis() > next_log_millis) {
-        axp.getTemp();
-    // axp.getAcinVoltage();
-    // axp.getAcinCurrent();
-    // axp.getVbusVoltage();
-    // axp.getVbusCurrent();
+    if (millis() > next_axp_log_millis) {
+        axp_update_data();
+        term_println( axp_update_str("[AXP] %s, %s, %s, %s") );
 
-    // float       getBattInpower(void);
-    // float       getBattVoltage(void);
-    // float       getBattChargeCurrent(void);
-    // float       getBattDischargeCurrent(void);
-    // uint32_t    getBattChargeCoulomb(void);
-    // uint32_t    getBattDischargeCoulomb(void);
-
-        next_log_millis = millis() + AXP_LOG_PERIOD;
+        next_axp_log_millis = millis() + AXP_LOG_PERIOD;
     }
 }
 
 // ----------------------------------------------------------------------------
 void axp_update_data() {
-    // snprintf(str_gps_datetime, sizeof(str_gps_datetime), "%02u-%02u-%04u %02u:%02u:%02u",
-    //     gps.date.day(),  gps.date.month(),  gps.date.year(),
-    //     gps.time.hour(), gps.time.minute(), gps.time.second());
-    // snprintf(str_gps_loc, sizeof(str_gps_loc), "(%f,%f,%.2f)",
-    //     gps.location.lat(), gps.location.lng(), gps.altitude.meters());
-    // snprintf(str_gps_quality, sizeof(str_gps_quality), "Sat:%d",
-    //     gps.satellites.value());
+    snprintf(str_axp_temp, sizeof(str_axp_temp), "%.2f℃", axp.getTemp());
+    snprintf(str_axp_acin, sizeof(str_axp_acin), "(%.3fV,%.3fA)", axp.getAcinVoltage(), axp.getAcinCurrent());
+    snprintf(str_axp_bus, sizeof(str_axp_bus), "(%.3fV,%.3fA)", axp.getVbusVoltage(), axp.getVbusCurrent());
+    snprintf(str_axp_bat, sizeof(str_axp_bat), "(%.3fW,%.3fV,%.3fA,%.3fA)",
+        axp.getBattInpower(), axp.getBattVoltage(), axp.getBattChargeCurrent(), axp.getBattDischargeCurrent());
+    // axp.getBattChargeCoulomb();
+    // axp.getBattDischargeCoulomb();
+}
+
+// ----------------------------------------------------------------------------
+char *axp_update_str(const char *fmt) {
+    static char str[sizeof(str_axp_temp) + sizeof(str_axp_acin) + sizeof(str_axp_bus) + sizeof(str_axp_bat) + 10];
+    snprintf(str, sizeof(str), fmt, str_axp_temp, str_axp_acin, str_axp_bus, str_axp_bat);
+    return str;
 }
