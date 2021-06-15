@@ -31,13 +31,14 @@ static char str_gps_loc[32];
 static char str_gps_quality[10];
 
 // ----------------------------------------------------------------------------
-void gps_setup(bool is_tbeam_version_less_v1) {
-    if (is_tbeam_version_less_v1) {
-        gps_tx = GPS_TX_V07;
-        gps_rx = GPS_RX_V07;
-    } else {
+void gps_setup(bool do_axp_exist) {
+    if (do_axp_exist) {
         gps_tx = GPS_TX_V10;
         gps_rx = GPS_RX_V10;
+    }
+    else {
+        gps_tx = GPS_TX_V07;
+        gps_rx = GPS_RX_V07;
     }
 
     SERIAL_GPS.begin(GPS_BAUDRATE, SERIAL_8N1, gps_rx, gps_tx);

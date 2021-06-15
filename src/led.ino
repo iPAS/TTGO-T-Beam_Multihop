@@ -10,9 +10,9 @@
 static uint8_t led_io, led_active;
 
 // ----------------------------------------------------------------------------
-void led_setup(bool is_tbeam_version_less_v1) {
-    led_io = (is_tbeam_version_less_v1)? LED_IO_V07 : LED_IO_V10;
-    led_active = (is_tbeam_version_less_v1)? HIGH : LOW;
+void led_setup(bool do_axp_exist) {
+    led_io = (do_axp_exist)? LED_IO_V10 : LED_IO_V07;
+    led_active = (do_axp_exist)? LOW : HIGH;
     pinMode(led_io, OUTPUT);
     digitalWrite(led_io, !led_active);
 }

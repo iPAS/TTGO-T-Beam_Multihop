@@ -28,19 +28,21 @@
 #include <SimpleCLI.h>
 
 
+static bool do_axp_exist;  // T-Beam v0.7, early version, does't has AXP192 installed.
+
 // ---------- Setup ----------
 void setup() {
     config_setup(); // Load configuration
     cli_setup();    // CLI
     oled_setup();   // OLED
 
-    bool is_tbeam_version_less_v1 = axp_setup();  // Init axp20x and return T-Beam Version
+    do_axp_exist = axp_setup();  // Init axp20x and return T-Beam Version
 
-    led_setup(is_tbeam_version_less_v1);  // LED
-    lora_setup();   // LoRa
-    gps_setup(is_tbeam_version_less_v1);  // GPS
+    led_setup(do_axp_exist);    // LED
+    lora_setup();               // LoRa
+    gps_setup(do_axp_exist);    // GPS
 
-    vtube_setup();  // Virtual Tube connected to weather station
+    vtube_setup();              // Virtual Tube connected to weather station
 
 
     // ----------------
