@@ -63,6 +63,10 @@ void loop() {
 
     lora_reporting_process();  // Report node status to #0
 
+    if (do_axp_exist)
+        axp_logging_process();  // Report energy usage on the node.
+
+
     // ----------------
     // XXX: For testing only
     // ----------------
