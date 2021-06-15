@@ -107,6 +107,7 @@ bool report_status_to(Address sink) {
 bool report_gps_to(Address sink) {
     char *str = gps_update_str("@GPS %s\n%s\n%s\n");
     uint8_t cnt = strlen(str);
+
     term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(str);
     term_println("[/LORA]");
@@ -116,9 +117,9 @@ bool report_gps_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_axp_to(Address sink) {
-    // char *str = axp_update_str("X %s\n%s\n%s\n%s\n");
     char *str = axp_update_str("@AXP %s\n%s\n%s\n");
     uint8_t cnt = strlen(str);
+
     term_printf("[LORA] Report AXP node %d to %d, %d bytes:", getAddress(), sink, cnt);
     term_print(str);
     term_println("[/LORA]");

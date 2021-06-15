@@ -18,8 +18,8 @@ static uint8_t gps_rx;
 #define GPS_RX_V10 34
 
 #define GPS_STAMP_PERIOD 60000 * 1  // One minutes
+#define GPS_REPORT_PERIOD_INIT 60000
 #define GPS_REPORT_PERIOD 60000 * 10  // Five minutes
-#define GPS_REPORT_PERIOD_INIT 60000 * 1
 
 static TinyGPSPlus gps;
 static uint32_t next_gps_stamp_millis;
