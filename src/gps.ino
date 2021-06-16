@@ -25,9 +25,9 @@ static TinyGPSPlus gps;
 static uint32_t next_gps_stamp_millis;
 static uint32_t next_gps_report_millis;
 
-static char str_gps_datetime[20];
-static char str_gps_loc[32];
-static char str_gps_quality[10];
+static char str_gps_datetime[20] = {'\0'};
+static char str_gps_loc[32] = {'\0'};
+static char str_gps_quality[10] = {'\0'};
 
 // ----------------------------------------------------------------------------
 void gps_setup(bool do_axp_exist) {
@@ -91,6 +91,8 @@ void gps_update_data() {
 
 // ----------------------------------------------------------------------------
 char *gps_update_str(const char *fmt) {
+    if (str_gps_datetime[0] == '\0' || str_gps_loc[0] == '\0' || str_gps_quality[0] == '\0') return NULL;
+
     static char str[sizeof(str_gps_datetime) + sizeof(str_gps_loc) + sizeof(str_gps_quality) + 10];
     snprintf(str, sizeof(str), fmt, str_gps_datetime, str_gps_loc, str_gps_quality);
     return str;

@@ -17,9 +17,9 @@ static AXP20X_Class axp;
 static uint32_t next_axp_log_millis;
 static uint32_t next_axp_report_millis;
 
-static char str_axp_temp[10];
-static char str_axp_bus[20];
-static char str_axp_bat[60];
+static char str_axp_temp[10] = {'\0'};
+static char str_axp_bus[20] = {'\0'};
+static char str_axp_bat[60] = {'\0'};
 
 // ----------------------------------------------------------------------------
 bool axp_setup() {
@@ -113,6 +113,8 @@ void axp_update_data() {
 
 // ----------------------------------------------------------------------------
 char *axp_update_str(const char *fmt) {
+    if (str_axp_temp[0] == '\0' || str_axp_bus[0] == '\0' || str_axp_bat[0] == '\0') return NULL;
+
     static char str[sizeof(str_axp_temp) + sizeof(str_axp_bus) + sizeof(str_axp_bat) + 10];
     snprintf(str, sizeof(str), fmt, str_axp_temp, str_axp_bus, str_axp_bat);
     return str;
