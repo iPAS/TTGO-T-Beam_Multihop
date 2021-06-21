@@ -1,0 +1,5 @@
+check process log_serial with pidfile /home/pi/log_serial/log_serial.pid
+	every 10 cycles
+	start program = "/home/pi/log_serial/log_serial.sh start" with timeout 60 seconds
+	stop program = "/home/pi/log_serial/log_serial.sh stop"
+

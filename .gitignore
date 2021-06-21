@@ -2,3 +2,5 @@
 **/.vscode/ipch
 OLED_LoRa_Receive/
 OLED_LoRa_Sender/
+tools/log_serial/log/
+**/*.pid
