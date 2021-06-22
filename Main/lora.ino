@@ -38,33 +38,6 @@ void on_neighbor_update(neighbor_t *nb) {
 }
 
 // ----------------------------------------------------------------------------
-bool send_status_to(Address sink) {
-    neighbor_status_t statuses[MAX_NEIGHBOR];
-    neighbor_status_t *sts = statuses;
-    neighbor_t *nb = neighbor_table();
-    uint8_t i, cnt;
-    for (i = 0, cnt = 0; i < MAX_NEIGHBOR; i++, nb++)
-    {
-        if (nb->addr != BROADCAST_ADDR)
-        {
-            sts->addr = nb->addr;
-            sts->rssi = nb->rssi;
-            sts->snr = nb->snr;
-            sts++;
-            cnt++;
-        }
-    }
-    cnt *= sizeof(neighbor_status_t);
-
-    term_printf("[LORA] Report status node %d to %d, %d bytes", getAddress(), sink, cnt);
-
-    if (getAddress() == sink)
-        return true;  // 'sink' needs none transaction.
-
-    return flood_send_to(sink, statuses, cnt);
-}
-
-// ----------------------------------------------------------------------------
 bool report_status_to(Address sink) {
     char buf[100];  // Guess max payload as per LoRa packet. Max = sizeof(buf)-1
     char *p = buf;
@@ -75,16 +48,16 @@ bool report_status_to(Address sink) {
             uint8_t len;
 
             if (cnt == 0) {
-                len = snprintf(p, sizeof(buf)-cnt, "@STS\n");
+                len = snprintf(p, sizeof(buf)-cnt, ">STS\n");
                 p += len;
                 cnt += len;
             }
 
-            len = snprintf(p, sizeof(buf)-cnt, "#%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
+            len = snprintf(p, sizeof(buf)-cnt, " @%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
             p += len;
             cnt += len;
             if (cnt >= sizeof(buf)-1) {
-                sprintf(p-3, "...");  // 'more' indicator
+                sprintf(p-3, " ...");  // 'more' indicator
                 break;
             }
         }
@@ -93,7 +66,7 @@ bool report_status_to(Address sink) {
     if (cnt == 0)
         return true;  // No any relation data
 
-    term_printf("[LORA] Report status node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_printf("[LORA] @%d report:%d status to @%d:", getAddress(), cnt, sink);
     term_print(buf);
     term_println("[/LORA]");
 
@@ -105,14 +78,14 @@ bool report_status_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_gps_to(Address sink) {
-    char *str = gps_update_str("@GPS %s\n%s\n%s\n");
+    char *str = gps_update_str(">GPS\n %s\n %s\n %s\n");
     if (str == NULL) {
         term_println("[LORA] report_gps_to(): gps_update_str() return NULL!");
         return false;
     }
     uint8_t cnt = strlen(str);
 
-    term_printf("[LORA] Report GPS node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_printf("[LORA] @%d report:%d GPS to @%d:", getAddress(), cnt, sink);
     term_print(str);
     term_println("[/LORA]");
 
@@ -121,14 +94,14 @@ bool report_gps_to(Address sink) {
 
 // ----------------------------------------------------------------------------
 bool report_axp_to(Address sink) {
-    char *str = axp_update_str("@AXP %s\n%s\n%s\n");
+    char *str = axp_update_str(">AXP\n %s\n %s\n %s\n");
     if (str == NULL) {
         term_println("[LORA] report_axp_to(): axp_update_str() return NULL!");
         return false;
     }
     uint8_t cnt = strlen(str);
 
-    term_printf("[LORA] Report AXP node %d to %d, %d bytes:", getAddress(), sink, cnt);
+    term_printf("[LORA] @%d report:%d AXP to @%d:", getAddress(), cnt, sink);
     term_print(str);
     term_println("[/LORA]");
 
@@ -182,7 +155,6 @@ void lora_setup() {
 // ----------------------------------------------------------------------------
 void lora_reporting_process() {
     if (millis() > next_report_millis) {
-        // send_status_to(SINK_ADDRESS);  // XXX: as binary
         report_status_to(SINK_ADDRESS);
         next_report_millis = millis() + LORA_REPORT_PERIOD;
     }
