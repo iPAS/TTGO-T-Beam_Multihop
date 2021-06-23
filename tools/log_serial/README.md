@@ -6,6 +6,6 @@
 	- `> sudo service monit restart`
 	- `> sudo monit start log_serial`
 
-3. Go to /etc/cron.daily, then:
-	- `> ln -sf /home/pi/log_serial/log_upload.sh log_upload`
-
+3. Setup uploading schedule:
+	- `> crontab -e`
+	- Enter `0 0 * * * /home/pi/log_serial/log_upload.sh`

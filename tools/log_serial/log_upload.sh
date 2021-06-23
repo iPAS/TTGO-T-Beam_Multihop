@@ -2,14 +2,18 @@
 
 pushd .
 cd /home/pi/log_serial
-
+conf_f=/home/pi/.dropbox_uploader
 current_accessed_log_file=$(sudo lsof -p `cat log_serial.pid` | grep '/.*\.log' -o)
 cur_f=$(basename $current_accessed_log_file)
+#echo $cur_f
 
 for f in `ls log/*.log`; do
 	f=$(basename $f)
+
 	if [ "${f}" != "${cur_f}" ]; then
-		dropbox_uploader/dropbox_uploader.sh upload "$f" log/ >&2
+		#echo "log: $f"
+		f="log/$f"
+		dropbox_uploader/dropbox_uploader.sh -f ${conf_f} upload "$f" log/ 
 		trash "$f"
 	fi
 done
