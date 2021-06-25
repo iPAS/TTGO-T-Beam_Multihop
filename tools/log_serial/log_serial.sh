@@ -29,7 +29,13 @@ case $1 in
 start)
 	grabserial  ${serial_options}  --timeformat="${stamp_format}" --systime  ${log_file}  ${rotate}  --quiet  &
 	#echo $$ > ${pid_file}
-	echo $! > ${pid_file}
+	pid=$!
+	running=$(ps -p ${pid} | grep ${pid} -o)
+	if [ "${running}" == "${pid}" ]; then
+		echo ${pid} > ${pid_file}
+	else
+		exit 1
+	fi
 	;;
 
 run)
@@ -49,5 +55,6 @@ status)
 	exit 1
 	;;
 esac
+
 exit 0
 
