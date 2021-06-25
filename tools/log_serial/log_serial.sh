@@ -27,6 +27,7 @@ pid_file="${here}/${script_name}.pid"
 
 case $1 in
 start)
+	[[ ! -d "${log_dir}" ]] && mkdir -p "${log_dir}" 
 	grabserial  ${serial_options}  --timeformat="${stamp_format}" --systime  ${log_file}  ${rotate}  --quiet  &
 	#echo $$ > ${pid_file}
 	pid=$!
