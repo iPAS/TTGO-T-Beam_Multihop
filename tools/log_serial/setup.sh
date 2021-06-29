@@ -1,4 +1,4 @@
-sudo apt install git vim screen virtualenv virtualenvwrapper trash-cli monit
+sudo apt install git vim screen virtualenv virtualenvwrapper trash-cli monit lsof
 
 mkvirtualenv deep --python=/home/pi/.virtualenvs/deep/bin/python3
 pip install grabserial
