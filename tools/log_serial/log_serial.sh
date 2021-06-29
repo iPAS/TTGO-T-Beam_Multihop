@@ -40,6 +40,7 @@ start)
 	;;
 
 run)
+	[[ ! -d "${log_dir}" ]] && mkdir -p "${log_dir}" 
 	grabserial  ${serial_options}  --timeformat="${stamp_format}" --systime  ${log_file}  ${rotate}
 	;;
 
