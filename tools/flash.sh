@@ -25,5 +25,13 @@ function flash {
 
 ports=`seq 0 2`
 for p in ${ports}; do
-    flash /dev/ttyUSB${p}
+    dev=/dev/ttyUSB${p}
+    echo "--------- Flash ${dev} ---------"
+    if [ -c "${dev}" ]; then
+        flash "${dev}" 
+    else
+        echo "${dev} does not exist!"
+    fi
+    echo
 done
+
