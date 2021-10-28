@@ -1,8 +1,8 @@
 #bin/bash
 
-TARGET_DIR=log
+log_dir=log
 
-found_records=$(grep '\[D\]' -r --no-filename "${TARGET_DIR}" | sort -t\  --version-sort -k8,8)
+found_records=$(grep '\[D\]' -r --no-filename "${log_dir}" | sort -t\  --version-sort -k8,8)
 
 nodes=( $(echo "${found_records}" | cut -d\  -f 8 | uniq | sed 's/@//' | tr '\n' ' ') )
 
