@@ -1,5 +1,5 @@
 1. At /home/pi, `> ln -sf /home/pi/TTGO-T-Beam_Multihop/tools/log_serial`.
-  So, __/home/pi/log\_serial__ exist.
+  So, __/home/pi/log\_serial__ will exist.
 
 2. Go to /etc/monit/conf.d, then:
 	- `> ln -sf /home/pi/log_serial/log_serial.monit`
