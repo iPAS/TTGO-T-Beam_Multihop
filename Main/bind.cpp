@@ -141,7 +141,7 @@ void test_ztimer()
 /******************************************************************************
  * Radio
  */
-static Address node_address = BROADCAST_ADDR;
+static volatile Address node_address = BROADCAST_ADDR;
 
 static RadioRxHandler radioRxHandler;
 static QueueHandle_t handleLoRaRecvQueue;
