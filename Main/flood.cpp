@@ -79,6 +79,7 @@ void on_receive(Address source, MessageType type, void *message, uint8_t len)
                 // Rebroadcast
                 // -----------
                 broadcast(message, len);
+                debug("Rebroadcast seqNo %d from node %d to %d", hdr->seqNo, source, hdr->finalSink);
             }
 
         }
