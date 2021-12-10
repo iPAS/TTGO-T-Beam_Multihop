@@ -122,6 +122,18 @@ void on_flood_receive(void *message, uint8_t len) {
         term_print((char)data[i]);
     }
     term_println("[/D]");
+
+
+    // If coming from "ping" CLI
+    if (strncmp((const char *)data, "ping\n", data_len) == 0) {
+        const char msg[] = "pong\n";
+        if (flood_send_to(hdr->originSource, msg, sizeof(msg)-1)) {
+            term_printf("[LORA] pong: back to %d", hdr->originSource);
+        }
+        else {
+            term_println("[LORA] pong: flood_send_to() failed!");
+        }
+    }
 }
 
 // ----------------------------------------------------------------------------
