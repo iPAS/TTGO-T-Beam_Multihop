@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include "bind.h"
+#include "version.h"
 
 
 // ------------

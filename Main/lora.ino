@@ -51,11 +51,16 @@ bool report_status_to(Address sink) {
                 len = snprintf(p, sizeof(buf)-cnt, ">STS\n");
                 p += len;
                 cnt += len;
+
+                len = snprintf(p, sizeof(buf)-cnt, " GIT.%s\n", __GIT_SHA1_ID__);
+                p += len;
+                cnt += len;
             }
 
             len = snprintf(p, sizeof(buf)-cnt, " @%d:%d,%.2f\n", nb->addr, nb->rssi, nb->snr);
             p += len;
             cnt += len;
+
             if (cnt >= sizeof(buf)-1) {
                 sprintf(p-3, " ...");  // 'more' indicator
                 break;

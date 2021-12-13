@@ -3,5 +3,8 @@
     "configuration": "PSRAM=disabled,FlashFreq=80,UploadSpeed=921600,DebugLevel=error",
     "port": "/dev/ttyUSB0",
     "output": "tmp",
-    "sketch": "Main.ino"
+    "sketch": "Main.ino",
+    "prebuild": "echo '#ifndef __VERSION_H__\n#define __VERSION_H__\n\n\n#define __GIT_SHA1_ID__ \"'$(git rev-parse --short HEAD)'\"\n\n\n#endif  // __GIT_SHA1_ID__'  >  $VSCA_WORKSPACE_DIR/version.h",
+    "postbuild": "#\n# ------------------------------------------------------\n# Please recompile after commit, so getting the real GIT id!!\n# ------------------------------------------------------",
+    "intelliSenseGen": "global"
 }
