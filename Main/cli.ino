@@ -14,6 +14,18 @@ static Command cmd_status_report;
 static Command cmd_gps_report;
 static Command cmd_axp_report;
 static Command cmd_flood_ping;
+static Command cmd_reset;
+
+const char * remote_commands[] = {
+    ">>> hello\n",
+    ">>> ping\n",
+    ">>> reset\n",
+};
+const char * remote_responses[] = {
+    "",
+    "+++ pong\n",
+    "",
+};
 
 // ----------------------------------------------------------------------------
 static boolean is_numeric(String str) {
@@ -83,6 +95,7 @@ void on_cmd_help(cmd *c) {
         "\tgps [sink_id] -- send GPS report to sink [default 0]",
         "\taxp [sink_id] -- send AXP report to sink [default 0]",
         "\tping [sink_id] -- ping to sink for testing [default 0]",
+        "\treset [sink_id] -- reset the sink [default 0]",
     };
     uint8_t i;
     Command cmd(c);
@@ -137,9 +150,8 @@ void on_cmd_flood_send(cmd *c) {
         term_println("[CLI] send: illegal sink id");  // Illegal id
     }
     else {
-        const char msg[] = "hello\n";
-        if (flood_send_to(id, msg, sizeof(msg)-1)) {
-            term_printf("[CLI] send: '%s' to %d", msg, id);
+        if (flood_send_to(id, REMOTE_CMD_HELLO, strlen(REMOTE_CMD_HELLO))) {
+            term_printf("[CLI] send: hello to %d", id);
         }
         else {
             term_println("[CLI] send: flood_send_to() failed!");
@@ -220,12 +232,31 @@ void on_cmd_flood_ping(cmd *c) {
         term_println("[CLI] ping: illegal sink id");  // Illegal id
     }
     else {
-        const char msg[] = "ping\n";
-        if (flood_send_to(id, msg, sizeof(msg)-1)) {
-            term_printf("[CLI] ping: '%s' to %d", msg, id);
+        if (flood_send_to(id, REMOTE_CMD_PING, strlen(REMOTE_CMD_PING))) {
+            term_printf("[CLI] ping: to %d", id);
         }
         else {
             term_println("[CLI] ping: flood_send_to() failed!");
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+void on_cmd_reset(cmd *c) {
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] reset: illegal sink id");  // Illegal id
+    }
+    else {
+        if (flood_send_to(id, REMOTE_CMD_RESET, strlen(REMOTE_CMD_RESET))) {
+            term_printf("[CLI] reset: to %d", id);
+        }
+        else {
+            term_println("[CLI] reset: flood_send_to() failed!");
         }
     }
 }
@@ -252,6 +283,8 @@ void cli_setup() {
     cmd_axp_report.addPositionalArgument("id", "0");  // Default value is "0"
     cmd_flood_ping = cli.addCommand("ping", on_cmd_flood_ping);
     cmd_flood_ping.addPositionalArgument("id", "0");  // Default value is "0"
+    cmd_reset = cli.addCommand("reset", on_cmd_reset);
+    cmd_reset.addPositionalArgument("id", "0");  // Default value is "0"
 }
 
 // ----------------------------------------------------------------------------
