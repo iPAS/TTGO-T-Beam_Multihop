@@ -14,6 +14,7 @@ static Command cmd_status_report;
 static Command cmd_gps_report;
 static Command cmd_axp_report;
 static Command cmd_flood_ping;
+static Command cmd_reset;
 
 const char * remote_commands[] = {
     ">>> hello\n",
@@ -240,6 +241,26 @@ void on_cmd_flood_ping(cmd *c) {
 }
 
 // ----------------------------------------------------------------------------
+void on_cmd_reset(cmd *c) {
+    Command cmd(c);
+    Argument arg = cmd.getArgument("id");
+    long id;
+    bool legal_id = extract_id(arg, &id);
+
+    if (legal_id == false) {
+        term_println("[CLI] reset: illegal sink id");  // Illegal id
+    }
+    else {
+        if (flood_send_to(id, REMOTE_CMD_RESET, strlen(REMOTE_CMD_RESET))) {
+            term_printf("[CLI] reset: to %d", id);
+        }
+        else {
+            term_println("[CLI] reset: flood_send_to() failed!");
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
 void cli_setup() {
     Serial.begin(115200);
     while (!Serial)
@@ -261,6 +282,8 @@ void cli_setup() {
     cmd_axp_report.addPositionalArgument("id", "0");  // Default value is "0"
     cmd_flood_ping = cli.addCommand("ping", on_cmd_flood_ping);
     cmd_flood_ping.addPositionalArgument("id", "0");  // Default value is "0"
+    cmd_reset = cli.addCommand("reset", on_cmd_reset);
+    cmd_reset.addPositionalArgument("id", "0");  // Default value is "0"
 }
 
 // ----------------------------------------------------------------------------
