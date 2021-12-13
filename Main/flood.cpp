@@ -63,7 +63,7 @@ void on_receive(Address source, MessageType type, void *message, uint8_t len)
             hist->currSeqNo = hdr->seqNo;
 
             // If we are the final node!! -- the sink, then
-            if (hdr->finalSink == getAddress())
+            if (hdr->finalSink == getAddress()  ||  hdr->finalSink == BROADCAST_ADDR)
             {
                 // -----------------------------------------------
                 // The message finally approaches its destination.
