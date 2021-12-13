@@ -124,15 +124,31 @@ void on_flood_receive(void *message, uint8_t len) {
     term_println("[/D]");
 
 
-    // If coming from "ping" CLI
-    if (strncmp((const char *)data, "ping\n", data_len) == 0) {
-        const char msg[] = "pong\n";
-        if (flood_send_to(hdr->originSource, msg, sizeof(msg)-1)) {
-            term_printf("[LORA] pong: back to %d", hdr->originSource);
+    // Command processing
+    for (i = 0; i < sizeof(remote_commands)/sizeof(remote_commands[0]); i++) {
+        if (strncmp((const char *)data, remote_commands[i], data_len) == 0) {
+
+            if (remote_commands[i] == REMOTE_CMD_HELLO) {
+                // Do nothing
+            }
+            else
+
+            if (remote_commands[i] == REMOTE_CMD_PING) {
+                if (flood_send_to(hdr->originSource, REMOTE_RESP_PING, strlen(REMOTE_RESP_PING))) {
+                    term_printf("[LORA] pong: back to %d", hdr->originSource);
+                }
+                else {
+                    term_println("[LORA] pong: flood_send_to() failed!");
+                }
+            }
+            else
+
+            if (remote_commands[i] == REMOTE_CMD_RESET) {
+                // Do nothing
+            }
+
         }
-        else {
-            term_println("[LORA] pong: flood_send_to() failed!");
-        }
+
     }
 }
 

@@ -15,6 +15,17 @@ static Command cmd_gps_report;
 static Command cmd_axp_report;
 static Command cmd_flood_ping;
 
+const char * remote_commands[] = {
+    ">>> hello\n",
+    ">>> ping\n",
+    ">>> reset\n",
+};
+const char * remote_responses[] = {
+    "",
+    "+++ pong\n",
+    "",
+};
+
 // ----------------------------------------------------------------------------
 static boolean is_numeric(String str) {
     // http://tripsintech.com/arduino-isnumeric-function/
@@ -137,9 +148,8 @@ void on_cmd_flood_send(cmd *c) {
         term_println("[CLI] send: illegal sink id");  // Illegal id
     }
     else {
-        const char msg[] = "hello\n";
-        if (flood_send_to(id, msg, sizeof(msg)-1)) {
-            term_printf("[CLI] send: '%s' to %d", msg, id);
+        if (flood_send_to(id, REMOTE_CMD_HELLO, strlen(REMOTE_CMD_HELLO))) {
+            term_printf("[CLI] send: hello to %d", id);
         }
         else {
             term_println("[CLI] send: flood_send_to() failed!");
@@ -220,9 +230,8 @@ void on_cmd_flood_ping(cmd *c) {
         term_println("[CLI] ping: illegal sink id");  // Illegal id
     }
     else {
-        const char msg[] = "ping\n";
-        if (flood_send_to(id, msg, sizeof(msg)-1)) {
-            term_printf("[CLI] ping: '%s' to %d", msg, id);
+        if (flood_send_to(id, REMOTE_CMD_PING, strlen(REMOTE_CMD_PING))) {
+            term_printf("[CLI] ping: to %d", id);
         }
         else {
             term_println("[CLI] ping: flood_send_to() failed!");
