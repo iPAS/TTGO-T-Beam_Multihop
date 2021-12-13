@@ -95,6 +95,7 @@ void on_cmd_help(cmd *c) {
         "\tgps [sink_id] -- send GPS report to sink [default 0]",
         "\taxp [sink_id] -- send AXP report to sink [default 0]",
         "\tping [sink_id] -- ping to sink for testing [default 0]",
+        "\treset [sink_id] -- reset the sink [default 0]",
     };
     uint8_t i;
     Command cmd(c);
