@@ -145,7 +145,7 @@ void on_flood_receive(void *message, uint8_t len) {
 
             if (remote_commands[i] == REMOTE_CMD_RESET) {
                 term_printf("[LORA] reset: from %d", hdr->originSource);
-                //ESP.restart();  // XXX: delay reset!!
+                ESP.restart();  // TODO: delay reset!!
             }
 
         }
