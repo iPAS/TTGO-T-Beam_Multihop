@@ -52,7 +52,7 @@ bool report_status_to(Address sink) {
                 p += len;
                 cnt += len;
 
-                len = snprintf(p, sizeof(buf)-cnt, " GIT.%s\n", __GIT_SHA1_ID__);
+                len = snprintf(p, sizeof(buf)-cnt, " !%s\n", __GIT_SHA1_ID__);
                 p += len;
                 cnt += len;
             }
