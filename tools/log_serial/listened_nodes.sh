@@ -1,7 +1,5 @@
 #!/usr/bin/bash
 
-log_dir=log
-
 found_records=$(grep '\[D\]' -R --no-filename "${log_dir}" | sort -t' ' --version-sort -k8 -k1,3)
 #echo "$found_records"
 #exit

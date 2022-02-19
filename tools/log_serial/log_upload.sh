@@ -4,8 +4,10 @@ pushd .
 cd /home/pi/log_serial
 conf_f=/home/pi/.dropbox_uploader
 #echo $cur_f
-log_dir=log
-dropbox_dir=log/
+
+source ./stations.sh
+# log_dir=log
+# dropbox_dir=log/
 
 for f in `ls ${log_dir}/*.log`; do
 	f=$(basename $f)

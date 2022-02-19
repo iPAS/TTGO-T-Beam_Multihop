@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 source /home/pi/.virtualenvs/deep/bin/activate
 
 #here="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
@@ -15,7 +15,8 @@ filename_format='lora_relay_%Y-%m-%d_%H:%M:%S.log'
 
 rotate="--endtime=$((log_period_min * 60)) --again"
 
-log_dir=log
+source ./stations.sh
+# log_dir=log
 log_file="--append --output=${here}/${log_dir}/${filename_format}"
 
 script_name=$(basename $0 .sh)
