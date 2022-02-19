@@ -34,4 +34,3 @@ for n in ${nodes[@]}; do
 
     echo ${node_latest_found}
 done
-
