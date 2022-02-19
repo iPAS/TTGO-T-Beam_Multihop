@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./stations.sh
+source ./env.sh
 
 # dropbox_token.conf contains the token without newline
 TOKEN=$(cat dropbox_token.conf)

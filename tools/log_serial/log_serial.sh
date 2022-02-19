@@ -15,7 +15,7 @@ filename_format='lora_relay_%Y-%m-%d_%H:%M:%S.log'
 
 rotate="--endtime=$((log_period_min * 60)) --again"
 
-source ./stations.sh
+source ./env.sh
 # log_dir=log
 log_file="--append --output=${here}/${log_dir}/${filename_format}"
 

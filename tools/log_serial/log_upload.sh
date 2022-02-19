@@ -5,7 +5,7 @@ cd /home/pi/log_serial
 conf_f=/home/pi/.dropbox_uploader
 #echo $cur_f
 
-source ./stations.sh
+source ./env.sh
 # log_dir=log
 # dropbox_dir=log/
 

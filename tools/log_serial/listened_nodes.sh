@@ -10,7 +10,7 @@ nodes=( $(echo "${found_records}" | cut -d' ' -f8 | uniq | sed 's/@//' | tr '\n'
 echo "Found: ${#nodes[@]}"
 #exit
 
-source ./stations.sh
+source ./env.sh
 #for station in "${stations[@]}"; do
 #	station=( $station )
 #	echo ${station[0]}, ${station[1]}
