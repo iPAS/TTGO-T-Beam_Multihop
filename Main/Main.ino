@@ -19,7 +19,6 @@
 
 #include <axp20x.h>
 #include <SSD1306.h>
-#include <BluetoothSerial.h>
 
 #include <SPI.h>
 #include <LoRa.h>
