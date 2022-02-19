@@ -54,7 +54,7 @@ void on_receive(Address source, MessageType type, void *message, uint8_t len)
             )
         {
             // Update parent
-            debug("Change parent from %d to %d on origin %d", hist->parent, source, hdr->originSource);
+            debug("Change parent from %d to %d on origin @%d", hist->parent, source, hdr->originSource);
             hist->parent = source;
             debug("New best hop %d", hdr->hopCount);
 

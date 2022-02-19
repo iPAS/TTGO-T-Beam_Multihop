@@ -2,7 +2,7 @@
 
 log_dir=log
 
-found_records=$(grep 'Change parent' -R --no-filename "${log_dir}" | sort -t' ' --version-sort -k13 -k1,3)
+found_records=$(grep '\[X\] Change parent' -R --no-filename "${log_dir}" | sort -t' ' --version-sort -k13 -k1,3)
 # echo  $"${found_records}"
 # exit
 
@@ -16,7 +16,7 @@ source ./stations.sh
 
 for n in ${nodes[@]}; do
     # echo $n
-    node_sorted_records=$(echo "${found_records}" | grep "origin $n" | sort -t' ' --version-sort -k1,3)
+    node_sorted_records=$(echo "${found_records}" | grep -E "origin @?$n" | sort -t' ' --version-sort -k1,3)
     # echo "$node_sorted_records"
     # exit
 
@@ -27,7 +27,7 @@ for n in ${nodes[@]}; do
         node_id=${station[0]}
         node_name=${station[1]}
         node_latest_found=$(echo ${node_latest_found} |  \
-            sed -E "s/(origin ${node_id})/\\1(${node_name})/" |  \
+            sed -E "s/(origin @?${node_id})/\\1(${node_name})/" |  \
             sed -E "s/(to ${node_id})/\\1(${node_name})/")
         #echo "s/@${node_id}/${node_name}/"
     done
