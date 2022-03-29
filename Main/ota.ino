@@ -39,7 +39,7 @@ void ota_setup() {
         term_println("[OTA] Start updating " + type);
     })
     .onEnd([]() {
-        term_println("\n[OTA] End");
+        term_println("[OTA] End");
     })
     // .onProgress([](unsigned int progress, unsigned int total) {
     //     term_printf("[OTA] .. %u%%\n", (progress / (total / 100)));
