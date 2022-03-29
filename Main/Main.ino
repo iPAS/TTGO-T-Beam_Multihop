@@ -43,6 +43,7 @@ void setup() {
 
     vtube_setup();              // Virtual Tube connected to weather station
 
+    ota_setup();  // OTA
 
     // ----------------
     // XXX: For testing only
@@ -65,6 +66,7 @@ void loop() {
     if (do_axp_exist)
         axp_logging_process();  // Report energy usage on the node.
 
+    ota_process();
 
     // ----------------
     // XXX: For testing only
