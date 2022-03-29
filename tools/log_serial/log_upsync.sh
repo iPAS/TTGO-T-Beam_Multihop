@@ -1,9 +1,11 @@
 #!/bin/bash
 
+source ./env.sh
+
 # dropbox_token.conf contains the token without newline
 TOKEN=$(cat dropbox_token.conf)
 
 python dropbox_upsync.py  \
     --token ${TOKEN}  \
-    "log"  \
-    log --yes
+    "${dropbox_dir}"  \
+    "${log_dir}" --yes
