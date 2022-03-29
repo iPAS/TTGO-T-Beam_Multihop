@@ -3,6 +3,7 @@ stations='
 4968 ป่าเมี่ยง
 4964 กปส
 4948 เจดีย์
+4976 ปชส2
 5340 rogue'
 
 SAVED_IFS=$IFS          # Save current IFS (Internal Field Separator)
