@@ -180,7 +180,7 @@ void lora_setup() {
     flood_set_rx_handler(on_flood_receive);
     neighbor_set_update_handler(on_neighbor_update);
 
-    term_println("[DEBUG] Starting LoRa ok");
+    term_println("[LORA] Starting LoRa ok");
 
     next_report_millis = millis() + LORA_REPORT_PERIOD_INIT;
 }

@@ -41,9 +41,9 @@ void ota_setup() {
     .onEnd([]() {
         term_println("\n[OTA] End");
     })
-    .onProgress([](unsigned int progress, unsigned int total) {
-        term_printf("[OTA] .. %u%%\n", (progress / (total / 100)));
-    })
+    // .onProgress([](unsigned int progress, unsigned int total) {
+    //     term_printf("[OTA] .. %u%%\n", (progress / (total / 100)));
+    // })
     .onError([](ota_error_t error) {
         String msg;
         msg =   (error == OTA_AUTH_ERROR)? "Auth Failed" :

@@ -25,11 +25,11 @@ static char str_axp_bat[60] = {'\0'};
 bool axp_setup() {
     Wire.begin(AXP_SDA, AXP_SCL);
     if (axp.begin(Wire, AXP192_SLAVE_ADDRESS) == AXP_FAIL) {
-        term_println("[DEBUG] Starting AXP192 failed! -- guessing, this is the V0.7");
+        term_println("[AXP] Starting AXP192 failed! -- guessing, this is the V0.7");
         return false;
     }
 
-    term_println("[DEBUG] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
+    term_println("[AXP] Starting AXP192 succeeded! -- guessing, its version >= V1.0");
 
     /*
     DCDC1 0.7-3.5V @ 1200mA max -> OLED // If you turn this off you'll lose comms to the axp192 because the
