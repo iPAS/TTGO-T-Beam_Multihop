@@ -117,11 +117,11 @@
                 "/home/ipas/Workspace/Arduino/libraries/AXP202X_Library/src",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/Wire/src",
                 "/home/ipas/Workspace/Arduino/libraries/ESP8266_and_ESP32_OLED_driver_for_SSD1306_displays/src",
-                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/BluetoothSerial/src",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/SPI/src",
                 "/home/ipas/Workspace/Arduino/libraries/LoRa/src",
                 "/home/ipas/Workspace/Arduino/libraries/TinyGPSPlus/src",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/Preferences/src",
+<<<<<<< Updated upstream
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/xtensa-esp32-elf",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include/c++/5.2.0/backward",
@@ -129,6 +129,19 @@
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/lib/gcc/xtensa-esp32-elf/5.2.0/include-fixed",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/include",
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/tools/xtensa-esp32-elf/xtensa-esp32-elf/sysroot/usr/include"
+=======
+                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/WiFi/src",
+                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/ArduinoOTA/src",
+                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/Update/src",
+                "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/libraries/ESPmDNS/src",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/xtensa-esp32-elf/include/c++/8.4.0",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/xtensa-esp32-elf/include/c++/8.4.0/xtensa-esp32-elf",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/xtensa-esp32-elf/include/c++/8.4.0/backward",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/lib/gcc/xtensa-esp32-elf/8.4.0/include",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/lib/gcc/xtensa-esp32-elf/8.4.0/include-fixed",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/xtensa-esp32-elf/sys-include",
+                "/home/ipas/.arduino15/packages/esp32/tools/xtensa-esp32-elf-gcc/gcc8_4_0-esp-2021r2/xtensa-esp32-elf/include"
+>>>>>>> Stashed changes
             ],
             "forcedInclude": [
                 "/home/ipas/Workspace/Arduino/hardware/espressif/esp32/cores/esp32/Arduino.h"
