@@ -54,6 +54,7 @@ void ota_setup() {
         term_printf("[OTA] Error[%u]: %s", error, msg.c_str());
     });
 
+    ArduinoOTA.setTimeout(20000);
     ArduinoOTA.begin();
 
     term_printf("[OTA] Starting SoftAP ok @ ssid:%s passwd:%s ip:%s",
