@@ -36,18 +36,7 @@ def cleanse_tags(matches, open_tag):
     return matches
 
 
-if __name__ == '__main__':
-    log_dir = args.log_dir
-
-    if not os.path.exists(log_dir):
-        print(f'{log_dir} NOT exists!')
-        sys.exit(-1)
-
-    # Read stations' names
-    with open('stations.dat', 'r') as datfile:
-        stations = { sid: name for (sid, name) in csv.reader(datfile, delimiter = ' ', quotechar = '"') }
-
-    # Extract all log files
+def extract_log(log_dir):
     matches = []
     log_files = sorted(os.listdir(log_dir))
     for log_file in log_files:
@@ -58,7 +47,25 @@ if __name__ == '__main__':
     # matches[0] = '[D]' + matches[0]     # DEBUG: test cleanse_tags()
     matches = cleanse_tags(matches, r'\[D\]')
     # print(len(matches))                 # DEBUG: test cleanse_tags()
+    return matches
 
-    for m in matches:
-        print(m)
-        break
+
+def read_stations_info(filename):
+    with open(filename, 'r') as datfile:
+        stations = { sid: name for (sid, name) in csv.reader(datfile, delimiter = ' ', quotechar = '"') }
+    return stations
+
+
+if __name__ == '__main__':
+    log_dir = args.log_dir
+
+    if not os.path.exists(log_dir):
+        print(f'{log_dir} NOT exists!')
+        sys.exit(-1)
+
+    stations = read_stations_info('stations.dat')  # Read stations' names
+
+    data = extract_log(log_dir)  # Extract all log files
+
+    for d in data:
+        print(d)
