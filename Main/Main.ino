@@ -19,7 +19,6 @@
 
 #include <axp20x.h>
 #include <SSD1306.h>
-#include <BluetoothSerial.h>
 
 #include <SPI.h>
 #include <LoRa.h>
@@ -44,12 +43,15 @@ void setup() {
 
     vtube_setup();              // Virtual Tube connected to weather station
 
+    ota_setup();  // OTA
 
     // ----------------
     // XXX: For testing only
     // ----------------
     // test_ztimer();
     // test_vtube_loopback();
+
+    term_printf("[MAIN] System initial success @ version: %s", __GIT_SHA1_ID__);
 }
 
 // ---------- Main ----------
@@ -66,6 +68,7 @@ void loop() {
     if (do_axp_exist)
         axp_logging_process();  // Report energy usage on the node.
 
+    ota_process();
 
     // ----------------
     // XXX: For testing only
