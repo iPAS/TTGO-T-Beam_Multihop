@@ -50,6 +50,8 @@ void setup() {
     // ----------------
     // test_ztimer();
     // test_vtube_loopback();
+
+    term_printf("[MAIN] System initial success @ version: %s", __GIT_SHA1_ID__);
 }
 
 // ---------- Main ----------
