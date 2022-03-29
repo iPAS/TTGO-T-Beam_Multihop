@@ -4,6 +4,7 @@ import os
 import sys
 import re
 import argparse
+import csv
 
 
 parser = argparse.ArgumentParser(description='Extract data from log file')
@@ -42,6 +43,11 @@ if __name__ == '__main__':
         print(f'{log_dir} NOT exists!')
         sys.exit(-1)
 
+    # Read stations' names
+    with open('stations.dat', 'r') as datfile:
+        stations = { sid: name for (sid, name) in csv.reader(datfile, delimiter = ' ', quotechar = '"') }
+
+    # Extract all log files
     matches = []
     log_files = sorted(os.listdir(log_dir))
     for log_file in log_files:
@@ -55,3 +61,4 @@ if __name__ == '__main__':
 
     for m in matches:
         print(m)
+        break
