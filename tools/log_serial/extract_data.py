@@ -63,7 +63,7 @@ if __name__ == '__main__':
         print(f'{log_dir} NOT exists!')
         sys.exit(-1)
 
-    stations = read_stations_info('stations.dat')  # Read stations' names
+    stations = read_stations_info('stations.txt')  # Read stations' names
 
     data = extract_log(log_dir)  # Extract all log files
 

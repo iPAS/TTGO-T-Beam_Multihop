@@ -1,4 +1,4 @@
-stations=`cat stations.dat`
+stations=`cat stations.txt`
 
 SAVED_IFS=$IFS          # Save current IFS (Internal Field Separator)
 IFS=$'\n'               # Change IFS to newline char
