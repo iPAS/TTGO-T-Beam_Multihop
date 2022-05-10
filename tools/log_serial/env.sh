@@ -8,3 +8,7 @@ IFS=$SAVED_IFS          # Restore original IFS
 
 log_dir=log
 dropbox_dir=log
+
+
+python_version=$(python --version 2>&1 | sed -r 's/.* ([0-9]).*/\1/')
+[[ "${python_version}" == "2" ]] && echo "Please use Python 3.x" && exit 255
