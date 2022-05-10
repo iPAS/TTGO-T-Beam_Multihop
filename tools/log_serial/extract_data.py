@@ -41,7 +41,7 @@ def extract_log(log_dir):
     log_files = sorted(os.listdir(log_dir))
     for log_file in log_files:
         # print(log_file.split('_'))
-        matches += findall_tags_in_file(os.path.join(log_dir, log_file), r'\[D\].*?\[/D\]')
+        matches += findall_tags_in_file(os.path.join(log_dir, log_file), r'\[[0-9:\.\- ]+\] \[D\].*?\[/D\]')
 
     # print(len(matches))                 # DEBUG: test cleanse_tags()
     # matches[0] = '[D]' + matches[0]     # DEBUG: test cleanse_tags()
@@ -56,6 +56,21 @@ def read_stations_info(filename):
     return stations
 
 
+def name_stations(data, stations):
+    new_data = []
+    re_addr = re.compile(r' @([0-9]+) ')
+
+    for d in data:
+        addresses = re_addr.findall(d)
+        if addresses is not None:
+            for a in addresses:
+                name = stations.get(a, None)
+                if name is not None:
+                    d = re.sub(f' @{a} ', f' @{a}({name}) ', d)
+        new_data.append(d)
+    return new_data
+
+
 if __name__ == '__main__':
     log_dir = args.log_dir
 
@@ -64,8 +79,8 @@ if __name__ == '__main__':
         sys.exit(-1)
 
     stations = read_stations_info('stations.txt')  # Read stations' names
-
     data = extract_log(log_dir)  # Extract all log files
+    data = name_stations(data, stations)  # Name the stations
 
     for d in data:
         print(d)
