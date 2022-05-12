@@ -12,6 +12,7 @@ parser.add_argument('log_dir', type=str)
 args = parser.parse_args()
 
 
+# -----------------------------------------------------------------------------
 def findall_tags_in_file(path, tag_reg):
     '''
     Extract
@@ -21,6 +22,7 @@ def findall_tags_in_file(path, tag_reg):
     return matches
 
 
+# -----------------------------------------------------------------------------
 def cleanse_tags(matches, open_tag):
     '''
     Cleanse
@@ -36,6 +38,7 @@ def cleanse_tags(matches, open_tag):
     return matches
 
 
+# -----------------------------------------------------------------------------
 def extract_log(log_dir):
     matches = []
     log_files = sorted(os.listdir(log_dir))
@@ -50,12 +53,14 @@ def extract_log(log_dir):
     return matches
 
 
+# -----------------------------------------------------------------------------
 def read_stations_info(filename):
     with open(filename, 'r') as datfile:
         stations = { sid: name for (sid, name) in csv.reader(datfile, delimiter = ' ', quotechar = '"') }
     return stations
 
 
+# -----------------------------------------------------------------------------
 def name_stations(data, stations):
     new_data = []
     re_addr = re.compile(r' @([0-9]+) ')
@@ -71,6 +76,7 @@ def name_stations(data, stations):
     return new_data
 
 
+# -----------------------------------------------------------------------------
 def analyze_data_and_send_server(data):
     pattern_data = re.compile(r'\[[0-9:\.\- ]+\] 1000 [0-9a-z]+ .*')
     pattern_station = re.compile(r'\[[0-9:\.\- ]+\] \[D\] .*')
@@ -82,9 +88,7 @@ def analyze_data_and_send_server(data):
                               r'\s+' + r'@(?P<origin>[0-9]+)'   + r'.*' +
                               r'\s+' + r'#(?P<order>[0-9]+)' +
                               r'\s+' + r'\^(?P<hop>[0-9]+)' +
-                              ''
-                              )
-
+                              '')
     for d in data:
         ## Data packet only
         matches_data = pattern_data.findall(d)
@@ -101,6 +105,7 @@ def analyze_data_and_send_server(data):
             break  # XXX: for debugging
 
 
+# -----------------------------------------------------------------------------
 if __name__ == '__main__':
     log_dir = args.log_dir
 
