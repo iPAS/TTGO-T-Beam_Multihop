@@ -71,6 +71,22 @@ def name_stations(data, stations):
     return new_data
 
 
+def analyze_data_and_send_server(data):
+    pattern_data = re.compile(r'\[[0-9:\.\- ]+\] 1000 [0-9a-z]+ .*')
+    pattern_station = re.compile(r'\[[0-9:\.\- ]+\] \[D\] .*')
+
+    for d in data:
+        ## Data packet only
+        matches_data = pattern_data.findall(d)
+        if matches_data:
+            print(pattern_station.search(d))
+            # print(d[:20])
+            for m in matches_data:
+                print (f'>>> {m} <<<')
+
+            break
+
+
 if __name__ == '__main__':
     log_dir = args.log_dir
 
@@ -80,7 +96,7 @@ if __name__ == '__main__':
 
     stations = read_stations_info('stations.txt')  # Read stations' names
     data = extract_log(log_dir)  # Extract all log files
+
     data = name_stations(data, stations)  # Name the stations
 
-    for d in data:
-        print(d)
+    analyze_data_and_send_server(data)
