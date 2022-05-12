@@ -13,9 +13,8 @@ from sqlite3 import Error
 
 parser = argparse.ArgumentParser(description='Extract data from log file')
 parser.add_argument('log_dir', type=str, help='Set the directory of log files')
+parser.add_argument('response_db', type=str, help='Set the response database file')
 args = parser.parse_args()
-
-RESPONSE_DB = 'extracted_data.sqlite3'
 
 
 # -----------------------------------------------------------------------------
@@ -208,6 +207,7 @@ def extract_data_lines(data):
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
     log_dir = args.log_dir
+    response_db = args.response_db
 
     if not os.path.exists(log_dir):
         print(f'{log_dir} NOT exists!')
@@ -225,8 +225,8 @@ if __name__ == '__main__':
     if data:
         conn = None
         try:
-            conn = sqlite3.connect(RESPONSE_DB)
-            print(f'Database: {RESPONSE_DB}\nSQLite3: {sqlite3.version}')
+            conn = sqlite3.connect(response_db)
+            print(f'Database: {response_db}\nSQLite3: {sqlite3.version}')
 
             cur = conn.cursor()
             sql = '''
@@ -234,6 +234,7 @@ if __name__ == '__main__':
                 response_id INTEGER PRIMARY KEY,
                 hash TEXT UNIQUE NOT NULL,
                 extracted_data TEXT NOT NULL,
+                datetime_created INTEGER NOT NULL,
                 uploaded BOOLEAN NOT NULL DEFAULT FALSE
                 )
             '''
@@ -250,7 +251,8 @@ if __name__ == '__main__':
                 ## Insert if not exists
                 # https://www.geeksforgeeks.org/python-mysql-insert-record-if-not-exists-in-table/
                 sql = '''
-                INSERT OR IGNORE INTO response(hash, extracted_data) VALUES(?, ?)
+                INSERT OR IGNORE INTO response(hash, extracted_data, datetime_created)
+                VALUES(?, ?, strftime("%s", "now"))
                 '''
                 cur.execute(sql, (hash_value, str(d)))
 

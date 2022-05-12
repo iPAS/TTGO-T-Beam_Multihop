@@ -8,6 +8,7 @@ IFS=$SAVED_IFS          # Restore original IFS
 
 log_dir=log
 dropbox_dir=log
+response_db=extracted_data.sqlite3
 
 
 python_version=$(python --version 2>&1 | sed -r 's/.* ([0-9]).*/\1/')
