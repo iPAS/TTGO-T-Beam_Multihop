@@ -121,80 +121,43 @@ def extract_response(resp):
     cmd = extracted['cmd']
     data = extracted['data']
 
-    if cmd == 'i2c':
-        try:
-            temp, humid = data.split(',')
-            temp = float(temp)
-            humid = float(humid)
-        except:
-            return None
-        return {
-            '1': temp,
-            '2': humid
-        }
+    extractors = {
+        'i2c': lambda: {
+            '1': float(data.split(',')[0]), # Temperature
+            '2': float(data.split(',')[1])  # Humidity
+        },
 
-    elif cmd == 'wind':
-        try:
-            wind_dir, wind_speed = data.split(',')
-            wind_dir = int(wind_dir)
-            wind_speed = float(wind_speed)
-        except:
-            return None
-        return {
-            '4': wind_dir,
-            '5': wind_speed
-        }
+        'wind': lambda: {
+            '4': int(data.split(',')[0]),   # Wind direction
+            '5': float(data.split(',')[1])  # Wind speed
+        },
 
-    elif cmd == 'rain':
-        try:
-            rain = float(data)
-        except:
-            return None
-        return {
-            '6': rain
-        }
+        'rain': lambda: {
+            '6': float(data)
+        },
 
-    elif cmd == 'landsld':
-        try:
-            rain24hr, _, _, _ = data.split(' ')
-            rain24hr = float(rain24hr)
-        except:
-            return None
-        return {
-            '7': rain24hr
-        }
+        'landsld': lambda: {
+            '7': float(data.split(' ')[0])  # Rain in 24 hours
+        },
 
-    elif cmd == 'uc20':
-        try:
-            gsm_quality, _, _, _ = data.split(',')
-            gsm_quality = int(gsm_quality)
-        except:
-            return None
-        return {
-            '8': gsm_quality
-        }
+        'uc20': lambda: {
+            '8': int(data.split(',')[0])  # GSM quality
+        },
 
-    elif cmd == 'charger':
-        try:
-            charging_current, _, _, _, _ = data.split(',')
-            charging_current = float(charging_current)
-        except:
-            return None
-        return {
-            '10': charging_current
-        }
+        'charger': lambda: {
+            '10': float(data.split(',')[0])  # Battery
+        },
 
-    elif cmd == 'atod':
-        try:
-            a2d_data = float(data)
-        except:
-            return None
-        io_no = '16' if a2d_data < 5.0 else '17'  # Charging current OR Bus voltage?
-        return {
-            io_no: a2d_data
-        }
+        'atod': lambda: {
+            '16' if float(data) < 5.0 else '17': float(data)
+        },
 
-    return None
+    }
+
+    try:
+        return extractors[cmd]()
+    except:
+        return None
 
 
 # -----------------------------------------------------------------------------
