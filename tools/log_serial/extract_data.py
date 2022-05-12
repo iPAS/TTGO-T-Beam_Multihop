@@ -74,17 +74,31 @@ def name_stations(data, stations):
 def analyze_data_and_send_server(data):
     pattern_data = re.compile(r'\[[0-9:\.\- ]+\] 1000 [0-9a-z]+ .*')
     pattern_station = re.compile(r'\[[0-9:\.\- ]+\] \[D\] .*')
+    pattern_meta = re.compile(r'\[\s*(?P<date>[0-9-]+)\s+(?P<time>[0-9:]+).*\]' +
+                              r'\s+' + r'\[D\]' +
+                              r'\s+' + r'@(?P<addr>[0-9]+)'     + r'.*' +
+                              r'\s+' + r'recv:(?P<recv>[0-9]+)' +
+                              r'\s+' + r'.*' +
+                              r'\s+' + r'@(?P<origin>[0-9]+)'   + r'.*' +
+                              r'\s+' + r'#(?P<order>[0-9]+)' +
+                              r'\s+' + r'\^(?P<hop>[0-9]+)' +
+                              ''
+                              )
 
     for d in data:
         ## Data packet only
         matches_data = pattern_data.findall(d)
         if matches_data:
-            print(pattern_station.search(d))
-            # print(d[:20])
-            for m in matches_data:
-                print (f'>>> {m} <<<')
+            station_info = pattern_station.search(d).group(0)
+            print(station_info)
 
-            break
+            meta = pattern_meta.search(station_info).groupdict()
+            print(meta)
+
+            for m in matches_data:
+                print(f'>>> {m} <<<')
+
+            break  # XXX: for debugging
 
 
 if __name__ == '__main__':
