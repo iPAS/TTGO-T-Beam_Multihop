@@ -77,6 +77,12 @@ def name_stations(data, stations):
 
 
 # -----------------------------------------------------------------------------
+def extract_response(resp):
+    extracted = resp
+    return extracted
+
+
+# -----------------------------------------------------------------------------
 def analyze_data_and_send_server(data):
     pattern_data = re.compile(r'\[[0-9:\.\- ]+\] 1000 [0-9a-z]+ .*')
     pattern_station = re.compile(r'\[[0-9:\.\- ]+\] \[D\] .*')
@@ -89,18 +95,23 @@ def analyze_data_and_send_server(data):
                               r'\s+' + r'#(?P<order>[0-9]+)' +
                               r'\s+' + r'\^(?P<hop>[0-9]+)' +
                               '')
+    infos = []
+
     for d in data:
         ## Data packet only
         matches_data = pattern_data.findall(d)
         if matches_data:
             station_info = pattern_station.search(d).group(0)
-            print(station_info)
+            print(f'>>> {station_info} ---------------------')
 
             meta = pattern_meta.search(station_info).groupdict()
             print(meta)
 
-            for m in matches_data:
-                print(f'>>> {m} <<<')
+            for matched in matches_data:
+                # print(f'>>> {matched} <<<')
+                filtered = extract_response(matched)
+                if filtered is not None:
+                    print(filtered)
 
             break  # XXX: for debugging
 
