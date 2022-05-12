@@ -194,14 +194,16 @@ def analyze_data_and_send_server(data):
             station_info = pattern_station.search(d).group(0)
             meta = pattern_meta.search(station_info).groupdict()
 
-            print(f'\n>>> {station_info} <<<')  # DEBUG:
-            print(meta)  # DEBUG:
-
+            extracted = {}
             for matched in matches_data:
-                # print(f'>>> {matched} <<<')
                 filtered = extract_response(matched)
                 if filtered is not None:
-                    print(filtered)
+                    extracted.update(filtered)
+
+            if extracted:
+                print(f'\n>>> {station_info} <<<')  # DEBUG:
+                print(meta)  # DEBUG:
+                print(extracted)
 
             # break  # DEBUG:
 
