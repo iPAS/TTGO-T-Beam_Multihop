@@ -6,6 +6,9 @@ import re
 import argparse
 import csv
 
+import sqlite3
+from sqlite3 import Error
+
 
 parser = argparse.ArgumentParser(description='Extract data from log file')
 parser.add_argument('log_dir', type=str, help='Set the directory of log files')
@@ -166,10 +169,10 @@ def extract_data_lines(data):
     pattern_station = re.compile(r'\[[0-9:\.\- ]+\] \[D\] .*')
     pattern_meta = re.compile(r'\[\s*(?P<date>[0-9-]+)\s+(?P<time>[0-9:]+).*\]' +
                               r'\s+' + r'\[D\]' +
-                              r'\s+' + r'@(?P<addr>[0-9]+)'     + r'.*' +
+                              r'\s+' + r'@(?P<addr>[0-9]+)'     + r'[^0-9 ]*' +
                               r'\s+' + r'recv:(?P<recv>[0-9]+)' +
                               r'\s+' + r'.*' +
-                              r'\s+' + r'@(?P<origin>[0-9]+)'   + r'.*' +
+                              r'\s+' + r'@(?P<origin>[0-9]+)'   + r'[^0-9 ]*' +
                               r'\s+' + r'#(?P<order>[0-9]+)' +
                               r'\s+' + r'\^(?P<hop>[0-9]+)' +
                               '')
@@ -207,12 +210,41 @@ if __name__ == '__main__':
         print(f'{log_dir} NOT exists!')
         sys.exit(-1)
 
-    stations = read_stations_info('stations.txt')  # Read stations' names
+    ## Data extraction
     data = extract_log(log_dir)  # Extract all log files
 
-    data = name_stations(data, stations)  # Name the stations
+    # stations = read_stations_info('stations.txt')  # Read stations' names
+    # data = name_stations(data, stations)  # Name the stations
 
     data = extract_data_lines(data)
 
-    for d in data:
-        print(d, '\n')  # DEBUG:
+    ## Data saving in SQLite
+    if data:
+        conn = None
+        try:
+            conn = sqlite3.connect('extracted_data.sqlite3')
+            print(f'SQLite3: {sqlite3.version}')
+
+            cur = conn.cursor()
+            sql = '''
+            CREATE TABLE IF NOT EXISTS response (
+                response_id INTEGER PRIMARY KEY,
+                hash INTEGER NOT NULL UNIQUE,
+                extracted_data TEXT NOT NULL,
+                uploaded BOOLEAN NOT NULL DEFAULT FALSE
+                )
+            '''
+            cur.execute(sql)
+            conn.commit()
+
+            for d in data:
+                hash_value = hash(frozenset(d.items()))
+                # d['hash'] = hash_value
+                # d['uploaded'] = False
+                # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
+
+        except Error as e:
+            print(e)
+        finally:
+            if conn:
+                conn.close()
