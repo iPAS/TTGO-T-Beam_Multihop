@@ -206,8 +206,11 @@ def extract_data_lines(data):
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
+    print(f'Program: {os.path.basename(os.path.splitext(__file__)[0])}')
+
     log_dir = args.log_dir
     response_db = args.response_db
+    print(f'Logging in: {log_dir}')
 
     if not os.path.exists(log_dir):
         print(f'{log_dir} NOT exists!')
@@ -226,7 +229,8 @@ if __name__ == '__main__':
         conn = None
         try:
             conn = sqlite3.connect(response_db)
-            print(f'Database: {response_db}\nSQLite3: {sqlite3.version}')
+            print(f'Database: {response_db}')
+            print(f'SQLite3: {sqlite3.version}')
 
             cur = conn.cursor()
             sql = '''
