@@ -78,7 +78,97 @@ def name_stations(data, stations):
 
 # -----------------------------------------------------------------------------
 def extract_response(resp):
-    extracted = resp
+    """Extract the response message to be sent to server.
+
+    >>> extract_response('[2022-05-02 11:35:33.812434 0.003139] 1000 i2c 27.7,65.0')
+
+    """
+    m = re.search(r'\[.*?\] +[0-9]+ +(?P<cmd>[0-9a-z]+) +(?P<data>.+) *', resp)
+    if m is None:
+        return None
+    extracted = m.groupdict()
+    # print(extracted)  # DEBUG:
+
+    cmd = extracted['cmd']
+    data = extracted['data']
+
+    if cmd == 'i2c':
+        try:
+            temp, humid = data.split(',')
+            temp = float(temp)
+            humid = float(humid)
+        except:
+            return None
+        return {
+            '1': temp,
+            '2': humid
+        }
+
+    elif cmd == 'wind':
+        try:
+            wind_dir, wind_speed = data.split(',')
+            wind_dir = int(wind_dir)
+            wind_speed = float(wind_speed)
+        except:
+            return None
+        return {
+            '4': wind_dir,
+            '5': wind_speed
+        }
+
+    elif cmd == 'rain':
+        try:
+            rain = float(data)
+        except:
+            return None
+        return {
+            '6': rain
+        }
+
+    elif cmd == 'landsld':
+        try:
+            rain24hr, _, _, _ = data.split(' ')
+            rain24hr = float(rain24hr)
+        except:
+            return None
+        return {
+            '7': rain24hr
+        }
+
+    elif cmd == 'uc20':
+        try:
+            gsm_quality, _, _, _ = data.split(',')
+            gsm_quality = int(gsm_quality)
+        except:
+            return None
+        return {
+            '8': gsm_quality
+        }
+
+    elif cmd == 'charger':
+        try:
+            charging_current, _, _, _, _ = data.split(',')
+            charging_current = float(charging_current)
+        except:
+            return None
+        return {
+            '10': charging_current
+        }
+
+    elif cmd == 'atod':
+        try:
+            a2d_data = float(data)
+        except:
+            return None
+        io_no = '16' if a2d_data < 5.0 else '17'  # Charging current OR Bus voltage?
+        return {
+            io_no: a2d_data
+        }
+
+    else:
+        return None
+
+    extracted = resp  # DEBUG:
     return extracted
 
 
@@ -102,10 +192,10 @@ def analyze_data_and_send_server(data):
         matches_data = pattern_data.findall(d)
         if matches_data:
             station_info = pattern_station.search(d).group(0)
-            print(f'>>> {station_info} ---------------------')
-
             meta = pattern_meta.search(station_info).groupdict()
-            print(meta)
+
+            print(f'\n>>> {station_info} <<<')  # DEBUG:
+            print(meta)  # DEBUG:
 
             for matched in matches_data:
                 # print(f'>>> {matched} <<<')
@@ -113,7 +203,7 @@ def analyze_data_and_send_server(data):
                 if filtered is not None:
                     print(filtered)
 
-            break  # XXX: for debugging
+            # break  # DEBUG:
 
 
 # -----------------------------------------------------------------------------
