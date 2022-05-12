@@ -6,6 +6,7 @@ import re
 import argparse
 import csv
 
+import hashlib
 import sqlite3
 from sqlite3 import Error
 
@@ -13,6 +14,8 @@ from sqlite3 import Error
 parser = argparse.ArgumentParser(description='Extract data from log file')
 parser.add_argument('log_dir', type=str, help='Set the directory of log files')
 args = parser.parse_args()
+
+RESPONSE_DB = 'extracted_data.sqlite3'
 
 
 # -----------------------------------------------------------------------------
@@ -222,14 +225,14 @@ if __name__ == '__main__':
     if data:
         conn = None
         try:
-            conn = sqlite3.connect('extracted_data.sqlite3')
-            print(f'SQLite3: {sqlite3.version}')
+            conn = sqlite3.connect(RESPONSE_DB)
+            print(f'Database: {RESPONSE_DB}\nSQLite3: {sqlite3.version}')
 
             cur = conn.cursor()
             sql = '''
             CREATE TABLE IF NOT EXISTS response (
                 response_id INTEGER PRIMARY KEY,
-                hash INTEGER NOT NULL UNIQUE,
+                hash TEXT UNIQUE NOT NULL,
                 extracted_data TEXT NOT NULL,
                 uploaded BOOLEAN NOT NULL DEFAULT FALSE
                 )
@@ -238,10 +241,30 @@ if __name__ == '__main__':
             conn.commit()
 
             for d in data:
-                hash_value = hash(frozenset(d.items()))
+                # hash_value = hash(frozenset(d.items()))  # Never be the same on different runtime
+                hash_value = hashlib.md5(str(sorted( d.items() )).encode()).hexdigest()
                 # d['hash'] = hash_value
                 # d['uploaded'] = False
                 # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
+
+                ## Insert if not exists
+                # https://www.geeksforgeeks.org/python-mysql-insert-record-if-not-exists-in-table/
+                sql = '''
+                INSERT OR IGNORE INTO response(hash, extracted_data) VALUES(?, ?)
+                '''
+                cur.execute(sql, (hash_value, str(d)))
+
+                # sql = '''
+                # INSERT INTO response(hash, extracted_data)
+                # SELECT * FROM (SELECT {h}, "{d}") as val
+                # WHERE NOT EXISTS(
+                #     SELECT hash
+                #     FROM response
+                #     WHERE hash = {h}
+                #     )
+                # '''.format(h = hash_value, d = str(d))
+                # cur.execute(sql)
+            conn.commit()
 
         except Error as e:
             print(e)
