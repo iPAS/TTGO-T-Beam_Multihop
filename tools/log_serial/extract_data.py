@@ -9,6 +9,7 @@ import csv
 import hashlib
 import sqlite3
 from sqlite3 import Error
+import sqlcmd
 
 
 parser = argparse.ArgumentParser(description='Extract data from log file')
@@ -233,43 +234,16 @@ if __name__ == '__main__':
             print(f'SQLite3: {sqlite3.version}')
 
             cur = conn.cursor()
-            sql = '''
-            CREATE TABLE IF NOT EXISTS response (
-                response_id INTEGER PRIMARY KEY,
-                hash TEXT UNIQUE NOT NULL,
-                extracted_data TEXT NOT NULL,
-                datetime_created INTEGER NOT NULL,
-                uploaded BOOLEAN NOT NULL DEFAULT FALSE
-                )
-            '''
-            cur.execute(sql)
+            cur.execute(sqlcmd.create_table_if_not_exists)
             conn.commit()
 
             for d in data:
                 # hash_value = hash(frozenset(d.items()))  # Never be the same on different runtime
                 hash_value = hashlib.md5(str(sorted( d.items() )).encode()).hexdigest()
-                # d['hash'] = hash_value
-                # d['uploaded'] = False
                 # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
 
-                ## Insert if not exists
-                # https://www.geeksforgeeks.org/python-mysql-insert-record-if-not-exists-in-table/
-                sql = '''
-                INSERT OR IGNORE INTO response(hash, extracted_data, datetime_created)
-                VALUES(?, ?, strftime("%s", "now"))
-                '''
-                cur.execute(sql, (hash_value, str(d)))
+                cur.execute(sqlcmd.insert_if_not_exists, (hash_value, str(d)))
 
-                # sql = '''
-                # INSERT INTO response(hash, extracted_data)
-                # SELECT * FROM (SELECT {h}, "{d}") as val
-                # WHERE NOT EXISTS(
-                #     SELECT hash
-                #     FROM response
-                #     WHERE hash = {h}
-                #     )
-                # '''.format(h = hash_value, d = str(d))
-                # cur.execute(sql)
             conn.commit()
 
         except Error as e:
