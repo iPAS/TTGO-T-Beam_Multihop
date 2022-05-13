@@ -30,3 +30,9 @@
 ## Note
 
 ![agritronics](fig/IOs.png)
+
+http://agritronics.nstda.or.th/webpost/test09.php?data1=1000,22/05/12,11:50:00,1,24.2,79.8,0,280,0,0,0,30,0,13.2
+
+http://agritronics.nstda.or.th/webpost/test09.php?data1=1000,22/05/12,11:50:00,11,0,0,0,0,0,0.1760,19.63
+
+http://agritronics.nstda.or.th/webpost/test09.php?data1=1000,22/05/14,12:50:00,1,24.2,79.8,0,280,0,0,0,30,0,13.2,0,0,0,0,0,0.1760,19.63

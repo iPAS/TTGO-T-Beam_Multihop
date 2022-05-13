@@ -235,7 +235,7 @@ def insert_data_into_database(db_filename, data):
         cur = conn.cursor()
 
         ## Create table
-        cur.execute(sqlcmd.create_table_if_not_exists)
+        cur.execute(sqlcmd.query_create_table_if_not_exists)
         conn.commit()
 
         ## Count row
@@ -247,7 +247,7 @@ def insert_data_into_database(db_filename, data):
             hash_value = hashlib.md5(str(sorted( d.items() )).encode()).hexdigest()
             # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
 
-            cur.execute(sqlcmd.insert_if_not_exists, (hash_value, str(d)))
+            cur.execute(sqlcmd.query_insert_if_not_exists, (hash_value, str(d)))
         conn.commit()
 
         ## Count row

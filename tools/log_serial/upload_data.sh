@@ -2,4 +2,4 @@
 
 source ./env.sh
 
-python upload_data.py "${response_db}"
+python upload_data.py --db "${response_db}"
