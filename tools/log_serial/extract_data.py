@@ -206,12 +206,43 @@ def extract_data_lines(data):
 
 
 # -----------------------------------------------------------------------------
+def insert_data_to_database(db_filename, data):
+    if not data:
+        return
+
+    conn = None
+    try:
+        conn = sqlite3.connect(db_filename)
+
+        cur = conn.cursor()
+        cur.execute(sqlcmd.create_table_if_not_exists)
+        conn.commit()
+
+        for d in data:
+            # hash_value = hash(frozenset(d.items()))  # Never be the same on different runtime
+            hash_value = hashlib.md5(str(sorted( d.items() )).encode()).hexdigest()
+            # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
+
+            cur.execute(sqlcmd.insert_if_not_exists, (hash_value, str(d)))
+
+        conn.commit()
+
+    except Error as e:
+        print(e)
+    finally:
+        if conn:
+            conn.close()
+
+
+# -----------------------------------------------------------------------------
 if __name__ == '__main__':
     print(f'Program: {os.path.basename(os.path.splitext(__file__)[0])}')
 
     log_dir = args.log_dir
     response_db = args.response_db
     print(f'Logging in: {log_dir}')
+    print(f'Database: {response_db}')
+    print(f'SQLite3: {sqlite3.version}')
 
     if not os.path.exists(log_dir):
         print(f'{log_dir} NOT exists!')
@@ -226,28 +257,4 @@ if __name__ == '__main__':
     data = extract_data_lines(data)
 
     ## Data saving in SQLite
-    if data:
-        conn = None
-        try:
-            conn = sqlite3.connect(response_db)
-            print(f'Database: {response_db}')
-            print(f'SQLite3: {sqlite3.version}')
-
-            cur = conn.cursor()
-            cur.execute(sqlcmd.create_table_if_not_exists)
-            conn.commit()
-
-            for d in data:
-                # hash_value = hash(frozenset(d.items()))  # Never be the same on different runtime
-                hash_value = hashlib.md5(str(sorted( d.items() )).encode()).hexdigest()
-                # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
-
-                cur.execute(sqlcmd.insert_if_not_exists, (hash_value, str(d)))
-
-            conn.commit()
-
-        except Error as e:
-            print(e)
-        finally:
-            if conn:
-                conn.close()
+    insert_data_to_database(response_db, data)
