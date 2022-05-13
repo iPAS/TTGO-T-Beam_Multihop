@@ -17,7 +17,7 @@ def get_arguments():
     parser = argparse.ArgumentParser(description='Extract data from log file')
     parser.add_argument('--log_dir', type=str, help='Set the directory of log files',
                         default='log', required=False)
-    parser.add_argument('--response_db', type=str, help='Set the response database file',
+    parser.add_argument('--db', type=str, help='Set the response database file',
                         default='extracted_data.sqlite3', required=False)
     return parser.parse_args()
 
@@ -268,7 +268,7 @@ if __name__ == '__main__':
 
     args = get_arguments()
     log_dir = args.log_dir
-    response_db = args.response_db
+    response_db = args.db
 
     print(f'Logging in: {log_dir}')
     print(f'Database: {response_db}')
