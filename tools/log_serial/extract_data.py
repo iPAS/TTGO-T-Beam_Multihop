@@ -216,7 +216,15 @@ def insert_data_into_database(db_filename, data):
     Insert data into the database
 
     >>> insert_data_into_database('test.sqlite3', [{'17': 13.223, 'date': '2022-05-03', 'time': '16:07:51'}])
-
+    (0, 1)
+    >>> insert_data_into_database('test.sqlite3', [{'17': 12.0, 'date': '2022-05-04', 'time': '13:01:41'}])
+    (1, 2)
+    >>> insert_data_into_database('test.sqlite3', [{'17': 13.223, 'date': '2022-05-03', 'time': '16:07:51'}])
+    (2, 2)
+    >>> insert_data_into_database('test.sqlite3', [{'17': 12.0, 'date': '2022-05-04', 'time': '13:01:41'}])
+    (2, 2)
+    >>> os.system('rm -f test.sqlite3')
+    0
     '''
     if not data:
         return
