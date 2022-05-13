@@ -2,7 +2,7 @@
 
 source ./env.sh
 
-found_records=$(grep '\[X\] Change parent' -R --no-filename "${log_dir}" | sort -t' ' --version-sort -k13 -k1,3)
+found_records=$(grep '\[X\] Change parent' -R --text --no-filename "${log_dir}" | sort -t' ' --version-sort -k13 -k1,3)
 # echo  $"${found_records}"
 # exit
 

@@ -2,7 +2,7 @@
 
 source ./env.sh
 
-found_records=$(grep '\[D\]' -R --no-filename "${log_dir}" | sort -t' ' --version-sort -k8 -k1,3)
+found_records=$(grep '\[D\]' -R --text --no-filename "${log_dir}" | sort -t' ' --version-sort -k8 -k1,3)
 #echo "$found_records"
 #exit
 
