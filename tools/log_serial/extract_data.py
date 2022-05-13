@@ -12,10 +12,14 @@ from sqlite3 import Error
 import sqlcmd
 
 
-parser = argparse.ArgumentParser(description='Extract data from log file')
-parser.add_argument('log_dir', type=str, help='Set the directory of log files')
-parser.add_argument('response_db', type=str, help='Set the response database file')
-args = parser.parse_args()
+# -----------------------------------------------------------------------------
+def get_arguments():
+    parser = argparse.ArgumentParser(description='Extract data from log file')
+    parser.add_argument('--log_dir', type=str, help='Set the directory of log files',
+                        default='log', required=False)
+    parser.add_argument('--response_db', type=str, help='Set the response database file',
+                        default='extracted_data.sqlite3', required=False)
+    return parser.parse_args()
 
 
 # -----------------------------------------------------------------------------
@@ -84,7 +88,8 @@ def name_stations(data, stations):
 
 # -----------------------------------------------------------------------------
 def extract_response(resp):
-    """Extract the response message to be sent to server.
+    '''
+    Extract the response message to be sent to server.
 
     >>> extract_response('[2022-05-02 12:27:54.807055 0.001959] 1000 i2c interface on ok')
     >>> extract_response('[2022-05-02 11:35:33.812434 0.003139] 1000 i2c 27.7,65.0')
@@ -117,7 +122,7 @@ def extract_response(resp):
 
     >>> extract_response('[2022-05-02 13:22:27.527841 0.002508] 1000 atod 18.286')
     {'17': 18.286}
-    """
+    '''
     m = re.search(r'\[.*?\] +[0-9]+ +(?P<cmd>[0-9a-z]+) +(?P<data>.+) *', resp)
     if m is None:
         return None
@@ -206,26 +211,39 @@ def extract_data_lines(data):
 
 
 # -----------------------------------------------------------------------------
-def insert_data_to_database(db_filename, data):
+def insert_data_into_database(db_filename, data):
+    '''
+    Insert data into the database
+
+    >>> insert_data_into_database('test.sqlite3', [{'17': 13.223, 'date': '2022-05-03', 'time': '16:07:51'}])
+
+    '''
     if not data:
         return
 
     conn = None
     try:
         conn = sqlite3.connect(db_filename)
-
         cur = conn.cursor()
+
+        ## Create table
         cur.execute(sqlcmd.create_table_if_not_exists)
         conn.commit()
 
+        ## Count row
+        old_row_count = sqlcmd.get_row_count(conn)
+
+        ## Insert data
         for d in data:
             # hash_value = hash(frozenset(d.items()))  # Never be the same on different runtime
             hash_value = hashlib.md5(str(sorted( d.items() )).encode()).hexdigest()
             # print(f'[{hash_value}]\n', d, '\n')  # DEBUG:
 
             cur.execute(sqlcmd.insert_if_not_exists, (hash_value, str(d)))
-
         conn.commit()
+
+        ## Count row
+        new_row_count = sqlcmd.get_row_count(conn)
 
     except Error as e:
         print(e)
@@ -233,13 +251,17 @@ def insert_data_to_database(db_filename, data):
         if conn:
             conn.close()
 
+    return old_row_count, new_row_count
+
 
 # -----------------------------------------------------------------------------
 if __name__ == '__main__':
     print(f'Program: {os.path.basename(os.path.splitext(__file__)[0])}')
 
+    args = get_arguments()
     log_dir = args.log_dir
     response_db = args.response_db
+
     print(f'Logging in: {log_dir}')
     print(f'Database: {response_db}')
     print(f'SQLite3: {sqlite3.version}')
@@ -257,4 +279,6 @@ if __name__ == '__main__':
     data = extract_data_lines(data)
 
     ## Data saving in SQLite
-    insert_data_to_database(response_db, data)
+    old_row_count, new_row_count = insert_data_into_database(response_db, data)
+    print(f'Rows count: {new_row_count}')
+    print(f'Rows inserted: {new_row_count - old_row_count}')

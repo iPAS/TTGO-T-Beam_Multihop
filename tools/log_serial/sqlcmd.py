@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS response (
     )
 '''
 
-
 ## Insert if not exists
 # https://www.geeksforgeeks.org/python-mysql-insert-record-if-not-exists-in-table/
 insert_if_not_exists = '''
@@ -19,3 +18,9 @@ VALUES(?, ?, strftime("%s", "now"))
 '''
 
 
+def get_row_count(conn):
+    cur = conn.cursor()
+    cur.execute('''
+    SELECT response_id FROM response
+    ''')
+    return len(cur.fetchall())
