@@ -19,7 +19,7 @@ VALUES(?, ?, strftime("%s", "now"))
 
 ## Select if not uploaded
 query_select_if_not_uploaded = '''
-SELECT response_id, extracted_data, uploaded FROM response_table 
+SELECT response_id, extracted_data, uploaded FROM response_table
 WHERE uploaded = FALSE
 '''
 

@@ -3,6 +3,7 @@
 here=$(dirname $(readlink -f "$0"))
 source "${here}/env.sh"
 
+
 serial_options='-d /dev/ttyUSB0 -b 115200'
 log_period_min=60
 
@@ -19,8 +20,6 @@ log_file="--append --output=${here}/${log_dir}/${filename_format}"
 script_name=$(basename $0 .sh)
 
 pid_file="${here}/${script_name}.pid"
-
-
 
 
 case $1 in
