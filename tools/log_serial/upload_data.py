@@ -54,8 +54,11 @@ if __name__ == '__main__':
             data = json.loads(row[1].translate(str.maketrans('\'', '"')))
 
             try:
-                # print(response_id, data)  # DEBUG:
-                request_msg = f'{server_url}?data1=1000,{data["date"]},{data["time"]},1'
+                print(response_id, data)  # DEBUG:
+                origin_addr = '%X' % int( data['origin'] )
+                recv_date = data["date"]
+                recv_time = data["time"]
+                request_msg = f'{server_url}?data1={origin_addr},{recv_date},{recv_time},1'
                 for i in range(1, 18):
                     request_msg += f',{data.get(str(i), "0")}'
                 resp = requests.get(request_msg)
