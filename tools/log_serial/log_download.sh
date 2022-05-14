@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# dropbox_token.conf contains the token without newline
-TOKEN=$(cat dropbox_token.conf)
+here=$(dirname $(readlink -f "$0"))
+source "${here}/env.sh"
 
 python dropbox_download.py
+

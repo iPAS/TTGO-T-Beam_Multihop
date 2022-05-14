@@ -32,13 +32,14 @@ import re
 
 
 # read access token
-ACCESS_TOKEN = open('dropbox_token.conf', 'r').read()
-
-# print(access_token.split('\n'))
-ACCESS_TOKEN = ACCESS_TOKEN.split('\n')[0]
-
+#ACCESS_TOKEN = open('dropbox_token.conf', 'r').read()
+#ACCESS_TOKEN = ACCESS_TOKEN.split('\n')[0]
+ACCESS_TOKEN = os.environ['dropbox_token'] 
 SYNC_DIR = 'log'
+LOG_DIR = os.environ['log_dir']
 
+if ACCESS_TOKEN == '' or SYNC_DIR == '':
+    exit(-1)
 
 #------------------------------ get_dropbox.py --------------------------------
 
@@ -188,7 +189,7 @@ if folder_id is None:
     exit()
 
 # Set target download directory on your local computer; ends with (e.g., raw_data/)
-download_dir = SYNC_DIR
+download_dir = LOG_DIR
 
 
 ##################

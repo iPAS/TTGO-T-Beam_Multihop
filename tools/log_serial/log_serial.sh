@@ -1,9 +1,7 @@
 #!/bin/bash
 
-source /home/pi/.virtualenvs/deep/bin/activate
-
-#here="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-here=/home/pi/log_serial
+here=$(dirname $(readlink -f "$0"))
+source "${here}/env.sh"
 
 serial_options='-d /dev/ttyUSB0 -b 115200'
 log_period_min=60
@@ -15,7 +13,6 @@ filename_format='lora_relay_%Y-%m-%d_%H:%M:%S.log'
 
 rotate="--endtime=$((log_period_min * 60)) --again"
 
-source "${here}/env.sh"
 # log_dir=log
 log_file="--append --output=${here}/${log_dir}/${filename_format}"
 
