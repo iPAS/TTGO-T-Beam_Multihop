@@ -1,3 +1,5 @@
+echo "[$(date +'%F %T')]"
+
 stations=`cat stations.txt`
 
 SAVED_IFS=$IFS          # Save current IFS (Internal Field Separator)

@@ -55,5 +55,6 @@ status)
 	;;
 esac
 
+echo
 exit 0
 
