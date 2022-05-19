@@ -63,7 +63,7 @@ if __name__ == '__main__':
                     request_msg += f',{data.get(str(i), "0")}'
                 resp = requests.get(request_msg)
 
-                print(request_msg)  # DEBUG:
+                print(f'<<< {request_msg}')  # DEBUG:
                 print(f'>>> {resp}\n')
             except Exception as e:
                 print(e)

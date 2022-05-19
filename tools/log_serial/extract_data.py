@@ -290,3 +290,4 @@ if __name__ == '__main__':
     old_row_count, new_row_count = insert_data_into_database(response_db, data)
     print(f'Rows count: {new_row_count}')
     print(f'Rows inserted: {new_row_count - old_row_count}')
+
