@@ -211,6 +211,19 @@ def extract_data_lines(data):
 
 
 # -----------------------------------------------------------------------------
+def merge_same_datetime(data):
+    print(f'len: {len(data)}')
+    
+    merged_data = {}
+    for d in data:
+        k = '{d[date]}_{d[time]}'.format(d=d)
+    
+    print(f'len: {len(data)}')
+    exit(0)
+    return data
+
+
+# -----------------------------------------------------------------------------
 def insert_data_into_database(db_filename, data):
     '''
     Insert data into the database
@@ -285,6 +298,8 @@ if __name__ == '__main__':
     # data = name_stations(data, stations)  # Name the stations
 
     data = extract_data_lines(data)
+
+    data = merge_same_datetime(data)
 
     ## Data saving in SQLite
     old_row_count, new_row_count = insert_data_into_database(response_db, data)
