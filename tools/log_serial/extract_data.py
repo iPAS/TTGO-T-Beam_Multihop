@@ -211,6 +211,25 @@ def extract_data_lines(data):
 
 
 # -----------------------------------------------------------------------------
+def merge_same_datetime(data):
+    merged_data = {}
+    for d in data:
+        k = '{d[date]}_{d[time]}'.format(d=d)
+
+        if k in merged_data:
+            print(f'Duplicate datetime on {k}')
+            print(f'    --  {merged_data[k]}')
+            merged_data[k].update(d)
+            print(f'    --> {merged_data[k]}')
+        else:
+            merged_data[k] = d
+
+    rearranged_data = sorted(merged_data.items(), key=lambda items : items[0], reverse=False)
+    new_data = [ v for k, v in rearranged_data ]
+    return data
+
+
+# -----------------------------------------------------------------------------
 def insert_data_into_database(db_filename, data):
     '''
     Insert data into the database
@@ -286,8 +305,9 @@ if __name__ == '__main__':
 
     data = extract_data_lines(data)
 
+    data = merge_same_datetime(data)  # Compact the data on the same datetime
+
     ## Data saving in SQLite
     old_row_count, new_row_count = insert_data_into_database(response_db, data)
     print(f'Rows count: {new_row_count}')
     print(f'Rows inserted: {new_row_count - old_row_count}')
-
