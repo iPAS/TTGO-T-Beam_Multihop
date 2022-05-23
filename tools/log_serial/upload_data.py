@@ -17,9 +17,13 @@ import json
 def get_arguments():
     parser = argparse.ArgumentParser(description='Upload data from log file to server')
     parser.add_argument('--db', type=str, help='Set the response database file',
-                        default='extracted_data.sqlite3', required=False)
+                        default='extracted_data.sqlite3', required=False, metavar='<*.sqlite3>')
     parser.add_argument('--url', type=str, help='Request URL to send data',
                         default='http://agritronics.nstda.or.th/webpost/test09.php', required=False)
+    parser.add_argument('--no-send', help='Generate REST URI only, no sending data', metavar='',
+                        action='append_const', const=1)
+    parser.add_argument('-v', '--verbose', help='Verbosity', metavar='',
+                        action='append_const', const=1)
     return parser.parse_args()
 
 
@@ -30,6 +34,8 @@ if __name__ == '__main__':
     args = get_arguments()
     response_db = args.db
     server_url = args.url
+    verbose_level = 0 if args.verbose is None else len(args.verbose)
+    do_send = True if args.no_send is None else False
 
     print(f'Database: {response_db}')
     print(f'SQLite3: {sqlite3.version}')
@@ -54,22 +60,29 @@ if __name__ == '__main__':
             data = json.loads(row[1].translate(str.maketrans('\'', '"')))
 
             try:
-                print(response_id, data)  # DEBUG:
+                if verbose_level > 1:
+                    print(response_id, data)  # DEBUG:
+
                 origin_addr = '%X' % int( data['origin'] )
                 recv_date = data["date"]
                 recv_time = data["time"]
                 request_msg = f'{server_url}?data1={origin_addr},{recv_date},{recv_time},1'
                 for i in range(1, 18):
                     request_msg += f',{data.get(str(i), "0")}'
-                resp = requests.get(request_msg)
 
-                print(f'<<< {request_msg}')  # DEBUG:
-                print(f'>>> {resp}\n')
+                if do_send:
+                    resp = requests.get(request_msg)
+
+                if verbose_level > 0:
+                    print(f'<<< {request_msg}')  # DEBUG:
+                    if do_send:
+                        print(f'>>> {resp}\n')
             except Exception as e:
                 print(e)
             else:
-                success_count += 1
-                cur.execute(sqlcmd.query_update_uploaded_on_id, (response_id,))
+                if do_send:
+                    success_count += 1
+                    cur.execute(sqlcmd.query_update_uploaded_on_id, (response_id,))
         conn.commit()
 
         ## Remove the uploaded record that older than 30 days
