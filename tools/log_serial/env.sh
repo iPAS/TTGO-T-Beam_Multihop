@@ -9,7 +9,7 @@ IFS=$SAVED_IFS          # Restore original IFS
 
 here=$(dirname $(readlink -f "$0"))
 export log_dir="${here}/log"
-dropbox_dir="${here}/log"
+dropbox_dir="log"
 dropbox_conf=/home/pi/.dropbox_uploader
 # dropbox_token.conf contains the token without newline
 export dropbox_token=$(cat "${here}/dropbox_token.conf")

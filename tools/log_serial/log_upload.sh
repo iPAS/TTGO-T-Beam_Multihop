@@ -19,9 +19,10 @@ for f in $(ls -tr "${log_dir}"/*.log); do
 
 	if [ "$f" != "${cur_f}" ]; then
 		echo "Sending: $f"
-		f="${log_dir}/$f"
-		dropbox_uploader/dropbox_uploader.sh -f "${dropbox_conf}" upload "$f" "${dropbox_dir}" 2>&1
-		trash "$f"
+		f_log="${log_dir}/$f"
+		f_dropbox="${dropbox_dir}/$f"	
+		dropbox_uploader/dropbox_uploader.sh -f "${dropbox_conf}" upload "${f_log}" "${f_dropbox}" 2>&1
+		trash "${f_log}"
 	else
 		echo "Current accessed log (will be ignored): $cur_f"
 	fi
