@@ -4,6 +4,8 @@ import os
 import sys
 import re
 import argparse
+from datetime import datetime as dt
+import csv
 
 import sqlite3
 from sqlite3 import Error
@@ -22,9 +24,26 @@ def get_arguments():
                         default='http://agritronics.nstda.or.th/webpost/test09.php', required=False)
     parser.add_argument('--no-send', help='Generate REST URI only, no sending data', metavar='',
                         action='append_const', const=1)
+    parser.add_argument('--end-points', help='Target on multiple end-points for testing', metavar='',
+                        action='append_const', const=1)
     parser.add_argument('-v', '--verbose', help='Verbosity', metavar='',
                         action='append_const', const=1)
     return parser.parse_args()
+
+
+# -----------------------------------------------------------------------------
+def read_end_points_info(filename):
+    # http://agritronics.nstda.or.th/webpost/landlora01.php
+    # http://agritronics.nstda.or.th/webpost/landlora02.php
+    # http://agritronics.nstda.or.th/webpost/landlora03.php
+    # http://agritronics.nstda.or.th/webpost/landlora04.php
+    # http://agritronics.nstda.or.th/webpost/landlora05.php
+    # http://agritronics.nstda.or.th/webpost/landlora06.php
+
+    with open(filename, 'r') as datfile:
+        end_points = { sid: f'http://agritronics.nstda.or.th/webpost/landlora{sno}.php' for
+            (sid, name, sno) in csv.reader(datfile, delimiter = ' ', quotechar = '"') }
+    return end_points
 
 
 # -----------------------------------------------------------------------------
@@ -36,6 +55,7 @@ if __name__ == '__main__':
     server_url = args.url
     verbose_level = 0 if args.verbose is None else len(args.verbose)
     do_send = True if args.no_send is None else False
+    do_send_end_points = False if args.end_points is None else True
 
     print(f'Database: {response_db}')
     print(f'SQLite3: {sqlite3.version}')
@@ -43,6 +63,9 @@ if __name__ == '__main__':
     if not os.path.exists(response_db):
         print(f'{response_db} NOT exists!')
         sys.exit(-1)
+
+    if do_send_end_points:
+        end_points = read_end_points_info('api_end-points.txt')
 
     conn = None
     try:
@@ -63,11 +86,21 @@ if __name__ == '__main__':
                 if verbose_level > 1:
                     print(response_id, data)  # DEBUG:
 
-                origin_addr = '%X' % int( data['origin'] )
+                origin_addr = data['origin']
                 recv_date = data["date"]
+                recv_date = dt.strptime(recv_date, '%Y-%m-%d').date().strftime('%y/%m/%d')  # YYYY-mm-dd
                 recv_time = data["time"]
-                request_msg = f'{server_url}?data1={origin_addr},{recv_date},{recv_time},1'
-                for i in range(1, 18):
+
+                end_point = server_url
+                station_addr = f'{int(origin_addr):02X}'
+                if do_send_end_points:
+                    end_point = end_points.get(origin_addr, server_url)
+                    station_addr = '1000'
+
+                start_io = 1
+                end_io = 18
+                request_msg = f'{end_point}?data1={station_addr},{recv_date},{recv_time},{start_io}'
+                for i in range(start_io, end_io):
                     request_msg += f',{data.get(str(i), "0")}'
 
                 if do_send:
