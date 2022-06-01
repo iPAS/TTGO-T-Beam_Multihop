@@ -99,9 +99,19 @@ if __name__ == '__main__':
 
                 start_io = 1
                 end_io = 18
-                request_msg = f'{end_point}?data1={station_addr},{recv_date},{recv_time},{start_io}'
-                for i in range(start_io, end_io):
-                    request_msg += f',{data.get(str(i), "0")}'
+                # request_msg = f'{end_point}?data1={station_addr},{recv_date},{recv_time},{start_io}'
+                # for i in range(start_io, end_io):
+                #     request_msg += f',{data.get(str(i), "0")}'
+
+                request_msg = f'{end_point}?'
+                data_cnt = 0
+                for io in range(start_io, end_io):
+                    io = str(io)
+                    if io in data:
+                        if request_msg[-1] != '?':
+                            request_msg += '&'
+                        data_cnt += 1
+                        request_msg += f'data{data_cnt}={station_addr},{recv_date},{recv_time},{io},{data[io]}'
 
                 if do_send:
                     resp = requests.get(request_msg)
