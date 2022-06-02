@@ -9,11 +9,14 @@ function get_lines () {
     python show_cm_ls.py --log_dir "${log_dir}" 2>&1
 }
 
-# | grep '.* .* .* .*' | sort -r -t\  -k3,4 -k1,2 | uniq -f2
-# | grep '.* .* .* .*' | sort    -t\  -k3,4 -k1,2 | uniq -f2
+data=`get_lines`
 
-get_lines #| | grep '.* .* .* .*' | sort    -t\  -k3,4 -k1,2 | uniq -f2
+echo
+echo 'Oldest:'
+echo "${data}" | grep '.* .* .* .*' | sort    -t\  -k3,4 -k1,2 | uniq -f2
+echo
+echo 'Newest:'
+echo "${data}" | grep '.* .* .* .*' | sort -r -t\  -k3,4 -k1,2 | uniq -f2
 
 popd >/dev/null
 echo
-

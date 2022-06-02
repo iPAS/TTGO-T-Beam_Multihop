@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     data = extract_data_lines(data)
 
-    data = sort_data_lines(data)
+    # data = sort_data_lines(data)
 
     for d in data:
         print('{date} {time} {origin} {station}'.format(**d))
