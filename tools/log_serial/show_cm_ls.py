@@ -89,55 +89,10 @@ def extract_response(resp):
     '''
     Extract the response message to be sent to server.
     '''
-    # print(resp)
-    # return None
-
-    m = re.search(r'\[.*?\] +[0-9]+ +(?P<cmd>[0-9a-z]+) +(?P<data>.+) *', resp)
+    m = re.search(r'\[.*?\] +[0-9]+ +route +[0-9]+ +(?P<station>CM-LS-[0-9]+)', resp)
     if m is None:
         return None
-    extracted = m.groupdict()
-    # print(extracted)  # DEBUG:
-
-    cmd = extracted['cmd']
-    data = extracted['data']
-
-    extractors = {
-        'i2c': lambda: {
-            '1': float(data.split(',')[0]), # Temperature
-            '2': float(data.split(',')[1])  # Humidity
-        },
-
-        'wind': lambda: {
-            '4': int(data.split(',')[0]),   # Wind direction
-            '5': float(data.split(',')[1])  # Wind speed
-        },
-
-        'rain': lambda: {
-            '6': float(data)
-        },
-
-        'landsld': lambda: {
-            '7': float(data.split(' ')[0])  # Rain in 24 hours
-        },
-
-        'uc20': lambda: {
-            '8': int(data.split(',')[0])  # GSM quality
-        },
-
-        'charger': lambda: {
-            '10': float(data.split(',')[0])  # Battery
-        },
-
-        'atod': lambda: {
-            '16' if float(data) < 5.0 else '17': float(data)
-        },
-
-    }
-
-    try:
-        return extractors[cmd]()
-    except:
-        return None
+    return m.groupdict()
 
 
 # -----------------------------------------------------------------------------
@@ -170,13 +125,18 @@ def extract_data_lines(data):
                     extracted_infos.update(filtered)
 
             if extracted_infos:
-                # print(f'\n>>> {open_line} <<<')  # DEBUG:
-                # print(meta)  # DEBUG:
-                # print(extracted_infos)  # DEBUG:
                 extracted_infos.update(meta)
                 extracted_data.append(extracted_infos)
 
     return extracted_data
+
+
+# -----------------------------------------------------------------------------
+def sort_data_lines(data):
+    return sorted(data,
+                  reverse = True,
+                  key = lambda d: (d['origin'], d['station'], d['date'], d['time'])
+                  )
 
 
 # -----------------------------------------------------------------------------
@@ -200,6 +160,7 @@ if __name__ == '__main__':
 
     data = extract_data_lines(data)
 
+    data = sort_data_lines(data)
+
     for d in data:
-        print('---')
-        print(d)
+        print('{date} {time} {origin} {station}'.format(**d))
