@@ -255,7 +255,7 @@
                 "ESP_PLATFORM",
                 "_POSIX_READER_WRITER_LOCKS",
                 "F_CPU=240000000L",
-                "ARDUINO=10818",
+                "ARDUINO=10819",
                 "ARDUINO_TBeam",
                 "ARDUINO_ARCH_ESP32",
                 "ARDUINO_BOARD=\"TBeam\"",

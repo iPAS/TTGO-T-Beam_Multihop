@@ -2,7 +2,7 @@
 #define __VERSION_H__
 
 
-#define __GIT_SHA1_ID__ "v1.8-52-g2683b1c, heads/master-0-g2683b1c"
+#define __GIT_SHA1_ID__ "v1.8-53-ge2541c0, heads/master-0-ge2541c0"
 
 
 #endif  // __GIT_SHA1_ID__
